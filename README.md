@@ -1,2 +1,1 @@
-# secj
-Security Tool
+# SECJ - Security Tool

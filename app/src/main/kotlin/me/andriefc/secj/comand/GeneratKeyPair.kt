@@ -7,7 +7,7 @@ import picocli.CommandLine.Command
     name = "generate-key-pair",
     description = ["Generates private-public key pair"]
 )
-class GenerateKeyCommand : Runnable {
+class GeneratKeyPair : Runnable {
     override fun run() {
         TODO("Not yet implemented")
     }

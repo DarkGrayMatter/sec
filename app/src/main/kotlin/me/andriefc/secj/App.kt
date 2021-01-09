@@ -9,7 +9,7 @@ import picocli.CommandLine.HelpCommand
 import kotlin.system.exitProcess
 
 @Command(
-    name = "secj",
+    name = "sec",
     description = ["Security companion to the excellent Palantar library."],
     mixinStandardHelpOptions = true,
     subcommands = [
@@ -20,14 +20,19 @@ import kotlin.system.exitProcess
     ]
 )
 object App {
+
     @JvmStatic
     fun main(args: Array<String>) {
         exitProcess(
             CommandLine(App)
-                .setAtFileCommentChar('@')
                 .setExpandAtFiles(true)
+                .separateOptionValuesWithSpace()
                 .setCaseInsensitiveEnumValuesAllowed(true)
                 .execute(* args)
         )
     }
+
+    private fun CommandLine.separateOptionValuesWithSpace() = setSeparator(SINGLE_SPACE)
+
+    private const val SINGLE_SPACE = " "
 }

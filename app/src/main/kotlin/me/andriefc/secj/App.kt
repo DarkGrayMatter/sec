@@ -8,7 +8,6 @@ import picocli.CommandLine.Command
 import picocli.CommandLine.HelpCommand
 import kotlin.system.exitProcess
 
-
 @Command(
     name = "secj",
     description = ["Security companion to the excellent Palantar library."],
@@ -20,14 +19,15 @@ import kotlin.system.exitProcess
         DecryptValue::class
     ]
 )
-class App
-
-fun main(args: Array<String>) {
-    exitProcess(
-        CommandLine(App())
-            .setAtFileCommentChar('@')
-            .setExpandAtFiles(true)
-            .setCaseInsensitiveEnumValuesAllowed(true)
-            .execute(* args)
-    )
+object App {
+    @JvmStatic
+    fun main(args: Array<String>) {
+        exitProcess(
+            CommandLine(App)
+                .setAtFileCommentChar('@')
+                .setExpandAtFiles(true)
+                .setCaseInsensitiveEnumValuesAllowed(true)
+                .execute(* args)
+        )
+    }
 }

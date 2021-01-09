@@ -34,7 +34,7 @@ dependencies {
 }
 
 application {
-    mainClass.set("me.andriefc.secj.AppKt")
+    mainClass.set("me.andriefc.secj.App")
 }
 
 tasks.withType<CreateStartScripts> {

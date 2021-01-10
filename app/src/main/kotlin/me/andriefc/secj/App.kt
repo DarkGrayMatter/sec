@@ -3,6 +3,7 @@ package me.andriefc.secj
 import me.andriefc.secj.comand.DecryptValue
 import me.andriefc.secj.comand.EncryptValue
 import me.andriefc.secj.comand.GenerateKeyPair
+import me.andriefc.secj.commons.cli.CommandFactory
 import picocli.CommandLine
 import picocli.CommandLine.Command
 import picocli.CommandLine.HelpCommand
@@ -24,7 +25,7 @@ object App {
     @JvmStatic
     fun main(args: Array<String>) {
         exitProcess(
-            CommandLine(App)
+            CommandLine(App, CommandFactory)
                 .setExpandAtFiles(true)
                 .separateOptionValuesWithSpace()
                 .setCaseInsensitiveEnumValuesAllowed(true)

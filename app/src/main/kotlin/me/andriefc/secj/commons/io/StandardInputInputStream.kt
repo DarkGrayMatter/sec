@@ -8,7 +8,7 @@ import java.io.InputStream
  */
 class StandardInputInputStream : InputStream() {
 
-    private val input = IOTarget(System::`in`, NOOP)
+    private val input = IOTarget(System::`in`, ignoreClosingTarget)
 
     override fun close() = input.close()
     override fun read(): Int = input { read() }
@@ -17,8 +17,7 @@ class StandardInputInputStream : InputStream() {
     override fun available(): Int =  input { available() }
 
     companion object {
-        @JvmStatic
-        private val NOOP = { _: Any? -> }
+        private val ignoreClosingTarget = { _: Any? -> }
     }
 
 }

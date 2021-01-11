@@ -12,7 +12,7 @@ public class TestReflect {
 
     @Test
     public void testFindObject() {
-        Object dummyObject = Reflect.asKotlinObject(DummyObject.class);
+        Object dummyObject = Reflect.tryAsKotlinSingleton(DummyObject.class);
         assertEquals(DummyObject.INSTANCE, dummyObject);
     }
 }

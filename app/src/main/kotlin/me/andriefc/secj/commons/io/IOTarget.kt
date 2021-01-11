@@ -30,8 +30,13 @@ class IOTarget<R>(getTarget: () -> R, private val closing: ((R) -> Unit) = { it.
 
     @Synchronized
     override fun close() {
-        target().also(closing)
-        eof = true
+        eof = try {
+            target().also(closing)
+            true
+        } catch (e: EOFException) {
+            if (eof) throw e
+            true
+        }
     }
 
     @Synchronized

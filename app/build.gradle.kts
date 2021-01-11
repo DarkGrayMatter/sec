@@ -32,9 +32,6 @@ dependencies {
     // palantir
     implementation("com.palantir.config.crypto:encrypted-config-value:2.1.0")
 
-    // Tar
-    implementation("org.kamranzafar:jtar:2.3")
-
     // JUnit5
     val junitVersion = "5.7.0"
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")

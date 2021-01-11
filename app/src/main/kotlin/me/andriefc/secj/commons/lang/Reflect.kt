@@ -18,7 +18,7 @@ fun <T> Class<T>.tryAsKotlinSingleton(): T? {
                         && !isAbstract(it.modifiers)
             }
             field?.get(null)?.let(this::cast)
-        } catch (_: NoSuchMethodException) {
+        } catch (_: NoSuchFieldException) {
             null
         }
     }

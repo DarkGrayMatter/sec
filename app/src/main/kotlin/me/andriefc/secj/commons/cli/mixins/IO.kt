@@ -1,4 +1,4 @@
-package me.andriefc.secj.comand.mixins
+package me.andriefc.secj.commons.cli.mixins
 
 /*
 
@@ -15,5 +15,4 @@ package me.andriefc.secj.comand.mixins
 
 
  */
-
 

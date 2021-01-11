@@ -27,13 +27,9 @@ object App {
         exitProcess(
             CommandLine(App, CommandFactory)
                 .setExpandAtFiles(true)
-                .separateOptionValuesWithSpace()
                 .setCaseInsensitiveEnumValuesAllowed(true)
+                .setInterpolateVariables(true)
                 .execute(* args)
         )
     }
-
-    private fun CommandLine.separateOptionValuesWithSpace() = setSeparator(SINGLE_SPACE)
-
-    private const val SINGLE_SPACE = " "
 }

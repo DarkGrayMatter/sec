@@ -3,10 +3,13 @@
 package me.andriefc.secj.comand
 
 import com.palantir.config.crypto.KeyFileUtils.keyPairToFile
+import com.palantir.config.crypto.KeyPair
+import com.palantir.config.crypto.KeyPairFiles
 import com.palantir.config.crypto.algorithm.Algorithm
 import picocli.CommandLine.*
 import java.io.File
 import java.io.IOException
+import java.nio.file.Files
 import java.nio.file.Path
 
 @Command(
@@ -27,7 +30,6 @@ class GenerateKeyPair : Runnable {
         names = ["--alg", "-a"],
         description = ["Which algorithm to use to generate the key pair. The following are available: RSA, AES"],
         required = true,
-        interactive = true
     )
     fun setAlgorithm(a: Algorithm) {
         this.algorithm = a
@@ -36,7 +38,6 @@ class GenerateKeyPair : Runnable {
     @Option(
         names = ["--key", "-k"],
         description = ["Name of the key file."],
-        interactive = true,
         required = true
     )
     fun setKeyName(s: String) {
@@ -52,7 +53,6 @@ class GenerateKeyPair : Runnable {
         forcePath = b
     }
 
-
     @Parameters(
         index = "0",
         arity = "1",
@@ -67,8 +67,8 @@ class GenerateKeyPair : Runnable {
 
     override fun run() {
         val kp = algorithm.newKeyPair()
-        val path = dest(keyName)
-        val keys = keyPairToFile(kp, path)
+        val path = dest(keyName).toAbsolutePath()
+        val keys = saveKeyPair(kp, path)
         println(
             """
             |Generated keys: 
@@ -78,12 +78,22 @@ class GenerateKeyPair : Runnable {
         )
     }
 
+    private fun saveKeyPair(kp: KeyPair, publicKeyPath: Path): KeyPairFiles {
+
+        val privateKeyPath = publicKeyPath.resolveSibling("${publicKeyPath.fileName}.private")
+
+        privateKeyPath.also(Files::deleteIfExists)
+        publicKeyPath.also(Files::deleteIfExists)
+
+        return keyPairToFile(kp, publicKeyPath)
+
+    }
+
     private fun dest(path: String): Path = File(dest, path).absoluteFile.run {
         if (!exists() && forcePath && !parentFile.mkdirs()) {
             throw IOException("Unable to create path for key files: $this")
         }
-        toPath()
+        toPath().toAbsolutePath()
     }
-
 }
 

@@ -17,13 +17,13 @@ dependencies {
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
 
     // Use the Kotlin JDK 8 standard library.
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    implementation(kotlin("stdlib-jdk8"))
 
-    // Use the Kotlin test library.
-    testImplementation("org.jetbrains.kotlin:kotlin-test")
+    // Need full reflection
+    implementation(kotlin("reflect"))
 
     // Use the Kotlin JUnit integration.
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+    testImplementation(kotlin("test-junit5"))
 
     // Command Line support
     implementation("info.picocli:picocli:4.6.1")
@@ -31,6 +31,11 @@ dependencies {
 
     // palantir
     implementation("com.palantir.config.crypto:encrypted-config-value:2.1.0")
+
+    // JUnit5
+    val junitVersion = "5.7.0"
+    testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
 }
 
 application {
@@ -38,7 +43,7 @@ application {
 }
 
 tasks.withType<CreateStartScripts> {
-    applicationName = "secj"
+    applicationName = "sec"
 }
 
 val javacTarget = JavaVersion.VERSION_1_8.toString()
@@ -48,9 +53,8 @@ tasks.withType<JavaCompile> {
     targetCompatibility = javacTarget
 }
 
-
 tasks.withType<Jar> {
-    archiveBaseName.set("secj")
+    archiveBaseName.set("sec")
 }
 
 tasks.withType<KotlinCompile>().configureEach {
@@ -62,5 +66,10 @@ tasks.withType<KotlinCompile>().configureEach {
 kapt {
     arguments {
         arg("project", "${project.group}/${project.name}")
+    }
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform {
     }
 }

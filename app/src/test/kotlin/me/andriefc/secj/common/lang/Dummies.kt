@@ -1,4 +1,4 @@
-package me.andriefc.secj.commons.lang
+package me.andriefc.secj.common.lang
 
 object DummyObject
 

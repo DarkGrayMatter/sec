@@ -85,7 +85,6 @@ class EncryptConfigFileCommand : Runnable {
         @Option(names = ["--paths"], required = false, description = ["Configuration paths to encrypt."])
         fun setPaths(paths: Set<String>) = Unit
 
-
     }
 
     companion object {

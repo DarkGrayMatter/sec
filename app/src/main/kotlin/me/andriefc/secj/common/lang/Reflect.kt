@@ -1,6 +1,6 @@
 @file:JvmName("Reflect")
 
-package me.andriefc.secj.commons.lang
+package me.andriefc.secj.common.lang
 
 import java.lang.reflect.Modifier.*
 

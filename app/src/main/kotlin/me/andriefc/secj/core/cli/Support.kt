@@ -1,6 +1,6 @@
-package me.andriefc.secj.common.cli
+package me.andriefc.secj.core.cli
 
-import me.andriefc.secj.common.lang.tryAsKotlinSingleton
+import me.andriefc.secj.core.lang.tryAsKotlinSingleton
 import picocli.CommandLine
 
 

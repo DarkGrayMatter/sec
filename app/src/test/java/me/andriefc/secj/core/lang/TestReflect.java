@@ -1,4 +1,4 @@
-package me.andriefc.secj.common.lang;
+package me.andriefc.secj.core.lang;
 
 
 import org.junit.jupiter.api.Test;

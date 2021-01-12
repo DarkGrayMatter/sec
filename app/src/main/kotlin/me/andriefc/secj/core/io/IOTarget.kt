@@ -1,4 +1,4 @@
-package me.andriefc.secj.common.io
+package me.andriefc.secj.core.io
 
 import java.io.Closeable
 import java.io.EOFException

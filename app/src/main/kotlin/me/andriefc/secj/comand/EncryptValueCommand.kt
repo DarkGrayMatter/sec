@@ -10,7 +10,7 @@ import java.io.File
     name = "encrypt-value",
     description = ["Encrypt value based on the supplied public key."]
 )
-class EncryptValue : Runnable {
+class EncryptValueCommand : Runnable {
 
     private lateinit var plainText: String
     private lateinit var publicKeyFile: File

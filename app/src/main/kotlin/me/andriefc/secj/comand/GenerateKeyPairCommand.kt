@@ -16,7 +16,7 @@ import java.nio.file.Path
     name = "generate-key-pair",
     description = ["Generates private-public key pair"]
 )
-class GenerateKeyPair : Runnable {
+class GenerateKeyPairCommand : Runnable {
 
     @Spec
     internal lateinit var spec: Model.CommandSpec

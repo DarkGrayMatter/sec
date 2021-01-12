@@ -12,7 +12,7 @@ import java.io.File
     description = ["Decrypts a value given a private key."]
 )
 @Suppress("unused")
-class DecryptValue : Runnable {
+class DecryptValueCommand : Runnable {
 
     private lateinit var secretText: String
     private lateinit var secretKey: File

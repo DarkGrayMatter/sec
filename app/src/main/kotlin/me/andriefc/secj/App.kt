@@ -1,8 +1,8 @@
 package me.andriefc.secj
 
-import me.andriefc.secj.comand.DecryptValue
-import me.andriefc.secj.comand.EncryptValue
-import me.andriefc.secj.comand.GenerateKeyPair
+import me.andriefc.secj.comand.DecryptValueCommand
+import me.andriefc.secj.comand.EncryptValueCommand
+import me.andriefc.secj.comand.GenerateKeyPairCommand
 import me.andriefc.secj.commons.cli.CommandFactory
 import picocli.CommandLine
 import picocli.CommandLine.Command
@@ -15,9 +15,9 @@ import kotlin.system.exitProcess
     mixinStandardHelpOptions = true,
     subcommands = [
         HelpCommand::class,
-        GenerateKeyPair::class,
-        EncryptValue::class,
-        DecryptValue::class
+        GenerateKeyPairCommand::class,
+        EncryptValueCommand::class,
+        DecryptValueCommand::class
     ]
 )
 object App {

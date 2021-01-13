@@ -3,7 +3,7 @@ package me.andriefc.secj
 import me.andriefc.secj.comand.DecryptValueCommand
 import me.andriefc.secj.comand.EncryptValueCommand
 import me.andriefc.secj.comand.GenerateKeyPairCommand
-import me.andriefc.secj.commons.cli.CommandFactory
+import me.andriefc.secj.core.cli.CommandFactory
 import picocli.CommandLine
 import picocli.CommandLine.Command
 import picocli.CommandLine.HelpCommand

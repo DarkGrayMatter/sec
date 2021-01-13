@@ -1,4 +1,4 @@
-package me.andriefc.secj.commons.io
+package me.andriefc.secj.core.io
 
 import java.io.OutputStream
 

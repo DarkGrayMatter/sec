@@ -1,3 +1,5 @@
+@file:Suppress("SpellCheckingInspection")
+
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -38,7 +40,10 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
 
     // YAML - Jackson
-    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.6.1")
+    implementation(platform("com.fasterxml.jackson:jackson-bom:2.12.1"))
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-properties")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-csv")
 
 }
 

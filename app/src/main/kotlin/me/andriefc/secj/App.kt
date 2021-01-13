@@ -1,7 +1,6 @@
 package me.andriefc.secj
 
 import me.andriefc.secj.comand.DecryptValueCommand
-import me.andriefc.secj.comand.EncryptConfigFileCommand
 import me.andriefc.secj.comand.EncryptValueCommand
 import me.andriefc.secj.comand.GenerateKeyPairCommand
 import me.andriefc.secj.core.cli.CommandFactory
@@ -18,8 +17,7 @@ import kotlin.system.exitProcess
         HelpCommand::class,
         GenerateKeyPairCommand::class,
         EncryptValueCommand::class,
-        DecryptValueCommand::class,
-        EncryptConfigFileCommand::class
+        DecryptValueCommand::class
     ]
 )
 object App {

@@ -8,7 +8,9 @@ import java.io.File
 enum class StructuredDocumentFormat(vararg validExtensions: String) {
 
     JSON("json"),
-    YAML("yml", "yaml");
+    YAML("yml", "yaml"),
+    PROPERTIES("properties"),
+    CSV(".csv");
 
     private val fileExtensions = validExtensions.map(String::toLowerCase).toSet()
 

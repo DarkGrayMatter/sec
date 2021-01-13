@@ -36,6 +36,10 @@ dependencies {
     val junitVersion = "5.7.0"
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
+
+    // YAML - Jackson
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.6.1")
+
 }
 
 application {

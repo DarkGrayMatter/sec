@@ -1,11 +1,19 @@
-# SECJ - Security companion to the excellent Palantar library.
+# SEC - Security companion to the excellent Palantar library
+
+- [SEC - Security companion to the excellent Palantar library](#sec---security-companion-to-the-excellent-palantar-library)
+  - [How to build from Source](#how-to-build-from-source)
+  - [Short Introduction](#short-introduction)
+
+## How to build from Source
 
 Run the following command from the command line: 
 
 ```shell
-cd <prohect-folder>
-gradlew clean installDist
+cd <project-folder>
+./gradlew clean installDist
 ```
+
+## Short Introduction
 
 The command line application can be found at `app/build/install/app`
 
@@ -14,10 +22,10 @@ The easies to add the absolute path to your command path variable.
 To execute the tool type in command prompt/shell the following command:
 
   `./sec help`
-  
-You should see something like this: 
 
-```
+You should see something like this:
+
+```shell
 ❯ sec help
 Usage: sec [-hV] [COMMAND]
 Security companion to the excellent Palantar library.
@@ -30,9 +38,9 @@ Commands:
   decrypt-value      Decrypts a value given a private key.
 ```
 
-To get help on specific command, type in `help <command-name>`, for example: 
+To get help on specific command, type in `help <command-name>`, for example:
 
-```
+```shell
 ❯ sec help generate-key-pair
 Usage: sec generate-key-pair [--force-path] -a=<algorithm> -k=<keyName>
                              DESTINATION

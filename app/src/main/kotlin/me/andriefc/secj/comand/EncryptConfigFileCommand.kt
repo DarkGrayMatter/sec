@@ -15,13 +15,11 @@ import java.io.FileFilter
 )
 class EncryptConfigFileCommand : Runnable {
 
-    private lateinit var key: String
+    private lateinit var encryptionKeyFile: File
     private lateinit var configFormat: ConfigFormat
     private lateinit var configFile: File
     private lateinit var encryptedFileQualifier: String
-
-    @Mixin
-    lateinit var valueSelection: EncryptionValueSelectionOptions
+    private lateinit var selection: TargetPropertySelection
 
     override fun run() {
         TODO("Not yet implemented")
@@ -40,10 +38,10 @@ class EncryptConfigFileCommand : Runnable {
     @Option(
         names = ["-k", "--key"],
         required = true,
-        description = ["The public key to use for encrypting the configuration file"]
+        description = ["The public key file to use for encrypting the configuration file"]
     )
-    fun setKey(key: String) {
-        this.key = key
+    fun setKey(keyFile: File) {
+        this.encryptionKeyFile = keyFile
     }
 
     @Option(
@@ -55,36 +53,47 @@ class EncryptConfigFileCommand : Runnable {
         this.configFile = file
     }
 
+
+    @ArgGroup(exclusive = true, multiplicity = "1")
+    fun setPropertySelection(pvs: TargetPropertySelection) {
+        selection = pvs
+    }
+
     enum class ConfigFormat(accepts: FileFilter) : FileFilter by accepts {
 
         AUTO(FileFilter { false })
         ;
 
         companion object {
-
             fun select(file: File): ConfigFormat? = autoSelectables.firstOrNull { it.accept(file) }
-
-            private val autoSelectables = values().toMutableSet().run {
-                remove(AUTO)
-                toSet()
-            }
+            private val autoSelectables = values().toSet() - AUTO
         }
     }
 
     /**
-     * This class specified which keys are selected for encryption
+     * This class specified which properties are selected for encryption
      */
-    class EncryptionValueSelectionOptions {
+    class TargetPropertySelection {
+
+        private var containsPath = { _: String -> false }
 
         @Option(names = ["--all-paths"], required = false, description = ["Encrypts all possible data paths."])
-        fun setAll(all: Boolean) = Unit
+        fun setAll(all: Boolean) {
+            containsPath = { all }
+        }
 
         @Option(names = ["--path-file"], required = false, description = ["File contain one path per line to encrypt."])
-        fun setPathFile(file: File) = Unit
+        fun setPathFile(file: File) {
+            val filedKeys by lazy { file.readLines().map(String::trim).toSet() }
+            containsPath = filedKeys::contains
+        }
 
-        @Option(names = ["--paths"], required = false, description = ["Configuration paths to encrypt."])
-        fun setPaths(paths: Set<String>) = Unit
+        @Option(names = ["--path", "-P"], required = false, description = ["Configuration paths to encrypt."])
+        fun setPaths(paths: Set<String>) {
+            containsPath = paths::contains
+        }
 
+        operator fun contains(path: String) = containsPath(path)
     }
 
     companion object {

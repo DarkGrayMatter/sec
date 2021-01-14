@@ -32,7 +32,9 @@ dependencies {
     kapt("info.picocli:picocli-codegen:4.6.1")
 
     // palantir
-    implementation("com.palantir.config.crypto:encrypted-config-value:2.1.0")
+    implementation("com.palantir.config.crypto:encrypted-config-value:2.1.0") {
+        exclude(group = "com.fasterxml.jackson.core")
+    }
 
     // JUnit5
     val junitVersion = "5.7.0"

@@ -10,7 +10,7 @@ enum class StructuredDocumentFormat(vararg validExtensions: String) {
     JSON("json"),
     YAML("yml", "yaml"),
     PROPERTIES("properties"),
-    CSV(".csv");
+    CSV("csv");
 
     private val fileExtensions = validExtensions.map(String::toLowerCase).toSet()
 
@@ -27,4 +27,5 @@ enum class StructuredDocumentFormat(vararg validExtensions: String) {
 
     }
 }
+
 

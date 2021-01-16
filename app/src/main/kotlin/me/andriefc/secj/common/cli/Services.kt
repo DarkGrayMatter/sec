@@ -1,6 +1,6 @@
-package me.andriefc.secj.core.cli
+package me.andriefc.secj.common.cli
 
-import me.andriefc.secj.core.lang.tryAsKotlinSingleton
+import me.andriefc.secj.common.lang.tryAsKotlinSingleton
 import picocli.CommandLine
 
 object CommandFactory : CommandLine.IFactory {

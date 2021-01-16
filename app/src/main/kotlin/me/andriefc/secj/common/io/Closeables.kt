@@ -1,5 +1,5 @@
 @file:JvmName("Closeables")
-package me.andriefc.secj.core.io
+package me.andriefc.secj.common.io
 
 import java.io.Closeable
 

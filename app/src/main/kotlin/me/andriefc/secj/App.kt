@@ -1,9 +1,10 @@
 package me.andriefc.secj
 
 import me.andriefc.secj.comand.DecryptValueCommand
+import me.andriefc.secj.comand.EncryptStructuredDocumentCommand
 import me.andriefc.secj.comand.EncryptValueCommand
 import me.andriefc.secj.comand.GenerateKeyPairCommand
-import me.andriefc.secj.core.cli.CommandFactory
+import me.andriefc.secj.common.cli.CommandFactory
 import picocli.CommandLine
 import picocli.CommandLine.Command
 import picocli.CommandLine.HelpCommand
@@ -17,7 +18,8 @@ import kotlin.system.exitProcess
         HelpCommand::class,
         GenerateKeyPairCommand::class,
         EncryptValueCommand::class,
-        DecryptValueCommand::class
+        DecryptValueCommand::class,
+        EncryptStructuredDocumentCommand::class
     ]
 )
 object App {

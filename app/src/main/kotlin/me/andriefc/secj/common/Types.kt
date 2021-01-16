@@ -1,4 +1,4 @@
-package me.andriefc.secj.core
+package me.andriefc.secj.common
 
 import java.io.File
 
@@ -9,8 +9,7 @@ enum class StructuredDocumentFormat(vararg validExtensions: String) {
 
     JSON("json"),
     YAML("yml", "yaml"),
-    PROPERTIES("properties"),
-    CSV("csv");
+    PROPERTIES("properties");
 
     private val fileExtensions = validExtensions.map(String::toLowerCase).toSet()
 

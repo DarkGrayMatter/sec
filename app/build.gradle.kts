@@ -1,10 +1,12 @@
 @file:Suppress("SpellCheckingInspection")
 
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.dokka.gradle.DokkaTask
 
 plugins {
     kotlin("jvm") version "1.4.21"
     kotlin("kapt") version "1.4.21"
+    id("org.jetbrains.dokka") version "1.4.20"
     application
 }
 
@@ -84,3 +86,4 @@ tasks.withType<Test> {
     useJUnitPlatform {
     }
 }
+

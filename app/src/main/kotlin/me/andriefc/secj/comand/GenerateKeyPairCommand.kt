@@ -18,9 +18,6 @@ import java.nio.file.Path
 )
 class GenerateKeyPairCommand : Runnable {
 
-    @Spec
-    internal lateinit var spec: Model.CommandSpec
-
     private lateinit var dest: File
     private var forcePath = true
     private lateinit var algorithm: Algorithm
@@ -89,11 +86,13 @@ class GenerateKeyPairCommand : Runnable {
 
     }
 
-    private fun dest(path: String): Path = File(dest, path).absoluteFile.run {
+    private fun dest(path: String): Path = File(dest, path).run {
         if (!exists() && forcePath && !parentFile.mkdirs()) {
             throw IOException("Unable to create path for key files: $this")
         }
-        toPath().toAbsolutePath()
+        canonicalFile
+            .toPath()
+            .toAbsolutePath()
     }
 }
 

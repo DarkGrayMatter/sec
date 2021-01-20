@@ -1,10 +1,11 @@
 package me.andriefc.secj
 
 import me.andriefc.secj.comand.DecryptValueCommand
-import me.andriefc.secj.comand.EncryptStructuredDocumentCommand
+import me.andriefc.secj.comand.EncryptConfigCommand
 import me.andriefc.secj.comand.EncryptValueCommand
 import me.andriefc.secj.comand.GenerateKeyPairCommand
-import me.andriefc.secj.common.cli.CommandFactory
+import me.andriefc.secj.common.cli.service.CommandFactory
+import me.andriefc.secj.common.cli.service.registerAppConverters
 import picocli.CommandLine
 import picocli.CommandLine.Command
 import picocli.CommandLine.HelpCommand
@@ -12,25 +13,25 @@ import kotlin.system.exitProcess
 
 @Command(
     name = "sec",
-    description = ["Security companion to the excellent Palantar library."],
+    description = ["Sec configuration companion to the excellent Palantir library."],
     mixinStandardHelpOptions = true,
     subcommands = [
         HelpCommand::class,
         GenerateKeyPairCommand::class,
         EncryptValueCommand::class,
         DecryptValueCommand::class,
-        EncryptStructuredDocumentCommand::class
+        EncryptConfigCommand::class,
     ]
 )
 object App {
-
     @JvmStatic
     fun main(args: Array<String>) {
         exitProcess(
-            CommandLine(App, CommandFactory)
+            CommandLine(App, CommandFactory())
                 .setExpandAtFiles(true)
                 .setCaseInsensitiveEnumValuesAllowed(true)
                 .setInterpolateVariables(true)
+                .registerAppConverters()
                 .execute(* args)
         )
     }

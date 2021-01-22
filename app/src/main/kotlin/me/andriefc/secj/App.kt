@@ -5,10 +5,10 @@ import me.andriefc.secj.comand.EncryptConfigCommand
 import me.andriefc.secj.comand.EncryptValueCommand
 import me.andriefc.secj.comand.GenerateKeyPairCommand
 import me.andriefc.secj.common.cli.service.CommandFactory
-import me.andriefc.secj.common.cli.service.registerAppConverters
+import me.andriefc.secj.common.cli.service.registerCommonConverters
+import me.andriefc.secj.common.cli.service.registerCommonExceptionMapping
 import picocli.CommandLine
-import picocli.CommandLine.Command
-import picocli.CommandLine.HelpCommand
+import picocli.CommandLine.*
 import kotlin.system.exitProcess
 
 @Command(
@@ -24,6 +24,7 @@ import kotlin.system.exitProcess
     ]
 )
 object App {
+
     @JvmStatic
     fun main(args: Array<String>) {
         exitProcess(
@@ -31,8 +32,11 @@ object App {
                 .setExpandAtFiles(true)
                 .setCaseInsensitiveEnumValuesAllowed(true)
                 .setInterpolateVariables(true)
-                .registerAppConverters()
+                .registerCommonConverters()
+                .registerCommonExceptionMapping()
                 .execute(* args)
         )
     }
+
+
 }

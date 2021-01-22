@@ -1,6 +1,7 @@
-package me.andriefc.secj.common.cli
+package me.andriefc.secj.common.cli.service
 
-import me.andriefc.secj.common.IOSource
+import me.andriefc.secj.common.exception.CommandFailedException
+import me.andriefc.secj.common.io.IOSource
 import me.andriefc.secj.common.lang.tryAsKotlinSingleton
 import picocli.CommandLine
 
@@ -14,7 +15,20 @@ class CommandFactory : CommandLine.IFactory {
 /**
  * Register all application value converters.
  */
-fun CommandLine.registerAppConverters(): CommandLine = apply {
+fun CommandLine.registerCommonConverters(): CommandLine = apply {
     registerConverter(IOSource.Output::class.java, IOSource.Output.Companion::fromString)
     registerConverter(IOSource.Input::class.java, IOSource.Input.Companion::fromString)
+}
+
+fun CommandLine.registerCommonExceptionMapping(): CommandLine {
+    setExitCodeExceptionMapper { ex ->
+        when (ex) {
+            is CommandFailedException -> {
+                System.err.println(ex.message)
+                ex.exitCode
+            }
+            else -> CommandLine.ExitCode.SOFTWARE
+        }
+    }
+    return this
 }

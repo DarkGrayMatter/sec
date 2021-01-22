@@ -4,6 +4,7 @@ package me.andriefc.secj.comand
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.palantir.config.crypto.KeyWithType
+import me.andriefc.secj.common.exception.fail
 import me.andriefc.secj.common.io.IOSource
 import me.andriefc.secj.common.parsing.Mappers.mapper
 import me.andriefc.secj.common.parsing.StructuredDocumentFormat
@@ -27,7 +28,13 @@ class EncryptConfigCommand : Runnable {
     lateinit var targetSelection: TargetSelection
 
 
-    @Option(names = ["-k"], description = ["Public key to encrypt with."], required = true, paramLabel = "<key>", order = 1)
+    @Option(
+        names = ["-k"],
+        description = ["Public key to encrypt with."],
+        required = true,
+        paramLabel = "<key>",
+        order = 1
+    )
     fun setKeySource(s: IOSource.Input) {
         publicKeySource = s
     }
@@ -54,12 +61,11 @@ class EncryptConfigCommand : Runnable {
         formatOverride = f
     }
 
-
     override fun run() {
 
         val format = formatOverride
             ?: StructuredDocumentFormat.fromName(configSource.uri)
-            ?: throw IllegalArgumentException("Unable to determine configuration format of ${configSource.uri}")
+            ?: fail("Unable to determine configuration format of ${configSource.uri}")
 
         val source: JsonNode = configSource.open().use { format.mapper().readTree(it) }
         val encryptionKey: KeyWithType = publicKeySource.open().use { KeyWithType.fromString(it.reader().readText()) }
@@ -70,8 +76,6 @@ class EncryptConfigCommand : Runnable {
     }
 
     private fun encryptWithSelection(source: JsonNode, encryptionKey: KeyWithType, selection: List<String>): JsonNode {
-
-
         return source
     }
 
@@ -81,7 +85,7 @@ class EncryptConfigCommand : Runnable {
         private lateinit var retrieveSelection: () -> List<String>
 
         @Option(
-            names = ["-t"],
+            names = ["-T", "--target"],
             description = ["Expression to select encryption keys in the source document."],
             required = true
         )
@@ -90,7 +94,7 @@ class EncryptConfigCommand : Runnable {
         }
 
         @Option(
-            names = ["--target-per-line"],
+            names = ["--target-file"],
             description = ["Treat each line as selection of keys in the source document"],
             required = true,
             paramLabel = "<inputSource>"
@@ -101,7 +105,6 @@ class EncryptConfigCommand : Runnable {
 
         fun selection() = retrieveSelection()
     }
-
 
 }
 

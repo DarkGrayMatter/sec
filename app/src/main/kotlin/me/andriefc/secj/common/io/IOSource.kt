@@ -1,10 +1,10 @@
 package me.andriefc.secj.common.io
 
-import java.io.Closeable
-import java.io.File as JavaFile
 import java.io.FileNotFoundException
+import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
+import java.io.File as JavaFile
 
 /**
  * An abstraction to work with common IO, (such as Files StdIn, StdOut and classpath) sources in an unified way.
@@ -73,23 +73,15 @@ sealed class IOSource<out T> {
         }
     }
 
+    fun tryOpen(): T? {
+        return runCatching { open() }
+            .onFailure { if (it !is IOException) throw it }
+            .getOrNull()
+    }
+
     companion object {
         private const val STDIO_IDENTIFIER = "-"
     }
 }
-
-interface Resource : Closeable {
-    abstract val uri: String
-    fun exist(): Boolean
-}
-
-interface Readable<R> : Resource where R: Closeable {
-    fun input(): R
-}
-
-interface Writable<R> : Resource where R:Closeable {
-    fun output(): R
-}
-
 
 

@@ -1,4 +1,4 @@
-package me.andriefc.secj.comand
+package me.andriefc.secj.command
 
 import com.palantir.config.crypto.KeyFileUtils
 import picocli.CommandLine.Command

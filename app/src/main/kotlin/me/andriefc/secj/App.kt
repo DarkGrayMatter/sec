@@ -1,12 +1,12 @@
 package me.andriefc.secj
 
-import me.andriefc.secj.comand.DecryptValueCommand
-import me.andriefc.secj.comand.EncryptConfigCommand
-import me.andriefc.secj.comand.EncryptValueCommand
-import me.andriefc.secj.comand.GenerateKeyPairCommand
+import me.andriefc.secj.command.DecryptValueCommand
+import me.andriefc.secj.command.EncryptConfigCommand
+import me.andriefc.secj.command.EncryptValueCommand
+import me.andriefc.secj.command.GenerateKeyPairCommand
 import me.andriefc.secj.common.cli.service.CommandFactory
 import me.andriefc.secj.common.cli.service.registerCommonConverters
-import me.andriefc.secj.common.cli.service.registerCommonExceptionMapping
+import me.andriefc.secj.common.cli.service.registerExceptionHandlers
 import picocli.CommandLine
 import picocli.CommandLine.*
 import kotlin.system.exitProcess
@@ -33,10 +33,8 @@ object App {
                 .setCaseInsensitiveEnumValuesAllowed(true)
                 .setInterpolateVariables(true)
                 .registerCommonConverters()
-                .registerCommonExceptionMapping()
+                .registerExceptionHandlers()
                 .execute(* args)
         )
     }
-
-
 }

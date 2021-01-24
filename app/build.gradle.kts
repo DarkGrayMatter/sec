@@ -52,7 +52,7 @@ dependencies {
 }
 
 application {
-    mainClass.set("me.andriefc.secj.App")
+    mainClass.set("becode.sec.App")
 }
 
 tasks.withType<CreateStartScripts> {

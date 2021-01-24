@@ -1,5 +1,5 @@
 
-rootProject.name = "secj"
+rootProject.name = "sec"
 include("app")
 
 pluginManagement {

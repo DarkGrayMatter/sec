@@ -1,9 +1,10 @@
 package becode.sec.common.parsing
 
+import becode.sec.common.parsing.JsonPathVisitor.visitPaths
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import becode.sec.common.parsing.JsonPathVisitor.visit
+import kotlin.test.assertEquals
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class JsonPathVisitorTest {
@@ -26,14 +27,28 @@ internal class JsonPathVisitorTest {
 
     @Test
     fun visitDoc() {
-        visit(doc) {
-            if (node.isValueNode) {
-                println("$path : ${node.textValue()}")
+
+        val expected = mapOf(
+            "name" to "andries",
+            "id" to "72717271",
+            "label" to "bottom"
+        )
+
+        val actual: Map<String, String?> = mutableMapOf<String, String>().run {
+            visitPaths(doc) {
+                if (node.isValueNode) {
+                    put(path, node.textValue())
+                }
             }
+            toMap()
         }
+
+        assertEquals(expected, actual)
+
     }
 
     @Test
     fun visitArrayDoc() {
+        TODO("Not implemented")
     }
 }

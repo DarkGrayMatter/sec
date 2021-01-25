@@ -7,3 +7,11 @@ fun String.tr(): String {
         else -> trimIndent().lines().joinToString(" ") { it.trim() }
     }
 }
+
+object PreCondition {
+    inline fun require(condition: Boolean, message: () -> String) {
+        if (!condition) {
+            throw IllegalStateException(message())
+        }
+    }
+}

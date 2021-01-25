@@ -2,13 +2,16 @@
 
 package becode.sec.common.parsing
 
+import becode.sec.common.PreCondition.require
+import becode.sec.common.parsing.JsonPathVisitor.visitPaths
+import becode.sec.common.tr
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.node.JsonNodeFactory
+import com.fasterxml.jackson.databind.node.NullNode
 import com.fasterxml.jackson.dataformat.csv.CsvMapper
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
-import becode.sec.common.parsing.JsonPathVisitor.visit
-import becode.sec.common.tr
 import java.util.*
 
 object ContentMapping {
@@ -54,11 +57,15 @@ inline fun <reified T : JsonNode> ObjectMapper.treeFromContent(content: String):
     return this.treeFromContent(content, T::class.java)
 }
 
+
+fun String.asTree(mapper: ObjectMapper): JsonNode = mapper.treeFromContent(this)
+
+
 /**
  * Object to visit a Json based documents based on path.
  *
  * @see [JsonPathVisitor.NodeVisit]
- * @see [visit]
+ * @see [visitPaths]
  */
 object JsonPathVisitor {
 
@@ -68,69 +75,104 @@ object JsonPathVisitor {
         fun stop()
     }
 
-    @JvmStatic
-    inline fun visit(root: JsonNode, crossinline visitNode: NodeVisit.() -> Unit) {
+    private val factory: JsonNodeFactory
+        get() = JsonNodeFactory.instance
+
+    private const val SEPARATOR = "."
+
+    fun visitPaths(root: JsonNode, visitNode: NodeVisit.() -> Unit) {
 
         object : NodeVisit {
 
-            private val queue: Queue<Pair<String, JsonNode>> = LinkedList()
-            private var visiting = false
-            private var currentPath: String? = null
-            private var currentNode: JsonNode? = null
+            private var visiting = true
+            private var stack = LinkedList<Pair<String, JsonNode>>()
 
             init {
-                visiting = true
-                enqueue(root, "")
-                visit()
-            }
-
-            override val node: JsonNode
-                get() = currentNode.takeIf { visiting } ?: throw IllegalStateException()
-
-            override val path: String
-                get() = currentPath.takeIf { visiting } ?: throw IllegalStateException()
-
-            override fun stop() {
-                queue.clear()
+                if (push(root)) {
+                    visitOnce()
+                }
                 visiting = false
             }
 
-            private fun enqueue(node: JsonNode, id: String) {
-                require(visiting)
-                when {
-                    node.isObject -> node.fieldNames().forEach { field -> enqueue(node.get(field), field) }
-                    node.isArray -> (0..node.size()).forEach { index -> enqueue(node.get(index), "$index") }
+
+            private fun push(jsonNode: JsonNode): Boolean {
+                return when {
+                    jsonNode.isArray -> {
+                        (0..jsonNode.size())
+                            .map(Int::toString)
+                            .zip(jsonNode)
+                            .forEach(stack::push)
+                        true
+                    }
+                    jsonNode.isObject -> {
+                        jsonNode.fields()
+                            .asSequence()
+                            .forEach { (k, v) -> stack.push(k to v) }
+                        true
+                    }
+                    jsonNode.isValueNode && jsonNode == root -> {
+                        val name = jsonNode.asText()
+                        val fieldValue = factory.nullNode()
+                        stack.push(name to fieldValue)
+                        true
+                    }
+                    else -> false
                 }
-                queue.add(id to node)
             }
 
-            private fun dequeue() {
-                val (id, node) = queue.remove()
-                currentNode = node
-                currentPath = buildString {
-                    queue.joinTo(this, ".") { (id, _) -> id }
-                    if (isNotEmpty()) append(".")
-                    append(id)
-                }
-            }
-
-            private fun visit() {
-                require(visiting)
+            private fun visitOnce() {
                 try {
-                    while (visiting && queue.isNotEmpty()) {
-                        dequeue()
+                    while (visiting && stack.isNotEmpty()) {
+                        val (k, v) = stack.pop()
+                        node = v
+                        path = buildPathTo(k)
                         visitNode()
+                        if (visiting && node.isContainerNode) {
+                            node.forEach(this::push)
+                        }
                     }
                 } finally {
-                    // Always cleanup!
-                    visiting = false
-                    queue.clear()
-                    currentNode = null
-                    currentPath = null
+                    stop()
                 }
             }
+
+            private fun buildPathTo(k: String): String {
+                return buildString {
+                    stack.joinTo(this, SEPARATOR)
+                    if (isNotEmpty()) append(SEPARATOR)
+                    append(k)
+                }
+            }
+
+            override var path: String = ""
+                private set
+                get() {
+                    requiresVisiting()
+                    return field
+                }
+
+            override var node: JsonNode = NullNode.instance
+                private set
+                get() {
+                    requiresVisiting()
+                    return field
+                }
+
+            private fun requiresVisiting() = require(visiting) {
+                "Tree is not available to visit anymore."
+            }
+
+            override fun stop() {
+                if (visiting) {
+                    visiting = false
+                    stack.clear()
+                    node = factory.nullNode()
+                    path = ""
+                }
+            }
+
         }
     }
+
 }
 
-fun String.asTree(mapper: ObjectMapper): JsonNode = mapper.treeFromContent(this)

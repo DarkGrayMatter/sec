@@ -1,6 +1,6 @@
 # SEC - Security companion to the excellent Palantar library
 
-- [SEC - Security companion to the excellent Palantar library](#sec---security-companion-to-the-excellent-palantar-library)
+- [SEC - Security companion to the excellent Palantir library](#sec---security-companion-to-the-excellent-palantar-library)
   - [How to build from Source](#how-to-build-from-source)
   - [Short Introduction](#short-introduction)
 

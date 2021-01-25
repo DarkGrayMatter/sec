@@ -1,13 +1,13 @@
 @file:Suppress("SpellCheckingInspection")
 
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import org.jetbrains.dokka.gradle.DokkaTask
 
 plugins {
     kotlin("jvm") version "1.4.21"
     kotlin("kapt") version "1.4.21"
     id("org.jetbrains.dokka") version "1.4.20"
     application
+    `maven-publish`
 }
 
 repositories {
@@ -87,3 +87,21 @@ tasks.withType<Test> {
     }
 }
 
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = "${project.group}"
+            artifactId = project.name
+            version = "${project.version}"
+            from(components["java"])
+        }
+    }
+    repositories {
+        maven {
+            url = uri("https://maven.pkg.jetbrains.space/graymatter/p/sec/maven")
+            credentials.username = project.property("graymatter_spaces_username") as String
+            credentials.password = project.property("graymatter_spaces_password") as String
+        }
+    }
+}

@@ -87,6 +87,9 @@ tasks.withType<Test> {
     }
 }
 
+java {
+    withSourcesJar()
+}
 
 publishing {
     publications {

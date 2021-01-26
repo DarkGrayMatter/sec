@@ -7,34 +7,32 @@ import becode.sec.common.parsing.JsonPathVisitor.visitPaths
 import becode.sec.common.tr
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.fasterxml.jackson.databind.node.NullNode
+import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.dataformat.csv.CsvMapper
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
 import java.util.*
 
-object ContentMapping {
+object StructuredDocumentType {
 
-    val json = ObjectMapper().findAndRegisterModules().configureCommons()
-    val csv = CsvMapper().findAndRegisterModules().configureCommons()
-    val properties = JavaPropsMapper().findAndRegisterModules().configureCommons()
-    val yaml = YAMLMapper().findAndRegisterModules().configureCommons()
+    val json = ObjectMapper().configure()
+    val csv = CsvMapper().configure()
+    val properties = JavaPropsMapper().configure()
+    val yaml = YAMLMapper().configure()
 
-    fun StructuredDocumentFormat.mapper(): ObjectMapper {
+    fun Format.mapper(): ObjectMapper {
         return when (this) {
-            StructuredDocumentFormat.JSON -> json
-            StructuredDocumentFormat.YAML -> yaml
-            StructuredDocumentFormat.PROPERTIES -> properties
-            StructuredDocumentFormat.CSV -> csv
+            Format.JSON -> json
+            Format.YAML -> yaml
+            Format.PROPERTIES -> properties
+            Format.CSV -> csv
         }
     }
 
-    private fun ObjectMapper.configureCommons() = apply {
-        // todo: set date formatting
-    }
-
-
+    private fun ObjectMapper.configure(): ObjectMapper = findAndRegisterModules()
 }
 
 fun <T : JsonNode> ObjectMapper.treeFromContent(content: String, expectedContentNodeClass: Class<out T>): T {
@@ -64,14 +62,14 @@ fun String.asTree(mapper: ObjectMapper): JsonNode = mapper.treeFromContent(this)
 /**
  * Object to visit a Json based documents based on path.
  *
- * @see [JsonPathVisitor.NodeVisit]
+ * @see [JsonPathVisitor.VisitingPath]
  * @see [visitPaths]
  */
 object JsonPathVisitor {
 
-    interface NodeVisit {
+    interface VisitingPath {
         val path: String
-        val node: JsonNode
+        var node: JsonNode
         fun stop()
     }
 
@@ -79,69 +77,26 @@ object JsonPathVisitor {
         get() = JsonNodeFactory.instance
 
     private const val SEPARATOR = "."
+    private const val EMPTY_PATH = ""
 
-    fun visitPaths(root: JsonNode, visitNode: NodeVisit.() -> Unit) {
+    private sealed class Id(val pathSegment: String) {
+        data class ByIndex(val value: Int) : Id(value.toString())
+        data class ByField(val field: String) : Id(field)
+        object Root : Id(EMPTY_PATH)
+    }
 
-        object : NodeVisit {
+    fun visitPaths(root: JsonNode, visitNode: VisitingPath.() -> Unit) {
+
+        object : VisitingPath {
 
             private var visiting = true
-            private var stack = LinkedList<Pair<String, JsonNode>>()
+            private var stack = LinkedList<Pair<Id, JsonNode>>()
+            private var parent: JsonNode? = null
 
             init {
-                if (push(root)) {
-                    visitOnce()
-                }
+                stack.push(Id.Root to root)
+                visitOnce()
                 visiting = false
-            }
-
-
-            private fun push(jsonNode: JsonNode): Boolean {
-                return when {
-                    jsonNode.isArray -> {
-                        (0..jsonNode.size())
-                            .map(Int::toString)
-                            .zip(jsonNode)
-                            .forEach(stack::push)
-                        true
-                    }
-                    jsonNode.isObject -> {
-                        jsonNode.fields()
-                            .asSequence()
-                            .forEach { (k, v) -> stack.push(k to v) }
-                        true
-                    }
-                    jsonNode.isValueNode && jsonNode == root -> {
-                        val name = jsonNode.asText()
-                        val fieldValue = factory.nullNode()
-                        stack.push(name to fieldValue)
-                        true
-                    }
-                    else -> false
-                }
-            }
-
-            private fun visitOnce() {
-                try {
-                    while (visiting && stack.isNotEmpty()) {
-                        val (k, v) = stack.pop()
-                        node = v
-                        path = buildPathTo(k)
-                        visitNode()
-                        if (visiting && node.isContainerNode) {
-                            node.forEach(this::push)
-                        }
-                    }
-                } finally {
-                    stop()
-                }
-            }
-
-            private fun buildPathTo(k: String): String {
-                return buildString {
-                    stack.joinTo(this, SEPARATOR)
-                    if (isNotEmpty()) append(SEPARATOR)
-                    append(k)
-                }
             }
 
             override var path: String = ""
@@ -152,10 +107,13 @@ object JsonPathVisitor {
                 }
 
             override var node: JsonNode = NullNode.instance
-                private set
                 get() {
                     requiresVisiting()
                     return field
+                }
+                set(value) {
+                    requiresVisiting()
+                    field = value
                 }
 
             private fun requiresVisiting() = require(visiting) {
@@ -167,10 +125,45 @@ object JsonPathVisitor {
                     visiting = false
                     stack.clear()
                     node = factory.nullNode()
-                    path = ""
+                    path = EMPTY_PATH
                 }
             }
 
+            private fun visitOnce() {
+                while (visiting && stack.isNotEmpty()) {
+                    val (p, n) = stack.pop()
+                    when {
+                        n.isValueNode -> visitPath(p, n)
+                        n.isArray -> visitArray(n as ArrayNode)
+                        n.isObject -> visitObject(n as ObjectNode)
+                    }
+                }
+            }
+
+            private fun visitObject(objectNode: ObjectNode) {
+                objectNode.fieldNames().forEachRemaining { field ->
+                    stack.push(Id.ByField(field) to objectNode.get(field))
+                }
+            }
+
+            private fun visitArray(arrayNode: ArrayNode) {
+                arrayNode.forEachIndexed { index, jsonNode ->
+                    stack.push(Id.ByIndex(index) to jsonNode)
+                }
+            }
+
+            private fun visitPath(id: Id, n: JsonNode) {
+                parent = stack.peek()?.second
+                path = buildString /*Build only on actual visit */ {
+                    stack.joinTo(this, SEPARATOR) { (id, _) -> id.pathSegment }
+                    if (id.pathSegment.isNotEmpty()) {
+                        if (isNotEmpty()) append(SEPARATOR)
+                        append(id.pathSegment)
+                    }
+                }
+                node = n
+                visitNode()
+            }
         }
     }
 

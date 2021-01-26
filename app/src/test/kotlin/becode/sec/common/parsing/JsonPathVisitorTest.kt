@@ -15,7 +15,7 @@ internal class JsonPathVisitorTest {
             "name": "andries",
             "id": "72717271",
             "label": "bottom"
-        }""".asTree(ContentMapping.json)
+        }""".asTree(StructuredDocumentType.json)
 
 
     @Language("JSON")
@@ -23,7 +23,7 @@ internal class JsonPathVisitorTest {
         [
           {"name": "andries","id": "72717271", "label": "bottom"},
           {"name": "Jason", "id": "6271212-12012012", "label": "top"}
-        ]""".asTree(ContentMapping.json)
+        ]""".asTree(StructuredDocumentType.json)
 
     @Test
     fun visitDoc() {

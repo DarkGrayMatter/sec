@@ -1,6 +1,6 @@
 package becode.sec.common.parsing
 
-import becode.sec.common.parsing.JsonPathVisitor.visitPaths
+import becode.sec.common.parsing.JsonPathVisitor.visit
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -35,7 +35,7 @@ internal class JsonPathVisitorTest {
         )
 
         val actual: Map<String, String?> = mutableMapOf<String, String>().run {
-            visitPaths(doc) {
+            visit(doc) {
                 if (node.isValueNode) {
                     put(path, node.textValue())
                 }

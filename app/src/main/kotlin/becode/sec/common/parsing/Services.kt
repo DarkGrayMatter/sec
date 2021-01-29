@@ -78,21 +78,19 @@ object JsonPathVisitor {
 
     private sealed class PathLocation(val segment: String) {
 
-        object Root : PathLocation(EMPTY_PATH)
-        data class AtIndex(val index: Int) : PathLocation(index.toString())
-        data class AtField(val name: String) : PathLocation(name)
-
-        fun extendPath(path: StringBuilder): Boolean {
-
-            if (this is Root || segment.isEmpty()) {
-                return false
-            }
-
+        open fun extendPath(path: StringBuilder): Boolean {
             if (path.isNotEmpty()) path.append(PATH_SEPARATOR)
             path.append(segment)
-
             return true
         }
+
+        object Root : PathLocation(EMPTY_PATH) {
+            override fun extendPath(path: StringBuilder): Boolean = false
+        }
+
+
+        data class AtIndex(val index: Int) : PathLocation(index.toString())
+        data class AtField(val name: String) : PathLocation(name)
 
         companion object {
             const val PATH_SEPARATOR: Char = '.'
@@ -111,8 +109,7 @@ object JsonPathVisitor {
 
             init {
                 stack.push(PathLocation.Root to root)
-                visitNodes()
-                visiting = false
+                visit()
             }
 
             override var path: String = ""
@@ -145,7 +142,7 @@ object JsonPathVisitor {
                 }
             }
 
-            private fun visitNodes() {
+            private fun visit() {
                 while (visiting && stack.isNotEmpty()) {
                     val (location, node) = stack.pop()
                     when {
@@ -154,6 +151,7 @@ object JsonPathVisitor {
                         node.isObject -> visitObject(node as ObjectNode)
                     }
                 }
+                visiting = false
             }
 
             private fun visitObject(objectNode: ObjectNode) {

@@ -13,14 +13,14 @@ import kotlin.system.exitProcess
 
 @Command(
     name = "sec",
-    description = ["Sec configuration companion to the excellent Palantir library."],
+    description = ["SEC is a configuration companion to the excellent Palantir library."],
     mixinStandardHelpOptions = true,
     subcommands = [
         HelpCommand::class,
         GenerateKeyPairCommand::class,
         EncryptValueCommand::class,
         DecryptValueCommand::class,
-        EncryptConfigCommand::class,
+        //EncryptConfigCommand::class,
     ]
 )
 object App {

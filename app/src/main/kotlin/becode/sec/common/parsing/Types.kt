@@ -2,11 +2,12 @@
 
 package becode.sec.common.parsing
 
+import becode.sec.common.Separator
 
 /**
  * An enum to indicate supported formats of documents this tool can process.
  */
-enum class Format(vararg validExtensions: String) {
+enum class DocumentedFormat(vararg validExtensions: String) {
 
     JSON("json"),
     YAML("yml", "yaml"),
@@ -17,7 +18,7 @@ enum class Format(vararg validExtensions: String) {
 
     companion object {
 
-        private val formatsWithSuffixes: List<Pair<Format, String>> =
+        private val formatsWithSuffixes: List<Pair<DocumentedFormat, String>> =
             values().flatMap { format ->
                 format.extensions.map { ext ->
                     val suffix = ".${ext}".toLowerCase()
@@ -29,7 +30,7 @@ enum class Format(vararg validExtensions: String) {
          * Determine yhe document format
          */
         @JvmStatic
-        fun ofFile(file: java.io.File): Format? {
+        fun ofFile(file: java.io.File): DocumentedFormat? {
             return fromName(file.name)
         }
 
@@ -37,9 +38,27 @@ enum class Format(vararg validExtensions: String) {
          * Determines the format denoted by the last part of a file name after the DOT ("**`.`**") character.
          */
         @JvmStatic
-        fun fromName(name: String): Format? {
+        fun fromName(name: String): DocumentedFormat? {
             return formatsWithSuffixes.firstOrNull { (_, suffix) -> name.endsWith(suffix, ignoreCase = true) }?.first
         }
+    }
+
+}
+
+
+class Path private constructor(
+    val value: String,
+    val separator: Separator,
+    parts: List<String>
+) : List<String> by parts {
+
+    constructor(
+        separator: Separator,
+        parts: List<String>
+    ): this(parts.joinToString("${separator.char}"), separator, parts)
+
+    companion object {
+
     }
 
 }

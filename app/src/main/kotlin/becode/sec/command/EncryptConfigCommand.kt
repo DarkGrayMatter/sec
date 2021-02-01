@@ -8,7 +8,7 @@ import becode.sec.common.cli.converter.CommaSeparatedListConverter
 import becode.sec.common.exception.failCommand
 import becode.sec.common.io.IOSource
 import becode.sec.common.parsing.StructuredDocumentType.mapper
-import becode.sec.common.parsing.Format
+import becode.sec.common.parsing.DocumentedFormat
 import picocli.CommandLine.*
 
 @Command(
@@ -17,7 +17,7 @@ import picocli.CommandLine.*
 )
 class EncryptConfigCommand : Runnable {
 
-    private var formatOverride: Format? = null
+    private var formatOverride: DocumentedFormat? = null
     private lateinit var configSource: IOSource.Input
     private lateinit var publicKeySource: IOSource.Input
 
@@ -58,14 +58,14 @@ class EncryptConfigCommand : Runnable {
         order = 5,
         paramLabel = "<format>"
     )
-    fun setConfigSourceFormat(f: Format) {
+    fun setConfigSourceFormat(f: DocumentedFormat) {
         formatOverride = f
     }
 
     override fun run() {
 
         val format = formatOverride
-            ?: Format.fromName(configSource.uri)
+            ?: DocumentedFormat.fromName(configSource.uri)
             ?: failCommand("Unable to determine configuration format of $configSource")
 
         val source: JsonNode = configSource.tryOpen()?.use { format.mapper().readTree(it) }

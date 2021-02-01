@@ -1,0 +1,81 @@
+postgres:
+  server: localhost
+  database: bigdb
+  user: bigduser
+  password: bigduserpassword
+  maximumPoolSize: 2
+  schema: public
+
+grpcServer:
+  port: 8015
+
+jdbcExecutor:
+  nameFormat: jdbc-pool-%d
+  isDaemon: true
+  numberOfThreads: 20
+
+legacyJwt:
+  signingKey: f22fcab0011fc6507b5ff
+
+hashId:
+  salt: ZL794W8APQ4986Q5A9TRS192395C1
+  alphabet: 0123456789ABCDEFGHJKLMNPQRSTUVWXYZ
+  minLength: 15
+
+bcrypt:
+  logRounds: 10
+
+jwt:
+  signingKey: ca22bc59fecb32e5e2606ea
+
+securityTokenExpiryInMinutes: 2
+securityTokenLength: 6
+
+networkClientEndpoint:
+  host: localhost
+  port: 8045
+  sslEnabled: false
+  uri: direct://localhost:8045
+
+recaptcha:
+  secret: secret
+  minimumScoreThreshold: 0.9
+
+recaptchaEndpoint:
+  baseUrl: https://www.google.com
+  endpoint: ""
+
+mongo:
+  uri: mongodb://localhost:27017
+  username: user1
+  password: user1
+  database: bigdck
+
+event:
+  version: v1
+  publishVersion: v1
+  keyName: eventKey
+  keyVersion: 1.0
+  key: ca22bc59fe25a3e42953daf15d7c421beb2af4058324f296b15f1371a32b7f0714315a3138a8f6b43f5cb32e5e2606ea
+  keyAlgorithm: RSA
+
+identityEncryptionKeys:
+  - key: 8581d32922480a21ba4c33cd91ba4e03ed1db47d
+    source: config
+    version: 1
+    domain: identity
+    encoding: hex
+
+maskConfiguration:
+  byteToTextEncoding: base32
+  key: c0a52605c46870bb6e9faad6f4a34ce03702af0b864aac53fa
+
+magicLinkChallenge:
+    sessionTimeToLiveMinutes: 30
+    globalSessionQuotaThreshold: 5
+    dispatchCountThreshold: 5
+    attemptsCountThreshold: 4
+    identityEncryptionKeyId: config_1_identity
+
+
+

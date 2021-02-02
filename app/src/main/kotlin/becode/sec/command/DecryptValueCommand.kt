@@ -8,7 +8,7 @@ import java.io.File
 
 
 @Command(
-    name = "decrypt-value",
+    name = "decrypt",
     description = ["Decrypts a value given a private key."]
 )
 @Suppress("unused")

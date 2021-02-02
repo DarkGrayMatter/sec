@@ -13,7 +13,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 
 @Command(
-    name = "generate-key-pair",
+    name = "generate-key",
     description = ["Generates private-public key pair"]
 )
 class GenerateKeyPairCommand : Runnable {

@@ -7,7 +7,7 @@ import java.io.File
 
 @Suppress("unused")
 @Command(
-    name = "encrypt-value",
+    name = "encrypt",
     description = ["Encrypt value based on the supplied public key."]
 )
 class EncryptValueCommand : Runnable {

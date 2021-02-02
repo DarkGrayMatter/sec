@@ -25,17 +25,17 @@ To execute the tool type in command prompt/shell the following command:
 
 You should see something like this:
 
-```shell
+```text
 ❯ sec help
 Usage: sec [-hV] [COMMAND]
-Security companion to the excellent Palantar library.
+SEC is a configuration companion to the excellent Palantir library.
   -h, --help      Show this help message and exit.
   -V, --version   Print version information and exit.
 Commands:
-  help               Displays help information about the specified command
-  generate-key-pair  Generates private-public key pair
-  encrypt-value      Encrypt value based on the supplied public key.
-  decrypt-value      Decrypts a value given a private key.
+  help          Displays help information about the specified command
+  generate-key  Generates private-public key pair
+  encrypt       Encrypt value based on the supplied public key.
+  decrypt       Decrypts a value given a private key.
 ```
 
 To get help on specific command, type in `help <command-name>`, for example:

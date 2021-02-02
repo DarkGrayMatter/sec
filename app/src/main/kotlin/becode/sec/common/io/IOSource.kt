@@ -67,6 +67,7 @@ sealed class IOSource<out T> {
             fun fromString(string: String): Output {
                 return when (string) {
                     STDIO_IDENTIFIER -> StdOut()
+                    "stdout" -> StdOut()
                     else -> File(JavaFile(string))
                 }
             }

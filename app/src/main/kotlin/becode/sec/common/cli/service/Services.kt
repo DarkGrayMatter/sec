@@ -1,5 +1,6 @@
 package becode.sec.common.cli.service
 
+import becode.sec.common.BinaryEncoding
 import becode.sec.common.exception.CommandFailedException
 import becode.sec.common.exception.failCommand
 import becode.sec.common.io.IOSource
@@ -19,6 +20,7 @@ class CommandFactory : CommandLine.IFactory {
 fun CommandLine.registerCommonConverters(): CommandLine = apply {
     registerConverter(IOSource.Output::class.java, IOSource.Output.Companion::fromString)
     registerConverter(IOSource.Input::class.java, IOSource.Input.Companion::fromString)
+    registerConverter(BinaryEncoding::class.java, BinaryEncoding.Companion::fromName)
 }
 
 /**

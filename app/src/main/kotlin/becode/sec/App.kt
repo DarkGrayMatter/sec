@@ -1,9 +1,8 @@
 package becode.sec
 
-import becode.sec.command.DecryptValueCommand
-import becode.sec.command.EncryptConfigCommand
-import becode.sec.command.EncryptValueCommand
-import becode.sec.command.GenerateKeyPairCommand
+import becode.sec.command.DecryptValue
+import becode.sec.command.EncryptValue
+import becode.sec.command.GenerateKey
 import becode.sec.common.cli.service.CommandFactory
 import becode.sec.common.cli.service.registerCommonConverters
 import becode.sec.common.cli.service.registerExceptionHandlers
@@ -17,9 +16,9 @@ import kotlin.system.exitProcess
     mixinStandardHelpOptions = true,
     subcommands = [
         HelpCommand::class,
-        GenerateKeyPairCommand::class,
-        EncryptValueCommand::class,
-        DecryptValueCommand::class,
+        GenerateKey::class,
+        EncryptValue::class,
+        DecryptValue::class,
         //EncryptConfigCommand::class,
     ]
 )

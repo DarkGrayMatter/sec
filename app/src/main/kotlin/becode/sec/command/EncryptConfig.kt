@@ -15,7 +15,7 @@ import picocli.CommandLine.*
     name = "encrypt-config",
     description = ["Encrypts a configuration document. (Supports yaml, JSon, & java properties)"]
 )
-class EncryptConfigCommand : Runnable {
+class EncryptConfig : Runnable {
 
     private var formatOverride: DocumentedFormat? = null
     private lateinit var configSource: IOSource.Input

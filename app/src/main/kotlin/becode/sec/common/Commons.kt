@@ -1,5 +1,9 @@
+@file:Suppress("unused")
+
 package becode.sec.common
 
+import java.security.SecureRandom
+import kotlin.random.Random
 import org.apache.commons.codec.binary.Base16 as ABase16
 import org.apache.commons.codec.binary.Base32 as ABase32
 import org.apache.commons.codec.binary.Hex as AHex
@@ -100,3 +104,21 @@ enum class BinaryEncoding {
     }
 }
 
+sealed class RandomBytesGenerator {
+
+    abstract operator fun invoke(bytes: ByteArray)
+
+    object Unsafe : RandomBytesGenerator() {
+        override fun invoke(bytes: ByteArray) {
+            Random.nextBytes(bytes)
+        }
+    }
+
+    class DefaultSecure(private val strong: Boolean) : RandomBytesGenerator() {
+        override fun invoke(bytes: ByteArray) {
+            val rnd = if (strong) SecureRandom.getInstanceStrong() else SecureRandom()
+            return rnd.nextBytes(bytes)
+        }
+    }
+
+}

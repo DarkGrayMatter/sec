@@ -2,12 +2,9 @@
 
 package becode.sec.common
 
-import java.security.SecureRandom
-import kotlin.random.Random
 import org.apache.commons.codec.binary.Base16 as ABase16
 import org.apache.commons.codec.binary.Base32 as ABase32
 import org.apache.commons.codec.binary.Hex as AHex
-
 
 fun String.tr(): String {
     return when {
@@ -42,9 +39,9 @@ enum class Separator(val char: Char) {
 }
 
 
-enum class BinaryEncoding {
+enum class BinaryEncoding(name: String, vararg alternates: String) {
 
-    Base64 {
+    Base64("64", "base64") {
         override fun encode(bytes: ByteArray): String {
             return java.util.Base64.getEncoder().encodeToString(bytes)
         }
@@ -53,7 +50,7 @@ enum class BinaryEncoding {
             return java.util.Base64.getDecoder().decode(byteString)
         }
     },
-    Base32 {
+    Base32("32", "base32") {
         override fun encode(bytes: ByteArray): String {
             return ABase32().encodeAsString(bytes)
         }
@@ -62,7 +59,7 @@ enum class BinaryEncoding {
             return ABase32().decode(byteString)
         }
     },
-    Hex {
+    Hex("hex") {
         override fun encode(bytes: ByteArray): String {
             return AHex.encodeHexString(bytes)
         }
@@ -71,54 +68,27 @@ enum class BinaryEncoding {
             return AHex.decodeHex(byteString)
         }
     },
-    Base16 {
+    Base16("16", "base16") {
+
         override fun encode(bytes: ByteArray): String {
             return ABase16().encodeAsString(bytes)
         }
 
         override fun decode(byteString: String): ByteArray {
-            return ABase16().decode(byteString)
+            return ABase16().decode(byteString.toLowerCase())
         }
-    };
+    },
+    ;
+
 
     abstract fun encode(bytes: ByteArray): String
     abstract fun decode(byteString: String): ByteArray
+    private val names = setOf(name) + alternates
 
     companion object {
 
-        private val encodingNames: Map<String, BinaryEncoding> = listOf(
-            Base16 to listOf("base16", "16"),
-            Base32 to listOf("base32", "32"),
-            Base64 to listOf("base64", "64"),
-            Hex to listOf("hex")
-        ).flatMap { (enc, opts) -> opts.map { opt -> opt to enc } }.toMap()
-
         fun fromName(namedEncoding: String): BinaryEncoding {
-            return encodingNames[namedEncoding.toLowerCase().trim()]
-                ?: throw IllegalArgumentException(buildString {
-                    append("Unsupported encoding name: ").append(namedEncoding)
-                    append(". The following encodings are available: ")
-                    encodingNames.keys.joinTo(this, prefix = "[", postfix = "]")
-                })
+            return values().first { encoding -> namedEncoding in encoding.names }
         }
     }
-}
-
-sealed class RandomBytesGenerator {
-
-    abstract operator fun invoke(bytes: ByteArray)
-
-    object Unsafe : RandomBytesGenerator() {
-        override fun invoke(bytes: ByteArray) {
-            Random.nextBytes(bytes)
-        }
-    }
-
-    class DefaultSecure(private val strong: Boolean) : RandomBytesGenerator() {
-        override fun invoke(bytes: ByteArray) {
-            val rnd = if (strong) SecureRandom.getInstanceStrong() else SecureRandom()
-            return rnd.nextBytes(bytes)
-        }
-    }
-
 }

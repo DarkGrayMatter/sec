@@ -1,9 +1,6 @@
 package becode.sec
 
-import becode.sec.command.DecryptValue
-import becode.sec.command.EncryptValue
-import becode.sec.command.GenerateKey
-import becode.sec.command.GenerateRandomBytes
+import becode.sec.command.*
 import becode.sec.common.cli.service.CommandFactory
 import becode.sec.common.cli.service.registerCommonConverters
 import becode.sec.common.cli.service.registerExceptionHandlers
@@ -22,6 +19,7 @@ import kotlin.system.exitProcess
         EncryptValue::class,
         DecryptValue::class,
         GenerateRandomBytes::class,
+        ProcessConfiguration::class
     ]
 )
 object App {

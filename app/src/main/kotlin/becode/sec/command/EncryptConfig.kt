@@ -7,8 +7,8 @@ import com.palantir.config.crypto.KeyWithType
 import becode.sec.common.cli.converter.CommaSeparatedListConverter
 import becode.sec.common.exception.failCommand
 import becode.sec.common.io.IOSource
-import becode.sec.common.parsing.StructuredDocumentType.mapper
-import becode.sec.common.parsing.DocumentedFormat
+import becode.sec.common.parsing.Mappers.mapper
+import becode.sec.common.parsing.ConfigurationFormat
 import picocli.CommandLine.*
 
 @Command(
@@ -17,7 +17,7 @@ import picocli.CommandLine.*
 )
 class EncryptConfig : Runnable {
 
-    private var formatOverride: DocumentedFormat? = null
+    private var formatOverride: ConfigurationFormat? = null
     private lateinit var configSource: IOSource.Input
     private lateinit var publicKeySource: IOSource.Input
 
@@ -58,14 +58,14 @@ class EncryptConfig : Runnable {
         order = 5,
         paramLabel = "<format>"
     )
-    fun setConfigSourceFormat(f: DocumentedFormat) {
+    fun setConfigSourceFormat(f: ConfigurationFormat) {
         formatOverride = f
     }
 
     override fun run() {
 
         val format = formatOverride
-            ?: DocumentedFormat.fromName(configSource.uri)
+            ?: ConfigurationFormat.fromName(configSource.uri)
             ?: failCommand("Unable to determine configuration format of $configSource")
 
         val source: JsonNode = configSource.tryOpen()?.use { format.mapper().readTree(it) }

@@ -8,24 +8,25 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.csv.CsvMapper
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
+import java.io.InputStream
 
-object StructuredDocumentType {
+object Mappers {
 
     val json = ObjectMapper().configure()
     val csv = CsvMapper().configure()
     val properties = JavaPropsMapper().configure()
     val yaml = YAMLMapper().configure()
 
-    fun DocumentedFormat.mapper(): ObjectMapper {
-        return when (this) {
-            DocumentedFormat.JSON -> json
-            DocumentedFormat.YAML -> yaml
-            DocumentedFormat.PROPERTIES -> properties
-            DocumentedFormat.CSV -> csv
+    private fun ObjectMapper.configure(): ObjectMapper = findAndRegisterModules()
+
+    operator fun get(format: ConfigurationFormat): ObjectMapper {
+        return when(format) {
+            ConfigurationFormat.JSON -> json
+            ConfigurationFormat.YAML -> yaml
+            ConfigurationFormat.PROPERTIES -> properties
+            ConfigurationFormat.CSV -> csv
         }
     }
-
-    private fun ObjectMapper.configure(): ObjectMapper = findAndRegisterModules()
 }
 
 fun <T : JsonNode> ObjectMapper.treeFromContent(content: String, expectedContentNodeClass: Class<out T>): T {
@@ -48,5 +49,13 @@ inline fun <reified T : JsonNode> ObjectMapper.treeFromContent(content: String):
     return this.treeFromContent(content, T::class.java)
 }
 
+inline fun <reified T : JsonNode> ObjectMapper.treeFrom(input: InputStream): T {
+    return readTree(input) as T
+}
+
 fun String.asTree(mapper: ObjectMapper): JsonNode = mapper.treeFromContent(this)
 
+
+inline fun <reified T: JsonNode> InputStream.readTree(format: ConfigurationFormat): T {
+    return Mappers[format].readTree(this) as T
+}

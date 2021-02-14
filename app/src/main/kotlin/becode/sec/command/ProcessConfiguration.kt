@@ -4,8 +4,8 @@ package becode.sec.command
 
 import becode.sec.common.exception.failCommand
 import becode.sec.common.io.IOSource
-import becode.sec.common.parsing.DocumentFormat
-import becode.sec.common.parsing.readTree
+import becode.sec.common.document.DocumentFormat
+import becode.sec.common.document.readTree
 import becode.sec.model.ConfigurationDocument
 import picocli.CommandLine.*
 

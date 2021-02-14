@@ -5,8 +5,8 @@ package becode.sec.command
 import becode.sec.common.cli.converter.CommaSeparatedListConverter
 import becode.sec.common.exception.failCommand
 import becode.sec.common.io.IOSource
-import becode.sec.common.parsing.DocumentFormat
-import becode.sec.common.parsing.jsonOf
+import becode.sec.common.document.DocumentFormat
+import becode.sec.common.document.jsonOf
 import com.fasterxml.jackson.databind.JsonNode
 import com.palantir.config.crypto.KeyWithType
 import picocli.CommandLine.*

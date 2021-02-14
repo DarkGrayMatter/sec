@@ -1,6 +1,6 @@
 @file:Suppress("MemberVisibilityCanBePrivate")
 
-package becode.sec.common.parsing
+package becode.sec.common.document
 
 import becode.sec.common.tr
 import com.fasterxml.jackson.databind.JsonNode

@@ -1,6 +1,6 @@
 @file:Suppress("unused", "ClassName")
 
-package becode.sec.common.parsing
+package becode.sec.common.document
 
 
 /**

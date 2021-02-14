@@ -1,4 +1,4 @@
-package becode.sec.common.parsing
+package becode.sec.common.document
 
 import becode.sec.common.BinaryEncoding
 import becode.sec.common.encodeBinary

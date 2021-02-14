@@ -1,4 +1,4 @@
-package becode.sec.common.parsing
+package becode.sec.common.document
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode

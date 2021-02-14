@@ -2,15 +2,16 @@
 
 package becode.sec.common.cli.converter
 
+import becode.sec.common.BinaryEncoding
 import becode.sec.common.io.IOSource
 import picocli.CommandLine.ITypeConverter
 
 
-class InputSourceConverter : ITypeConverter<IOSource.Input> {
+object InputSourceConverter : ITypeConverter<IOSource.Input> {
     override fun convert(value: String?): IOSource.Input = IOSource.Input.fromString(requireNotNull(value))
 }
 
-class OutputSourceConverter : ITypeConverter<IOSource.Output> {
+object OutputSourceConverter : ITypeConverter<IOSource.Output> {
     override fun convert(value: String?): IOSource.Output = IOSource.Output.fromString(requireNotNull(value))
 }
 
@@ -22,3 +23,10 @@ object CommaSeparatedListConverter : ITypeConverter<List<String>> {
         }
     }
 }
+
+object BinaryEncodingConverter : ITypeConverter<BinaryEncoding> {
+    override fun convert(value: String): BinaryEncoding {
+        return BinaryEncoding.fromName(value)
+    }
+}
+

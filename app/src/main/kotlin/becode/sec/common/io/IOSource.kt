@@ -41,11 +41,11 @@ sealed class IOSource<out T> {
         }
 
         companion object {
-            fun fromString(string: String): Input {
+            fun fromString(inputSpec: String): Input {
                 return when {
-                    string == STDIO_IDENTIFIER -> StdIn()
-                    string.startsWith(ClassPath.PREFIX) -> ClassPath(string.substringAfter(ClassPath.PREFIX))
-                    else -> File(JavaFile(string))
+                    inputSpec == STDIO_IDENTIFIER -> StdIn()
+                    inputSpec.startsWith(ClassPath.PREFIX) -> ClassPath(inputSpec.substringAfter(ClassPath.PREFIX))
+                    else -> File(JavaFile(inputSpec))
                 }
             }
         }
@@ -63,11 +63,22 @@ sealed class IOSource<out T> {
             override fun open(): OutputStream = StandardOutputStream()
         }
 
+        object NULL : Output() {
+            object NullOut : OutputStream() {
+                override fun write(b: Int) = Unit
+                override fun close() = Unit
+                override fun toString(): String = "@NULL"
+            }
+            override fun open(): OutputStream = NullOut
+            override val uri: String = NullOut.toString()
+        }
+
         companion object {
-            fun fromString(string: String): Output {
-                return when (string) {
+            fun fromString(outputSpec: String): Output {
+                return when (outputSpec) {
                     STDIO_IDENTIFIER -> StdOut()
-                    else -> File(JavaFile(string))
+                    "NULL" -> NULL
+                    else -> File(JavaFile(outputSpec))
                 }
             }
         }

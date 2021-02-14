@@ -2,9 +2,10 @@
 
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
+
 plugins {
-    kotlin("jvm") version "1.4.21"
-    kotlin("kapt") version "1.4.21"
+    kotlin("jvm") version "1.4.30"
+    kotlin("kapt") version "1.4.30"
     id("org.jetbrains.dokka") version "1.4.20"
     application
     `maven-publish`
@@ -49,32 +50,37 @@ dependencies {
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-properties")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-csv")
 
+    // Apache Commons Codecs compile group: 'commons-codec', name: 'commons-codec', version: '1.15'
+    val apacheCommonsCodevVersion = "1.15"
+    implementation("commons-codec:commons-codec:$apacheCommonsCodevVersion")
+
 }
 
+val secToolAppMain = "becode.sec.App"
+
 application {
-    mainClass.set("becode.sec.App")
+    mainClass.set(secToolAppMain)
 }
 
 tasks.withType<CreateStartScripts> {
     applicationName = "sec"
 }
 
-val javacTarget = JavaVersion.VERSION_1_8.toString()
+val jvmTarget = JavaVersion.VERSION_1_8.toString()
 
 tasks.withType<JavaCompile> {
-    sourceCompatibility = javacTarget
-    targetCompatibility = javacTarget
+    sourceCompatibility = jvmTarget
+    targetCompatibility = jvmTarget
 }
 
-tasks.withType<Jar> {
-    archiveBaseName.set("sec")
-}
 
 tasks.withType<KotlinCompile>().configureEach {
     kotlinOptions {
-        jvmTarget = javacTarget
+        jvmTarget = this@Build_gradle.jvmTarget
     }
 }
+
+tasks.withType<Jar> { archiveBaseName.set("sec") }
 
 kapt {
     arguments {
@@ -86,6 +92,7 @@ tasks.withType<Test> {
     useJUnitPlatform {
     }
 }
+
 
 java {
     withSourcesJar()

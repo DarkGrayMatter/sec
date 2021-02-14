@@ -16,7 +16,7 @@ import java.nio.file.Path
     name = "generate-key",
     description = ["Generates private-public key pair"]
 )
-class GenerateKeyPairCommand : Runnable {
+class GenerateKey : Runnable {
 
     private lateinit var dest: File
     private var forcePath = true
@@ -66,13 +66,18 @@ class GenerateKeyPairCommand : Runnable {
         val kp = algorithm.newKeyPair()
         val path = dest(keyName).toAbsolutePath()
         val keys = saveKeyPair(kp, path)
-        println(
-            """
-            |Generated keys: 
-            |   Encryption: ${keys.encryptionKeyFile()}
-            |   Decryption: ${keys.decryptionKeyFile()}
-        """.trimMargin()
-        )
+        val keyTypeName = algorithm.name.toUpperCase()
+        when(algorithm) {
+            Algorithm.AES -> {
+                println("Generated Key [$keyTypeName]")
+                println("  Shared Secret -> ${keys.encryptionKeyFile()}")
+            }
+            Algorithm.RSA -> {
+                println("Generated Key Pair [$keyTypeName]")
+                println("  -> Encryption Key (Public) : ${keys.encryptionKeyFile()}")
+                println("  -> Decryption Key (Private) : ${keys.decryptionKeyFile()}")
+            }
+        }
     }
 
     private fun saveKeyPair(kp: KeyPair, publicKeyPath: Path): KeyPairFiles {

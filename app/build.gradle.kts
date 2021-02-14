@@ -56,7 +56,7 @@ dependencies {
 
 }
 
-val secToolAppMain = "becode.sec.App"
+val secToolAppMain = "graymatter.sec.App"
 
 application {
     mainClass.set(secToolAppMain)

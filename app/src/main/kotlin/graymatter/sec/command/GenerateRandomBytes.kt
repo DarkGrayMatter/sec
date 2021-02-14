@@ -1,7 +1,7 @@
 package graymatter.sec.command
 
-import becode.sec.common.BinaryEncoding
-import becode.sec.common.exception.failCommandOn
+import graymatter.sec.common.BinaryEncoding
+import graymatter.sec.common.exception.failCommandOn
 import picocli.CommandLine.*
 import java.security.SecureRandom
 

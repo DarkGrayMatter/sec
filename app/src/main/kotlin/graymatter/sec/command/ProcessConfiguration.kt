@@ -2,11 +2,11 @@
 
 package graymatter.sec.command
 
-import becode.sec.common.exception.failCommand
-import becode.sec.common.io.IOSource
-import becode.sec.common.document.DocumentFormat
-import becode.sec.common.document.readTree
-import becode.sec.model.ConfigurationDocument
+import graymatter.sec.common.document.DocumentFormat
+import graymatter.sec.common.document.readTree
+import graymatter.sec.common.exception.failCommand
+import graymatter.sec.common.io.IOSource
+import graymatter.sec.model.ConfigurationDocument
 import picocli.CommandLine.*
 
 @Command(

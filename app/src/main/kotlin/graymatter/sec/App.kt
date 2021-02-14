@@ -1,9 +1,9 @@
 package graymatter.sec
 
-import becode.sec.command.*
-import becode.sec.common.cli.service.CommandFactory
-import becode.sec.common.cli.service.registerCommonConverters
-import becode.sec.common.cli.service.registerExceptionHandlers
+import graymatter.sec.command.*
+import graymatter.sec.common.cli.service.CommandFactory
+import graymatter.sec.common.cli.service.registerCommonConverters
+import graymatter.sec.common.cli.service.registerExceptionHandlers
 import picocli.CommandLine
 import picocli.CommandLine.Command
 import picocli.CommandLine.HelpCommand
@@ -17,7 +17,7 @@ import kotlin.system.exitProcess
         HelpCommand::class,
         GenerateKey::class,
         EncryptValue::class,
-        graymatter.sec.command.DecryptValue::class,
+        DecryptValue::class,
         GenerateRandomBytes::class,
         ProcessConfiguration::class
     ]

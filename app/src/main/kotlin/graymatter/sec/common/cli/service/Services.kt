@@ -1,10 +1,10 @@
 package graymatter.sec.common.cli.service
 
-import becode.sec.common.BinaryEncoding
-import becode.sec.common.exception.CommandFailedException
-import becode.sec.common.exception.failCommand
-import becode.sec.common.io.IOSource
-import becode.sec.common.lang.tryAsKotlinSingleton
+import graymatter.sec.common.BinaryEncoding
+import graymatter.sec.common.exception.CommandFailedException
+import graymatter.sec.common.exception.failCommand
+import graymatter.sec.common.io.IOSource
+import graymatter.sec.common.lang.tryAsKotlinSingleton
 import picocli.CommandLine
 import picocli.CommandLine.IExitCodeExceptionMapper
 

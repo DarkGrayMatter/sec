@@ -2,7 +2,7 @@
 
 package graymatter.sec.common.document
 
-import becode.sec.common.tr
+import graymatter.sec.common.tr
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.csv.CsvMapper

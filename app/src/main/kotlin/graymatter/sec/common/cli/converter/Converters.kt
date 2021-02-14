@@ -2,8 +2,8 @@
 
 package graymatter.sec.common.cli.converter
 
-import becode.sec.common.BinaryEncoding
-import becode.sec.common.io.IOSource
+import graymatter.sec.common.BinaryEncoding
+import graymatter.sec.common.io.IOSource
 import picocli.CommandLine.ITypeConverter
 
 

@@ -54,6 +54,9 @@ dependencies {
     val apacheCommonsCodevVersion = "1.15"
     implementation("commons-codec:commons-codec:$apacheCommonsCodevVersion")
 
+    // Ant Style Path Matcher
+    implementation("io.github.azagniotov:ant-style-path-matcher:1.0.0")
+
 }
 
 val secToolAppMain = "graymatter.sec.App"

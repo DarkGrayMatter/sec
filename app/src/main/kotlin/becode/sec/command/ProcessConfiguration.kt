@@ -4,7 +4,7 @@ package becode.sec.command
 
 import becode.sec.common.exception.failCommand
 import becode.sec.common.io.IOSource
-import becode.sec.common.parsing.ConfigurationFormat
+import becode.sec.common.parsing.DocumentFormat
 import becode.sec.common.parsing.readTree
 import becode.sec.model.ConfigurationDocument
 import picocli.CommandLine.*
@@ -34,7 +34,7 @@ class ProcessConfiguration {
             "Use this if the format cannot be derived from the INPUT (for example STDIN), or ",
             "if you want the name extension does not match the actual type."]
     )
-    var inputFormat: ConfigurationFormat? = null
+    var inputFormat: DocumentFormat? = null
 
     @Command(name = "encrypt", description = ["Encrypts a configuration file given a key, and a path specification."])
     fun encrypt(
@@ -44,7 +44,7 @@ class ProcessConfiguration {
         ) encryptionPaths: PathSpecification
     ) {
         val configFormat = inputFormat
-            ?: ConfigurationFormat.fromName(input.uri)
+            ?: DocumentFormat.fromName(input.uri)
             ?: failCommand("Unable to determine the configuration format of $input")
 
         val configDocument = ConfigurationDocument(input.open().use { it.readTree(configFormat) })

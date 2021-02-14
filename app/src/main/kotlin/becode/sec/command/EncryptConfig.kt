@@ -2,13 +2,13 @@
 
 package becode.sec.command
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.palantir.config.crypto.KeyWithType
 import becode.sec.common.cli.converter.CommaSeparatedListConverter
 import becode.sec.common.exception.failCommand
 import becode.sec.common.io.IOSource
-import becode.sec.common.parsing.Mappers.mapper
-import becode.sec.common.parsing.ConfigurationFormat
+import becode.sec.common.parsing.DocumentFormat
+import becode.sec.common.parsing.jsonOf
+import com.fasterxml.jackson.databind.JsonNode
+import com.palantir.config.crypto.KeyWithType
 import picocli.CommandLine.*
 
 @Command(
@@ -17,7 +17,7 @@ import picocli.CommandLine.*
 )
 class EncryptConfig : Runnable {
 
-    private var formatOverride: ConfigurationFormat? = null
+    private var formatOverride: DocumentFormat? = null
     private lateinit var configSource: IOSource.Input
     private lateinit var publicKeySource: IOSource.Input
 
@@ -58,17 +58,17 @@ class EncryptConfig : Runnable {
         order = 5,
         paramLabel = "<format>"
     )
-    fun setConfigSourceFormat(f: ConfigurationFormat) {
+    fun setConfigSourceFormat(f: DocumentFormat) {
         formatOverride = f
     }
 
     override fun run() {
 
         val format = formatOverride
-            ?: ConfigurationFormat.fromName(configSource.uri)
+            ?: DocumentFormat.fromName(configSource.uri)
             ?: failCommand("Unable to determine configuration format of $configSource")
 
-        val source: JsonNode = configSource.tryOpen()?.use { format.mapper().readTree(it) }
+        val source: JsonNode = configSource.tryOpen()?.use { jsonOf(it.bufferedReader().readText()) }
             ?: failCommand("Could not find source configuration document: $configSource")
 
         val encryptionKey: KeyWithType = publicKeySource.tryOpen()?.use { KeyWithType.fromString(it.reader().readText()) }

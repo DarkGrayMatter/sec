@@ -19,12 +19,12 @@ object Mappers {
 
     private fun ObjectMapper.configure(): ObjectMapper = findAndRegisterModules()
 
-    operator fun get(format: ConfigurationFormat): ObjectMapper {
-        return when(format) {
-            ConfigurationFormat.JSON -> json
-            ConfigurationFormat.YAML -> yaml
-            ConfigurationFormat.PROPERTIES -> properties
-            ConfigurationFormat.CSV -> csv
+    operator fun get(format: DocumentFormat): ObjectMapper {
+        return when (format) {
+            DocumentFormat.JSON -> json
+            DocumentFormat.YAML -> yaml
+            DocumentFormat.PROPERTIES -> properties
+            DocumentFormat.CSV -> csv
         }
     }
 }
@@ -56,6 +56,12 @@ inline fun <reified T : JsonNode> ObjectMapper.treeFrom(input: InputStream): T {
 fun String.asTree(mapper: ObjectMapper): JsonNode = mapper.treeFromContent(this)
 
 
-inline fun <reified T: JsonNode> InputStream.readTree(format: ConfigurationFormat): T {
+inline fun <reified T : JsonNode> InputStream.readTree(format: DocumentFormat): T {
     return Mappers[format].readTree(this) as T
 }
+
+inline fun <reified T : JsonNode> treeOf(format: DocumentFormat, content: String): T {
+    return Mappers[format].treeFromContent(content) as T
+}
+
+inline fun <reified T : JsonNode> jsonOf(content: String): T = treeOf(DocumentFormat.JSON, content)

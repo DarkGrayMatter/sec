@@ -56,6 +56,10 @@ enum class Separator(val char: Char) {
 }
 
 
+fun ByteArray.encodeBinary(encoding: BinaryEncoding): String = encoding.encode(this)
+fun String.decodeBinary(encoding: BinaryEncoding): ByteArray = encoding.decode(this)
+
+
 enum class BinaryEncoding(name: String, vararg alternates: String) {
 
     Base64("64", "base64") {

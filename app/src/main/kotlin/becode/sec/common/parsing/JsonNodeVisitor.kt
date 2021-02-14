@@ -2,6 +2,8 @@ package becode.sec.common.parsing
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
+import com.fasterxml.jackson.databind.node.JsonNodeCreator
+import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.fasterxml.jackson.databind.node.ObjectNode
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
@@ -25,13 +27,18 @@ interface VisitingPath<T> {
      */
     val path: String
 
+
+}
+
+interface JsonNodePathVisitor : VisitingPath<JsonNode>, JsonNodeCreator {
     /**
      * Replaces [item] with [new] if the new item is not the same as current item.
      *
      * @param new The item to replace the current item being visited.
      * @return The replaced item or `null` if the new item is the same as current item.
      */
-    fun replace(new: T): T?
+    fun replace(new: JsonNode): JsonNode?
+
 }
 
 /**
@@ -87,7 +94,10 @@ private class Container(val key: Any, val parent: Container?, content: JsonNode)
  *
  * > **Important:** The this visitor implementation is not thread safe.
  */
-private class PathVisitor(private val visitNodePath: VisitingPath<JsonNode>.() -> Unit) : VisitingPath<JsonNode> {
+private class PathVisitor(
+    private val visitNodePath: JsonNodePathVisitor.() -> Unit
+) : JsonNodePathVisitor,
+    JsonNodeCreator by JsonNodeFactory.instance {
 
     var visiting = true; private set
     private var container: Container? = null
@@ -165,7 +175,7 @@ private class PathVisitor(private val visitNodePath: VisitingPath<JsonNode>.() -
  * @param visitNodePath A lambda with which takes a [VisitingPath] as receiver.
  * @return The root node visited.
  */
-fun <N : JsonNode> visitNodePathsOf(root: N, visitNodePath: VisitingPath<JsonNode>.() -> Unit): N {
+fun <N : JsonNode> visitNodePathsOf(root: N, visitNodePath: JsonNodePathVisitor.() -> Unit): N {
     PathVisitor(visitNodePath).run(root)
     return root
 }

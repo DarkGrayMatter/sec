@@ -1,30 +1,57 @@
 package becode.sec.common.parsing
 
+import becode.sec.common.BinaryEncoding
+import becode.sec.common.encodeBinary
 import com.fasterxml.jackson.databind.node.ObjectNode
-import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import kotlin.test.assertEquals
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ParsingTest {
 
     @Test
-    fun findPaths() {
-        val expectedString = "keystore.jks"
-        val actual = sample.at("/server/adapters/")
-        println(actual.toPrettyString())
+    fun visiting() {
+        val actual = mutableListOf<String>()
+        val expected = """
+            /server/host
+            /server/adapters/0/protocol
+            /server/adapters/0/port
+            /server/adapters/1/protocol
+            /server/adapters/1/port
+            /server/adapters/1/keystore/path
+            /server/adapters/1/keystore/format
+            /server/adapters/1/keystore/password
+        """.trimIndent().split(Regex("\\n"))
+        visitNodePathsOf(sample()) {
+            println(path)
+            actual += path
+        }
+
+        assertEquals(expected, actual)
     }
 
     @Test
-    fun visiting() {
-        visitNodePathsOf(sample) {
-            println(path)
+    fun testEditing() {
+
+        val encodedPassword = "encoded".encodeToByteArray().encodeBinary(BinaryEncoding.Base16)
+
+        val edited = visitNodePathsOf(sample()) {
+            if (path.endsWith("/keystore/password")) {
+                replace(textNode(encodedPassword))
+            }
         }
+
+        println(edited.toPrettyString())
+
+        val actual = edited.at("/server/adapters/1/keystore/password").textValue()
+
+        assertEquals(encodedPassword, actual)
+
     }
 
 
-    @Language("JSON")
-    private val sample = jsonOf<ObjectNode>(
+    private fun sample() = jsonOf<ObjectNode>(
         """{
           "server": {
             "host": "localhost",

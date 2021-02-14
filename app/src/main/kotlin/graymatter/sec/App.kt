@@ -19,14 +19,13 @@ import kotlin.system.exitProcess
         EncryptValue::class,
         DecryptValue::class,
         GenerateRandomBytes::class,
-        ProcessConfiguration::class
     ]
 )
 object App {
     @JvmStatic
     fun main(args: Array<String>) {
         exitProcess(
-            CommandLine(graymatter.sec.App, CommandFactory())
+            CommandLine(App, CommandFactory())
                 .registerExceptionHandlers()
                 .setExpandAtFiles(true)
                 .setCaseInsensitiveEnumValuesAllowed(true)

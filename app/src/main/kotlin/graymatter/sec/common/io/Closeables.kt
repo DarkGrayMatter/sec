@@ -4,7 +4,17 @@ package graymatter.sec.common.io
 import java.io.Closeable
 
 fun <R> R.tryClose(): Boolean {
-    val closeable = this as? Closeable
-    closeable?.close()
-    return closeable != null
+    return when (val closable = this) {
+        is AutoCloseable -> {
+            closable.close()
+            true
+        }
+        is Closeable -> {
+            closable.close()
+            true
+        }
+        else -> {
+            false
+        }
+    }
 }

@@ -1,11 +1,11 @@
+@file:Suppress("MemberVisibilityCanBePrivate")
+
 package graymatter.sec.common.io
 
 import java.io.Closeable
 import java.io.EOFException
 
 /**
- *
- *
  * > **NB:** This really just a _crutch_ because Kotlin does not make it possible to delegate to class instances.
  *
  * To access the underlying IO target, supply a lambda to the [invoke] function.
@@ -15,8 +15,10 @@ import java.io.EOFException
  *
  * @see [tryClose]
  */
-class IOTarget<R>(getTarget: () -> R, private val closing: ((R) -> Unit) = { it.tryClose() }) :
-    Closeable {
+class IOTarget<R>(
+    getTarget: () -> R,
+    private val closing: ((R) -> Unit) = { it.tryClose() }
+) : Closeable {
 
     var eof: Boolean = false
         private set

@@ -1,6 +1,9 @@
 package graymatter.sec.command
 
-import graymatter.sec.command.mixins.*
+import graymatter.sec.command.mixins.ConfigOutputRequirements
+import graymatter.sec.command.mixins.ConfigProcessingRulesRequirements
+import graymatter.sec.command.mixins.ConfigSourceRequirements
+import graymatter.sec.command.mixins.KeyRequirements
 import picocli.CommandLine.Command
 import picocli.CommandLine.Mixin
 
@@ -18,9 +21,6 @@ class EncryptConfig : Runnable {
 
     @Mixin
     lateinit var outputRequirements: ConfigOutputRequirements
-
-    @Mixin
-    lateinit var reportingRequirements: ReportingRequirements
 
     override fun run() {
         TODO("Not yet implemented")

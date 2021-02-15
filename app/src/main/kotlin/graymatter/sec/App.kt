@@ -1,10 +1,7 @@
 package graymatter.sec
 
+import graymatter.sec.AppConfig.createCommandLine
 import graymatter.sec.command.*
-import graymatter.sec.common.cli.service.CommandFactory
-import graymatter.sec.common.cli.service.registerCommonConverters
-import graymatter.sec.common.cli.service.registerExceptionHandlers
-import picocli.CommandLine
 import picocli.CommandLine.Command
 import picocli.CommandLine.HelpCommand
 import kotlin.system.exitProcess
@@ -26,15 +23,7 @@ object App {
     @JvmStatic
     fun main(args: Array<String>) {
         exitProcess(
-            CommandLine(App, CommandFactory())
-                .registerExceptionHandlers()
-                .setExpandAtFiles(true)
-                .setCaseInsensitiveEnumValuesAllowed(true)
-                .setInterpolateVariables(true)
-                .registerCommonConverters()
-                .setUsageHelpWidth(150)
-                .setUsageHelpAutoWidth(true)
-                .execute(* args)
+            createCommandLine().execute(* args)
         )
     }
 }

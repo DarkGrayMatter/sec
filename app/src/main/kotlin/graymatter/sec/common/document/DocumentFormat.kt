@@ -1,7 +1,4 @@
-@file:Suppress("unused", "ClassName")
-
 package graymatter.sec.common.document
-
 
 /**
  * An enum to indicate supported formats of documents this tool can process.
@@ -13,13 +10,14 @@ enum class DocumentFormat(vararg validExtensions: String) {
     PROPERTIES("properties"),
     CSV("csv");
 
-    private val extensions = validExtensions.map(String::toLowerCase)
+    val fileExtensions = validExtensions.map(String::toLowerCase).toList()
+    val fileExtension: String get() = fileExtensions.first()
 
     companion object {
 
         private val FORMATS_WITH_SUFFIXES: List<Pair<DocumentFormat, String>> =
             values().flatMap { format ->
-                format.extensions.map { ext ->
+                format.fileExtensions.map { ext ->
                     val suffix = ".${ext}".toLowerCase()
                     format to suffix
                 }

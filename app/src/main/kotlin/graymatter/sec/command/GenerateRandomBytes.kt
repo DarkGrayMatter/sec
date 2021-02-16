@@ -9,9 +9,10 @@ import java.security.SecureRandom
 class GenerateRandomBytes : Runnable {
 
     private var numberOfChunks: Int = 1
-    private lateinit var generateRandomBytes: ByteArray.() -> Unit
     private var byteSize: Int = -1
     private lateinit var encoding: BinaryEncoding
+
+    private val secureRandom by lazy(LazyThreadSafetyMode.NONE, ::SecureRandom)
 
     @Option(
         names = ["-b", "--base"],
@@ -43,17 +44,19 @@ class GenerateRandomBytes : Runnable {
         numberOfChunks = n
     }
 
+
     override fun run() {
-
-        val randomGeneratedChunks = generateSequence {
-            ByteArray(byteSize).run {
-                val rnd = SecureRandom()
-                rnd.nextBytes(this)
-                encoding.encode(this)
-            }
+        if (numberOfChunks == 1) {
+            println(generateEncodedRandomBytes())
+        } else generateSequence { generateEncodedRandomBytes() }.take(numberOfChunks).forEach {
+            println(it)
         }
-
-        randomGeneratedChunks.take(numberOfChunks).forEach { println(it) }
     }
 
+    private fun generateEncodedRandomBytes() = secureRandom.run {
+        ByteArray(byteSize).run {
+            nextBytes(this)
+            encoding.encode(this)
+        }
+    }
 }

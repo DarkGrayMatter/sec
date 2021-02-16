@@ -17,7 +17,10 @@ class GenerateRandomBytes : Runnable {
     private var givenSeed: GivenSeed? = null
 
     private val secureRandom by lazy(LazyThreadSafetyMode.NONE) {
-        givenSeed?.asBytes()?.let(::SecureRandom) ?: SecureRandom()
+        when (val seedAsBytes = givenSeed?.asBytes()) {
+            null -> SecureRandom()
+            else -> SecureRandom(seedAsBytes)
+        }
     }
 
 

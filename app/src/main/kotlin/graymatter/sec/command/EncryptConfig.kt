@@ -1,9 +1,9 @@
 package graymatter.sec.command
 
-import graymatter.sec.command.mixins.ConfigOutputRequirements
-import graymatter.sec.command.mixins.ConfigProcessingRulesRequirements
-import graymatter.sec.command.mixins.ConfigSourceRequirements
-import graymatter.sec.command.mixins.KeyRequirements
+import graymatter.sec.command.parts.ConfigOutputRequirements
+import graymatter.sec.command.parts.ConfigProcessingRulesRequirements
+import graymatter.sec.command.parts.ConfigSourceRequirements
+import graymatter.sec.command.parts.KeyRequirements
 import picocli.CommandLine.Command
 import picocli.CommandLine.Mixin
 

@@ -1,5 +1,6 @@
 package graymatter.sec.command
 
+import graymatter.sec.command.parts.GivenSeed
 import graymatter.sec.common.BinaryEncoding
 import graymatter.sec.common.exception.failCommandOn
 import picocli.CommandLine.*
@@ -12,7 +13,13 @@ class GenerateRandomBytes : Runnable {
     private var byteSize: Int = -1
     private lateinit var encoding: BinaryEncoding
 
-    private val secureRandom by lazy(LazyThreadSafetyMode.NONE, ::SecureRandom)
+    @ArgGroup(validate = false, heading = "If you want specify a seed, use the following options:%n")
+    private var givenSeed: GivenSeed? = null
+
+    private val secureRandom by lazy(LazyThreadSafetyMode.NONE) {
+        givenSeed?.asBytes()?.let(::SecureRandom) ?: SecureRandom()
+    }
+
 
     @Option(
         names = ["-b", "--base"],
@@ -43,7 +50,6 @@ class GenerateRandomBytes : Runnable {
         )
         numberOfChunks = n
     }
-
 
     override fun run() {
         if (numberOfChunks == 1) {

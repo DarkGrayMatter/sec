@@ -1,4 +1,4 @@
-package graymatter.sec.command.mixins
+package graymatter.sec.command.parts
 
 import picocli.CommandLine
 import java.io.File

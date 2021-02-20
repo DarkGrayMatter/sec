@@ -50,6 +50,9 @@ sealed class IOSource<out T> {
 
     sealed class Output : IOSource<OutputStream>() {
 
+        val isNull: Boolean get() = this is NULL
+        val isStdOut: Boolean get() = this is StdOut
+
         class File(val file: java.io.File) : Output() {
             override val uri: String get() = file.toURI().toString()
             override fun open(): OutputStream = file.outputStream()
@@ -90,4 +93,6 @@ sealed class IOSource<out T> {
     companion object {
         private const val STDIO_IDENTIFIER = "-"
     }
+
+    fun isStdout(): Boolean = this is Output.StdOut
 }

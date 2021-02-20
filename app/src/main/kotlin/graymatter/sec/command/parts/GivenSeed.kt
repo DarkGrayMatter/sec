@@ -1,6 +1,6 @@
 package graymatter.sec.command.parts
 
-import graymatter.sec.common.BinaryEncoding
+import graymatter.sec.common.crypto.BinaryEncoding
 import picocli.CommandLine.Option
 
 /**

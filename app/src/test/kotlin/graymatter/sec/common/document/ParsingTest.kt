@@ -38,7 +38,7 @@ class ParsingTest {
 
         val edited = visitNodePathsOf(sample()) {
             if (path.endsWith("/keystore/password")) {
-                replace(textNode(encodedPassword))
+                set(textNode(encodedPassword))
             }
         }
 

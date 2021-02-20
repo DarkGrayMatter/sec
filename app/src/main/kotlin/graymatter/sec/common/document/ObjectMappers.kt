@@ -14,7 +14,7 @@ object ObjectMappers {
 
     private fun ObjectMapper.configure(): ObjectMapper = findAndRegisterModules()
 
-    operator fun get(format: DocumentFormat): ObjectMapper {
+    fun of(format: DocumentFormat): ObjectMapper {
         return when (format) {
             DocumentFormat.JSON -> json
             DocumentFormat.YAML -> yaml

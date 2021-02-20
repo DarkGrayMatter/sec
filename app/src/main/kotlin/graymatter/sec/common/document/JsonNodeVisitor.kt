@@ -68,7 +68,7 @@ private class PathVisitor(
     var visiting = true; private set
     private var container: Container? = null
 
-    override val item: JsonNode
+    override val subject: JsonNode
         get() = connectedContainer.content
 
     override val path: String
@@ -87,7 +87,7 @@ private class PathVisitor(
         }
     }
 
-    override fun replace(new: JsonNode): JsonNode? = connectedContainer.replace(new)
+    override fun set(new: JsonNode): JsonNode? = connectedContainer.replace(new)
 
     private val connectedContainer: Container
         get() = container.takeIf { visiting } ?: throw IllegalStateException()

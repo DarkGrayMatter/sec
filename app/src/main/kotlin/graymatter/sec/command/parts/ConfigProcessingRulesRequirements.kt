@@ -21,7 +21,14 @@ class ConfigProcessingRulesRequirements {
     var additionalPaths: List<String> = emptyList()
 
     @CommandLine.ArgGroup(exclusive = true, heading = "Choose one fhe following sources to of encoding rules:%n")
-    lateinit var processingRulesSource: ProcessingRulesSource
+    var processingRulesSource: ProcessingRulesSource? = null
+
+
+    val rules: List<String> by lazy {
+        val primary = processingRulesSource?.rules() ?: emptyList()
+        val secondary = additionalPaths
+        primary + secondary
+    }
 
     class ProcessingRulesSource {
 

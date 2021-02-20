@@ -30,6 +30,6 @@ class ConfigSourceRequirements {
             "NOTE: If using STDIN, make sure you are setting the format via the \"-F\", or \"--format\" switch.",
         ]
     )
-    lateinit var inputDocument: IOSource.Input
+    lateinit var input: IOSource.Input
 
 }

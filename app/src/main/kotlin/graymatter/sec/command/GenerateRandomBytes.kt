@@ -1,7 +1,7 @@
 package graymatter.sec.command
 
 import graymatter.sec.command.parts.GivenSeed
-import graymatter.sec.common.BinaryEncoding
+import graymatter.sec.common.crypto.BinaryEncoding
 import graymatter.sec.common.exception.failCommandOn
 import picocli.CommandLine.*
 import java.security.SecureRandom

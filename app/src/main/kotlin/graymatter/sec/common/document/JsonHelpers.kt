@@ -35,11 +35,11 @@ fun String.asTree(mapper: ObjectMapper): JsonNode = mapper.treeFromContent(this)
 
 
 inline fun <reified T : JsonNode> InputStream.readTree(format: DocumentFormat): T {
-    return ObjectMappers[format].readTree(this) as T
+    return ObjectMappers.of(format).readTree(this) as T
 }
 
 inline fun <reified T : JsonNode> treeOf(format: DocumentFormat, content: String): T {
-    return ObjectMappers[format].treeFromContent(content) as T
+    return ObjectMappers.of(format).treeFromContent(content) as T
 }
 
 inline fun <reified T : JsonNode> jsonOf(content: String): T = treeOf(DocumentFormat.JSON, content)

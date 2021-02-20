@@ -50,9 +50,9 @@ dependencies {
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-properties")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-csv")
 
-    // Apache Commons Codecs compile group: 'commons-codec', name: 'commons-codec', version: '1.15'
-    val apacheCommonsCodevVersion = "1.15"
-    implementation("commons-codec:commons-codec:$apacheCommonsCodevVersion")
+    // Apache Commons 
+    val apacheCommonsCodecVersion = "1.15"
+    implementation("commons-codec:commons-codec:$apacheCommonsCodecVersion")
 
     // Ant Style Path Matcher
     implementation("io.github.azagniotov:ant-style-path-matcher:1.0.0")
@@ -78,9 +78,7 @@ tasks.withType<JavaCompile> {
 
 
 tasks.withType<KotlinCompile>().configureEach {
-    kotlinOptions {
-        jvmTarget = this@Build_gradle.jvmTarget
-    }
+    kotlinOptions.jvmTarget = jvmTarget
 }
 
 tasks.withType<Jar> { archiveBaseName.set("sec") }

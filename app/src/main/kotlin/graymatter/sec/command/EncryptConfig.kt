@@ -72,13 +72,13 @@ class EncryptConfig : Runnable {
 
     private fun write(
         output: OutputStream,
-        encryptedDoc: ObjectNode,
-        encryptedDocFormat: DocumentFormat
+        doc: ObjectNode,
+        docFormat: DocumentFormat
     ) {
         try {
-            val mapper = ObjectMappers.of(encryptedDocFormat)
+            val mapper = ObjectMappers.of(docFormat)
             val generator = mapper.createGenerator(output, JsonEncoding.UTF8)
-            mapper.writeTree(generator, encryptedDoc)
+            mapper.writeTree(generator, doc)
         } finally {
             output.flush()
         }

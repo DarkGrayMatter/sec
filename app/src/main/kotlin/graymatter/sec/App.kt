@@ -1,7 +1,11 @@
 package graymatter.sec
 
-import graymatter.sec.AppConfig.createCommandLine
 import graymatter.sec.command.*
+import graymatter.sec.common.BinaryEncoding
+import graymatter.sec.common.cli.CommandFactory
+import graymatter.sec.common.exception.CommandFailedException
+import graymatter.sec.common.io.IOSource
+import picocli.CommandLine
 import picocli.CommandLine.Command
 import picocli.CommandLine.HelpCommand
 import kotlin.system.exitProcess
@@ -20,10 +24,34 @@ import kotlin.system.exitProcess
     ]
 )
 object App {
+
     @JvmStatic
     fun main(args: Array<String>) {
-        exitProcess(
-            createCommandLine().execute(* args)
-        )
+        exitProcess(createCommandLine().execute(* args))
     }
+
+    private fun createCommandLine(): CommandLine {
+        return CommandLine(this, CommandFactory)
+            .registerExceptionHandlers()
+            .setExpandAtFiles(true)
+            .setCaseInsensitiveEnumValuesAllowed(true)
+            .setInterpolateVariables(true)
+            .registerCommonConverters()
+            .setUsageHelpWidth(150)
+            .setUsageHelpAutoWidth(true)
+    }
+
+    private fun CommandLine.registerCommonConverters(): CommandLine = apply {
+        registerConverter(IOSource.Output::class.java, IOSource.Output.Companion::fromString)
+        registerConverter(IOSource.Input::class.java, IOSource.Input.Companion::fromString)
+        registerConverter(BinaryEncoding::class.java, BinaryEncoding.Companion::fromName)
+    }
+
+    private fun CommandLine.registerExceptionHandlers(): CommandLine {
+        exitCodeExceptionMapper = CommandLine.IExitCodeExceptionMapper {
+            (it as? CommandFailedException)?.exitCode ?: CommandLine.ExitCode.SOFTWARE
+        }
+        return this
+    }
+
 }

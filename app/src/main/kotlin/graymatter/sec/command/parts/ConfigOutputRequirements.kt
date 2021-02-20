@@ -4,6 +4,9 @@ import graymatter.sec.common.document.DocumentFormat
 import graymatter.sec.common.io.IOSource
 import picocli.CommandLine
 
+/**
+ * This class models the CLI for processing the output of configuration processing.
+ */
 class ConfigOutputRequirements {
 
     @CommandLine.Option(

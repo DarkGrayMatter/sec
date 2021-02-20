@@ -15,12 +15,12 @@ class KeyRequirements {
 
         private lateinit var openKeyFile: () -> InputStream
 
-        @CommandLine.Option(names = ["--key-file"], description = ["File containing encryption key"])
+        @CommandLine.Option(names = ["-k","--key"], description = ["File containing encryption key"])
         fun setKeyFile(keyFile: File) {
             openKeyFile = keyFile::inputStream
         }
 
-        @CommandLine.Option(names = ["-k", "--key"], description = ["Key value on command line."])
+        @CommandLine.Option(names = ["--key-value"], description = ["Key value on command line."])
         fun setKeyFromCommandLine(keyFromCommandLine: String) {
             openKeyFile = { keyFromCommandLine.byteInputStream() }
         }

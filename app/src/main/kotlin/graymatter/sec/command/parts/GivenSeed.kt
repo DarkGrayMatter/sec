@@ -3,6 +3,10 @@ package graymatter.sec.command.parts
 import graymatter.sec.common.BinaryEncoding
 import picocli.CommandLine.Option
 
+/**
+ * A CLI requirement for seed value. Supports standard binary encoding of Base16, Hex(lower case Base16), as well
+ * as base 32 and base 64.
+ */
 class GivenSeed() {
 
     @JvmOverloads

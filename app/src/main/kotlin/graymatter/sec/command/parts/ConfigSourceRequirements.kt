@@ -4,6 +4,9 @@ import graymatter.sec.common.document.DocumentFormat
 import graymatter.sec.common.io.IOSource
 import picocli.CommandLine
 
+/**
+ * Describes the CLI for configuration sources to process.
+ */
 class ConfigSourceRequirements {
 
     @CommandLine.Option(
@@ -17,7 +20,6 @@ class ConfigSourceRequirements {
         ]
     )
     var inputFormat: DocumentFormat? = null
-        internal set
 
     @CommandLine.Parameters(
         index = "0",
@@ -29,6 +31,5 @@ class ConfigSourceRequirements {
         ]
     )
     lateinit var inputDocument: IOSource.Input
-        internal set
 
 }

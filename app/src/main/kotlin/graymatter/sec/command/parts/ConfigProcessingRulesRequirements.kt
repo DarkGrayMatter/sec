@@ -4,6 +4,9 @@ import picocli.CommandLine
 import java.io.File
 import java.io.FileNotFoundException
 
+/**
+ * This class describes the CLI for processing rules supplied to configuration processing.
+ */
 class ConfigProcessingRulesRequirements {
 
     @CommandLine.Option(
@@ -16,11 +19,9 @@ class ConfigProcessingRulesRequirements {
         ]
     )
     var additionalPaths: List<String> = emptyList()
-        internal set
 
     @CommandLine.ArgGroup(exclusive = true, heading = "Choose one fhe following sources to of encoding rules:%n")
     lateinit var processingRulesSource: ProcessingRulesSource
-        internal set
 
     class ProcessingRulesSource {
 

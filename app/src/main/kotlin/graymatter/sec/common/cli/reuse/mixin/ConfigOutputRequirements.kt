@@ -1,7 +1,7 @@
-package graymatter.sec.command.parts
+package graymatter.sec.common.cli.reuse.mixin
 
+import graymatter.sec.common.cli.reuse.group.OutputTargetArgGroup
 import graymatter.sec.common.document.DocumentFormat
-import graymatter.sec.common.io.IOSource
 import picocli.CommandLine
 
 /**
@@ -16,7 +16,10 @@ class ConfigOutputRequirements {
     )
     var outputFormat: DocumentFormat? = null
 
-    @CommandLine.Parameters(paramLabel = "OUTPUT", arity = "1", description = ["Output of processed configuration file."])
-    lateinit var output: IOSource.Output
+    @CommandLine.ArgGroup(
+        exclusive = true,
+        heading = "Use any of the following command line options to supply input for \${COMMAND-NAME}%n"
+    )
+    lateinit var target: OutputTargetArgGroup
 
 }

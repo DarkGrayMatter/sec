@@ -1,4 +1,4 @@
-package graymatter.sec.command.parts
+package graymatter.sec.common.cli.reuse.mixin
 
 import graymatter.sec.common.document.DocumentFormat
 import picocli.CommandLine

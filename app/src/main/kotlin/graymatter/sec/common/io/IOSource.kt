@@ -1,6 +1,9 @@
 package graymatter.sec.common.io
 
-import java.io.*
+import java.io.FileNotFoundException
+import java.io.IOException
+import java.io.InputStream
+import java.io.OutputStream
 import java.io.File as JavaFile
 
 /**
@@ -16,7 +19,9 @@ sealed class IOSource<out T> {
 
     sealed class Input : IOSource<InputStream>() {
 
-        class File(val file: java.io.File) : Input() {
+        val isStdIn: Boolean get() = this is StdIn
+
+        class File(val file: JavaFile) : Input() {
             override val uri: String get() = file.toURI().toString()
             override fun open(): InputStream = file.inputStream()
         }
@@ -37,15 +42,6 @@ sealed class IOSource<out T> {
             }
         }
 
-        companion object {
-            fun fromString(inputSpec: String): Input {
-                return when {
-                    inputSpec == STDIO_IDENTIFIER -> StdIn()
-                    inputSpec.startsWith(ClassPath.PREFIX) -> ClassPath(inputSpec.substringAfter(ClassPath.PREFIX))
-                    else -> File(JavaFile(inputSpec))
-                }
-            }
-        }
     }
 
     sealed class Output : IOSource<OutputStream>() {
@@ -64,7 +60,7 @@ sealed class IOSource<out T> {
         }
 
         object NULL : Output() {
-            object NullOut : OutputStream() {
+            private object NullOut : OutputStream() {
                 override fun write(b: Int) = Unit
                 override fun close() = Unit
                 override fun toString(): String = "@NULL"
@@ -73,15 +69,6 @@ sealed class IOSource<out T> {
             override val uri: String = NullOut.toString()
         }
 
-        companion object {
-            fun fromString(outputSpec: String): Output {
-                return when (outputSpec) {
-                    STDIO_IDENTIFIER -> StdOut()
-                    "NULL" -> NULL
-                    else -> File(JavaFile(outputSpec))
-                }
-            }
-        }
     }
 
     fun tryOpen(): T? {
@@ -90,9 +77,5 @@ sealed class IOSource<out T> {
             .getOrNull()
     }
 
-    companion object {
-        private const val STDIO_IDENTIFIER = "-"
-    }
 
-    fun isStdout(): Boolean = this is Output.StdOut
 }

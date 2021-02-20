@@ -1,7 +1,7 @@
-package graymatter.sec.command.parts
+package graymatter.sec.common.cli.reuse.mixin
 
+import graymatter.sec.common.cli.reuse.group.InputSourceArgGroup
 import graymatter.sec.common.document.DocumentFormat
-import graymatter.sec.common.io.IOSource
 import picocli.CommandLine
 
 /**
@@ -21,15 +21,10 @@ class ConfigSourceRequirements {
     )
     var inputFormat: DocumentFormat? = null
 
-    @CommandLine.Parameters(
-        index = "0",
-        arity = "1",
-        paramLabel = "CONFIG_SOURCE",
-        description = [
-            "Input source of the document. Could be a file, a resource on the classpath, or even STDIN.",
-            "NOTE: If using STDIN, make sure you are setting the format via the \"-F\", or \"--format\" switch.",
-        ]
+    @CommandLine.ArgGroup(
+        exclusive = true,
+        heading = "Use any of the following options to supply inout for \${COMMAND-NAME}%n"
     )
-    lateinit var input: IOSource.Input
+    lateinit var input: InputSourceArgGroup
 
 }

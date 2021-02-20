@@ -1,6 +1,6 @@
 package graymatter.sec.command
 
-import graymatter.sec.command.parts.GivenSeed
+import graymatter.sec.common.cli.reuse.mixin.GivenSeed
 import graymatter.sec.common.crypto.BinaryEncoding
 import graymatter.sec.common.exception.failCommandOn
 import picocli.CommandLine.*

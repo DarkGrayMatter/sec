@@ -3,10 +3,10 @@ package graymatter.sec.command
 import com.fasterxml.jackson.core.JsonEncoding
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.palantir.config.crypto.KeyWithType
-import graymatter.sec.command.parts.ConfigOutputRequirements
-import graymatter.sec.command.parts.ConfigProcessingRulesRequirements
-import graymatter.sec.command.parts.ConfigSourceRequirements
-import graymatter.sec.command.parts.KeyRequirements
+import graymatter.sec.common.cli.reuse.mixin.ConfigOutputRequirements
+import graymatter.sec.common.cli.reuse.mixin.ConfigProcessingRulesRequirements
+import graymatter.sec.common.cli.reuse.mixin.ConfigSourceRequirements
+import graymatter.sec.common.cli.reuse.mixin.KeyRequirements
 import graymatter.sec.common.document.DocumentFormat
 import graymatter.sec.common.document.ObjectMappers
 import graymatter.sec.common.document.readTree
@@ -33,7 +33,7 @@ class EncryptConfig : Runnable {
     override fun run() {
 
         val doc: ObjectNode = sourceConfig.run {
-            input.open().use {
+            input.source.open().use {
                 it.readTree(requireNotNull(inputFormat))
             }
         }
@@ -42,7 +42,7 @@ class EncryptConfig : Runnable {
         val encryptedDoc = encrypt(doc, keyWithType, encryptionRules.rules)
         val encryptedDocFormat = requireNotNull(outputConfig.outputFormat ?: sourceConfig.inputFormat)
 
-        outputConfig.output.open().use { output -> write(output, encryptedDoc, encryptedDocFormat) }
+        outputConfig.target.output.open().use { output -> write(output, encryptedDoc, encryptedDocFormat) }
 
     }
 

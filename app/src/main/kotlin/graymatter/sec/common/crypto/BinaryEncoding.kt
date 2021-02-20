@@ -1,9 +1,9 @@
+@file:Suppress("unused")
+
 package graymatter.sec.common.crypto
 
 import org.apache.commons.codec.binary.Base16
 import org.apache.commons.codec.binary.Base32
-import org.apache.commons.codec.binary.Hex
-import java.util.*
 
 enum class BinaryEncoding(name: String, vararg alternates: String) {
 
@@ -49,12 +49,13 @@ enum class BinaryEncoding(name: String, vararg alternates: String) {
 
     abstract fun encode(bytes: ByteArray): String
     abstract fun decode(byteString: String): ByteArray
-    private val names = setOf(name) + alternates
+    val names: Set<String> = setOf(name) + alternates
 
     companion object {
 
         fun fromName(namedEncoding: String): BinaryEncoding {
-            return values().first { encoding -> namedEncoding in encoding.names }
+            return values().firstOrNull { encoding -> namedEncoding in encoding.names }
+                ?: throw NoSuchElementException("Unknown binary encoding [$namedEncoding]")
         }
     }
 }

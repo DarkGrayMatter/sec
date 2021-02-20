@@ -23,7 +23,7 @@ object App {
     @JvmStatic
     fun main(args: Array<String>) {
         exitProcess(
-            createCommandLine().execute(* args)
+            createCommandLine(App).execute(* args)
         )
     }
 }

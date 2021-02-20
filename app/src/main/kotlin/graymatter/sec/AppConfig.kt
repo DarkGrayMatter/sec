@@ -9,8 +9,8 @@ import picocli.CommandLine.IExitCodeExceptionMapper
 
 object AppConfig {
 
-    fun createCommandLine(): CommandLine {
-        return CommandLine(App, CommandFactory)
+    fun createCommandLine(app: Any): CommandLine {
+        return CommandLine(app, CommandFactory)
             .registerExceptionHandlers()
             .setExpandAtFiles(true)
             .setCaseInsensitiveEnumValuesAllowed(true)

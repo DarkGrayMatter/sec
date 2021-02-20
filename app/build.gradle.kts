@@ -44,7 +44,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
 
-    // YAML - Jackson
+    // Jackson Data Formats
     implementation(platform("com.fasterxml.jackson:jackson-bom:2.12.1"))
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-properties")

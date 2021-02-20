@@ -57,11 +57,11 @@ class EncryptConfig : Runnable {
         }
 
         val encryptable = AntPathMatcher.Builder().withTrimTokens().build()::isMatch
-        val encryptor = keyWithType.type.algorithm.newEncrypter()
+        val encrypt = keyWithType.type.algorithm.newEncrypter()::encrypt
 
         visitNodePathsOf(config) {
             encryptablePaths.firstOrNull { rule -> encryptable(rule, path) }?.also {
-                val encrypted = encryptor.encrypt(keyWithType, subject.textValue())
+                val encrypted = encrypt(keyWithType, subject.textValue())
                 val encryptedNode = textNode("\${enc:$encrypted}")
                 set(encryptedNode)
             }

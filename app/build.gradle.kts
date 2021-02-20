@@ -1,6 +1,10 @@
 @file:Suppress("SpellCheckingInspection")
 
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.io.IOException
+import java.io.StringWriter
+import java.time.LocalDateTime
+import java.util.*
 
 
 plugins {
@@ -77,9 +81,11 @@ tasks.withType<JavaCompile> {
 }
 
 
+
 tasks.withType<KotlinCompile>().configureEach {
     kotlinOptions.jvmTarget = jvmTarget
 }
+
 
 tasks.withType<Jar> { archiveBaseName.set("sec") }
 
@@ -116,3 +122,26 @@ publishing {
         }
     }
 }
+
+tasks.create("generateToolBuildInfo") {
+    description = "Generates tool version file for command line inpsection."
+    group = "Build"
+    doLast {
+        val version = Properties().run {
+            put("version", "${project.version}")
+            put("build.ts", "${LocalDateTime.now()}")
+            put("build.platform.os.name", System.getProperty("os.name"))
+            put("build.platform.os.version", System.getProperty("os.version"))
+            put("build.platform.os.arch", System.getProperty("os.arch"))
+            StringWriter().also { store(it, "SEC tool version file.") }.toString()
+        }
+        val versionFile = file("/build/resources/main/graymatter/sec/version.properties").apply {
+            if (!parentFile.exists() && !parentFile.mkdirs()) {
+                throw IOException("Failed to create directory: $parent")
+            }
+        }
+        versionFile.writeText(version)
+    }
+}
+
+tasks.named("processResources") { dependsOn("generateToolBuildInfo") }

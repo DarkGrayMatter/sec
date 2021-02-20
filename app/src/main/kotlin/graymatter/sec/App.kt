@@ -2,6 +2,7 @@ package graymatter.sec
 
 import graymatter.sec.command.*
 import graymatter.sec.common.cli.CommandFactory
+import graymatter.sec.common.cli.ToolVersionProvider
 import graymatter.sec.common.crypto.BinaryEncoding
 import graymatter.sec.common.exception.CommandFailedException
 import picocli.CommandLine
@@ -12,6 +13,7 @@ import kotlin.system.exitProcess
 @Command(
     name = "sec",
     description = ["SEC is a configuration companion to the excellent Palantir library."],
+    versionProvider = ToolVersionProvider::class,
     mixinStandardHelpOptions = true,
     subcommands = [
         HelpCommand::class,

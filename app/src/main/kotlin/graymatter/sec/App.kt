@@ -31,8 +31,8 @@ object App {
         exitProcess(createCommandLine().execute(* args))
     }
 
-    private fun createCommandLine(): CommandLine {
-        return CommandLine(this, CommandFactory)
+    fun createCommandLine(cmd: Any = this): CommandLine{
+        return CommandLine(cmd, CommandFactory)
             .registerExceptionHandlers()
             .setExpandAtFiles(true)
             .setCaseInsensitiveEnumValuesAllowed(true)
@@ -40,6 +40,7 @@ object App {
             .registerCommonConverters()
             .setUsageHelpWidth(150)
     }
+
 
     private fun CommandLine.registerCommonConverters(): CommandLine = apply {
         registerConverter(BinaryEncoding::class.java, BinaryEncoding.Companion::fromName)

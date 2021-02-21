@@ -34,13 +34,13 @@ class EncryptConfig : Runnable {
 
         val doc: ObjectNode = sourceConfig.run {
             input.source.open().use {
-                it.readTree(requireNotNull(inputFormat))
+                it.readTree(requireNotNull(overriddenInputFormat))
             }
         }
 
         val keyWithType = encryptionKey.keyWithType()
         val encryptedDoc = encrypt(doc, keyWithType, encryptionRules.rules)
-        val encryptedDocFormat = requireNotNull(outputConfig.outputFormat ?: sourceConfig.inputFormat)
+        val encryptedDocFormat = requireNotNull(outputConfig.outputFormat ?: sourceConfig.overriddenInputFormat)
 
         outputConfig.target.output.open().use { output -> write(output, encryptedDoc, encryptedDocFormat) }
 

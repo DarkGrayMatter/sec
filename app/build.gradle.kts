@@ -46,6 +46,7 @@ dependencies {
     // JUnit5
     val junitVersion = "5.7.0"
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:$junitVersion")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
 
     // Jackson Data Formats
@@ -127,20 +128,19 @@ tasks.create("generateToolBuildInfo") {
     description = "Generates tool version file for command line inpsection."
     group = "Build"
     doLast {
-        val version = Properties().run {
+        val versionFile = file("/build/resources/main/graymatter/sec/version.properties").apply {
+            if (!parentFile.exists() && !parentFile.mkdirs()) {
+                throw IOException("Failed to create directory: $parent")
+            }
+        }
+        versionFile.writeText(Properties().run {
             put("version", "${project.version}")
             put("build.ts", "${LocalDateTime.now()}")
             put("build.platform.os.name", System.getProperty("os.name"))
             put("build.platform.os.version", System.getProperty("os.version"))
             put("build.platform.os.arch", System.getProperty("os.arch"))
             StringWriter().also { store(it, "SEC tool version file.") }.toString()
-        }
-        val versionFile = file("/build/resources/main/graymatter/sec/version.properties").apply {
-            if (!parentFile.exists() && !parentFile.mkdirs()) {
-                throw IOException("Failed to create directory: $parent")
-            }
-        }
-        versionFile.writeText(version)
+        })
     }
 }
 

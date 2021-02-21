@@ -19,7 +19,7 @@ class ConfigSourceRequirements {
             "information to derive the document type."
         ]
     )
-    var inputFormat: DocumentFormat? = null
+    var overriddenInputFormat: DocumentFormat? = null
 
     @CommandLine.ArgGroup(
         exclusive = true,
@@ -27,4 +27,7 @@ class ConfigSourceRequirements {
     )
     lateinit var input: InputSourceArgGroup
 
+    fun requestedFormat(): DocumentFormat? {
+        return overriddenInputFormat ?: DocumentFormat.fromName(input.source.uri)
+    }
 }

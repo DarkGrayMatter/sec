@@ -103,8 +103,6 @@ internal class EncryptConfigurationUseCaseTest {
             val matchedValueIsEncrypted =
                 matchedValue != null && matchedValue.startsWith("{enc:") && matchedValue.endsWith("}")
 
-
-
             assertTrue(
                 matchedValueIsEncrypted,
                 """

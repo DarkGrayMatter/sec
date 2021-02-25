@@ -1,6 +1,6 @@
 @file:Suppress("unused")
 
-package graymatter.sec.common.cli.reuse.mixin
+package graymatter.sec.command.reuse.mixin
 
 import com.palantir.config.crypto.KeyWithType
 import graymatter.sec.common.crypto.readKeyWithType

@@ -1,4 +1,4 @@
-package graymatter.sec.common.cli.reuse.mixin
+package graymatter.sec.command.reuse.mixin
 
 import graymatter.sec.common.crypto.BinaryEncoding
 import picocli.CommandLine.Option

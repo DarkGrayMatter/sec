@@ -1,4 +1,4 @@
-package graymatter.sec.common.cli.reuse.mixin
+package graymatter.sec.command.reuse.mixin
 
 import picocli.CommandLine
 import java.io.File

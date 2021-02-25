@@ -1,6 +1,6 @@
-package graymatter.sec.common.cli.reuse.mixin
+package graymatter.sec.command.reuse.mixin
 
-import graymatter.sec.common.cli.reuse.group.InputSourceArgGroup
+import graymatter.sec.command.reuse.group.InputSourceArgGroup
 import graymatter.sec.common.document.DocumentFormat
 import graymatter.sec.common.trimToLine
 import picocli.CommandLine

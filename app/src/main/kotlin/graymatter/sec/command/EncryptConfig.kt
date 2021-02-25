@@ -11,15 +11,21 @@ import graymatter.sec.common.document.DocumentFormat
 import graymatter.sec.common.document.ObjectMappers
 import graymatter.sec.common.document.readTree
 import graymatter.sec.common.document.visitNodePathsOf
+import graymatter.sec.common.exception.failCommand
+import graymatter.sec.common.exception.failedWithHelp
 import io.github.azagniotov.matcher.AntPathMatcher
 import picocli.CommandLine
+import picocli.CommandLine.Model.CommandSpec
 import java.io.OutputStream
 
 @CommandLine.Command(name = "encrypt-config", description = ["Encrypt a configuration document given a key"])
 class EncryptConfig : Runnable {
 
+    @CommandLine.Spec
+    lateinit var spec: CommandSpec
+
     @CommandLine.Mixin
-    lateinit var sourceConfig: ConfigSourceRequirements
+    lateinit var input: ConfigSourceRequirements
 
     @CommandLine.Mixin
     lateinit var encryptionKey: KeyRequirements
@@ -28,23 +34,42 @@ class EncryptConfig : Runnable {
     lateinit var encryptionRules: ConfigProcessingRulesRequirements
 
     @CommandLine.Mixin
-    lateinit var outputConfig: ConfigOutputRequirements
+    lateinit var output: ConfigOutputRequirements
 
     override fun run() {
 
-        val doc: ObjectNode = sourceConfig.run {
-            input.source.open().use {
-                it.readTree(requireNotNull(overriddenInputFormat))
-            }
-        }
+        validate()
+
+        val doc = input.requestedFormat
+            ?.let { format -> input.open().use { it.readTree<ObjectNode>(format) } }
+            ?: failCommand("Failed to open :${input}")
 
         val keyWithType = encryptionKey.keyWithType()
         val encryptedDoc = encrypt(doc, keyWithType, encryptionRules.rules)
-        val encryptedDocFormat = requireNotNull(outputConfig.outputFormat ?: sourceConfig.overriddenInputFormat)
+        val encryptedDocFormat = requireNotNull(output.outputFormat ?: input.overriddenInputFormat)
 
-        outputConfig.target.output.open().use { output -> write(output, encryptedDoc, encryptedDocFormat) }
-
+        output.open().use { output -> write(output, encryptedDoc, encryptedDocFormat) }
     }
+
+    private fun validate() {
+
+        val errorList = mutableListOf<String>()
+
+        if (!this::input.isInitialized) errorList += "No configuration source input provided."
+        if (!this::encryptionKey.isInitialized) errorList += "No encryption key provided."
+        if (!this::encryptionRules.isInitialized) errorList += "No encryption path rules provided."
+        if (!this::output.isInitialized) errorList += "No output/destination provided."
+
+        if (errorList.isNotEmpty()) {
+            spec.failedWithHelp(
+                errorList.joinToString(
+                    separator = "\n",
+                    prefix = "Multiple command line errors. Please consult help command:"
+                )
+            )
+        }
+    }
+
 
     private fun encrypt(
         config: ObjectNode,
@@ -85,3 +110,4 @@ class EncryptConfig : Runnable {
     }
 
 }
+

@@ -15,7 +15,7 @@ sealed class IOSource<out T> {
     abstract fun open(): T
     abstract val uri: String
 
-    final override fun toString(): String = uri
+    final override fun toString(): String = "${javaClass.simpleName.toLowerCase()}@:$uri"
 
     sealed class Input : IOSource<InputStream>() {
 
@@ -41,7 +41,6 @@ sealed class IOSource<out T> {
                 internal const val PREFIX = ":classpath"
             }
         }
-
     }
 
     sealed class Output : IOSource<OutputStream>() {

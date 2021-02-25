@@ -4,9 +4,9 @@ package graymatter.sec.common.cli.reuse.mixin
 
 import com.palantir.config.crypto.KeyWithType
 import graymatter.sec.common.crypto.readKeyWithType
+import graymatter.sec.common.resourceAt
 import picocli.CommandLine
 import java.io.File
-import java.io.FileNotFoundException
 import java.io.InputStream
 
 class KeyRequirements {
@@ -27,19 +27,14 @@ class KeyRequirements {
             openKeyFile = keyFile::inputStream
         }
 
-        @CommandLine.Option(names = ["--key-value"], description = ["Key value on command line."])
+        @CommandLine.Option(names = ["--key-text"], description = ["Key value on command line."])
         fun setKeyFromCommandLine(keyFromCommandLine: String) {
             openKeyFile = { keyFromCommandLine.byteInputStream() }
         }
 
-        @CommandLine.Option(names = ["--key-resource"], description = ["Key file as a resource on the classpath."])
+        @CommandLine.Option(names = ["--key-res"], description = ["Key file as a resource on the classpath."])
         fun setKeyFromClassPath(keyFromClassPath: String) {
-            openKeyFile = {
-                javaClass.getResourceAsStream(keyFromClassPath)
-                    ?: throw FileNotFoundException(
-                        "Could not find key file on classpath: $keyFromClassPath"
-                    )
-            }
+            openKeyFile = { resourceAt<KeyRequirements>(keyFromClassPath).openStream() }
         }
 
         fun readKey(): InputStream = openKeyFile()

@@ -3,17 +3,28 @@
 package graymatter.sec.common
 
 import graymatter.sec.common.crypto.BinaryEncoding
+import java.io.File
+import java.io.FileNotFoundException
+import java.net.URI
+import java.net.URL
 import java.util.*
 
-fun String.tr(): String {
-    return when {
-        isEmpty() -> this
-        else -> lineSequence()
-            .map { it.trim() }
-            .filterNot { it.isEmpty() }
-            .let { parts -> buildString { parts.joinTo(this, separator = " ") } }
+private const val EMPTY_TEXT = ""
+
+private val Char.isPrintableNonWhitespace: Boolean get() = !(isISOControl() || isWhitespace())
+
+fun <T> Boolean.value(truth: T, notTrue: T): T {
+    return when (this) {
+        true -> truth
+        else -> notTrue
     }
 }
+
+private fun Sequence<String>.join() = joinToString("")
+
+fun String.trimToLine() = lineSequence().map { it.trim() }.join()
+fun String.trimIndentToLine() = trimIndent().lineSequence().join()
+fun String.trimMarginToLine(marginPrefix: String = "|") = trimMargin(marginPrefix).lineSequence().join()
 
 inline fun requiresStateOf(inState: Boolean, errorMessage: () -> String) {
     if (!inState) {
@@ -54,7 +65,7 @@ enum class Separator(val char: Char) {
 }
 
 
-fun ByteArray.encodeBinary(encoding: BinaryEncoding): String = encoding.encode(this)
+fun ByteArray.encodeBinary(encoding: BinaryEncoding = BinaryEncoding.Base64): String = encoding.encode(this)
 fun String.decodeBinary(encoding: BinaryEncoding): ByteArray = encoding.decode(this)
 
 
@@ -114,6 +125,25 @@ inline fun <T> memoize(crossinline get: () -> T): () -> T {
 data class
 Holder<out T>(val value: T)
 
+
+class ClassPathResourceNotFoundException(resourcePath: String) : FileNotFoundException(resourcePath)
+class UndefinedLocalFileUriException(uri: URI) : FileNotFoundException("Undefined uri: $uri")
+
+inline fun <reified T> resourceAt(resourcePath: String): URL {
+    return T::class.java.getResource(resourcePath) ?: throw ClassPathResourceNotFoundException(resourcePath)
+}
+
+inline fun <reified T> resourceFile(resourcePath: String): File = resourceAt<T>(resourcePath).file()
+
+
+fun URL.file(): File {
+    return toURI().let { uri ->
+        when (val file = uri?.let(::File)?.canonicalFile) {
+            null -> throw UndefinedLocalFileUriException(uri)
+            else -> file
+        }
+    }
+}
 
 
 

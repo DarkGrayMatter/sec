@@ -2,7 +2,9 @@ package graymatter.sec.common.cli.reuse.mixin
 
 import graymatter.sec.common.cli.reuse.group.InputSourceArgGroup
 import graymatter.sec.common.document.DocumentFormat
+import graymatter.sec.common.trimToLine
 import picocli.CommandLine
+import java.io.InputStream
 
 /**
  * Describes the CLI for configuration sources to process.
@@ -27,7 +29,17 @@ class ConfigSourceRequirements {
     )
     lateinit var input: InputSourceArgGroup
 
-    fun requestedFormat(): DocumentFormat? {
-        return overriddenInputFormat ?: DocumentFormat.fromName(input.source.uri)
+    val requestedFormat: DocumentFormat?
+        get() = overriddenInputFormat ?: DocumentFormat.ofName(input.source.uri)
+
+    fun open(): InputStream = input.source.open()
+
+    override fun toString(): String {
+        return """
+            ConfigurationDocumentInput {
+              "format": ${requestedFormat},
+              "input": $input
+            }
+        """.trimToLine()
     }
 }

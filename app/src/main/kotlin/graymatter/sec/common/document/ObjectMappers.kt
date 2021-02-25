@@ -5,10 +5,10 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
 
+@Suppress("MemberVisibilityCanBePrivate")
 object ObjectMappers {
 
     val json = ObjectMapper().configure()
-    val csv = CsvMapper().configure()
     val properties = JavaPropsMapper().configure()
     val yaml = YAMLMapper().configure()
 
@@ -18,8 +18,7 @@ object ObjectMappers {
         return when (format) {
             DocumentFormat.JSON -> json
             DocumentFormat.YAML -> yaml
-            DocumentFormat.PROPERTIES -> properties
-            DocumentFormat.CSV -> csv
+            DocumentFormat.JAVA_PROPERTIES -> properties
         }
     }
 }

@@ -3,6 +3,7 @@ package graymatter.sec.common.cli.reuse.mixin
 import graymatter.sec.common.cli.reuse.group.OutputTargetArgGroup
 import graymatter.sec.common.document.DocumentFormat
 import picocli.CommandLine
+import java.io.OutputStream
 
 /**
  * This class models the CLI for processing the output of configuration processing.
@@ -22,4 +23,5 @@ class ConfigOutputRequirements {
     )
     lateinit var target: OutputTargetArgGroup
 
+    fun open(): OutputStream = target.output.open()
 }

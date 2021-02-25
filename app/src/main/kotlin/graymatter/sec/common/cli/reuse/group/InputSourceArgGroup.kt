@@ -1,6 +1,7 @@
 package graymatter.sec.common.cli.reuse.group
 
 import graymatter.sec.common.io.IOSource
+import graymatter.sec.common.trimToLine
 import picocli.CommandLine
 import java.io.File
 
@@ -32,5 +33,8 @@ class InputSourceArgGroup {
         }
     }
 
+    override fun toString(): String {
+        return "InputSource { $source }"
+    }
 }
 

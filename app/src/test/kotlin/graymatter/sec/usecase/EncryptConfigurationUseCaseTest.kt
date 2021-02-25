@@ -24,7 +24,7 @@ internal class EncryptConfigurationUseCaseTest {
     fun setUp() {
         matcher = AntPathMatcher.Builder().build()
         publicKey = resourceFile<EncryptConfigurationUseCase>("/keys/test")
-        unencryptedConfigFile = resourceFile<EncryptConfigurationUseCase>("/samples/sample.yaml")
+        unencryptedConfigFile = resourceFile<EncryptConfigurationUseCase>("/samples/unencryptedConfig.yaml")
         encryptionPaths = listOf(
             "/postgres/user",
             "/postgres/password",

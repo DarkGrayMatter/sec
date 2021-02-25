@@ -3,6 +3,7 @@ package graymatter.sec
 import graymatter.sec.command.*
 import graymatter.sec.common.cli.CommandFactory
 import graymatter.sec.common.cli.ToolVersionProvider
+import graymatter.sec.common.cli.installValidationExecutionHandler
 import graymatter.sec.common.crypto.BinaryEncoding
 import graymatter.sec.common.exception.CommandFailedException
 import picocli.CommandLine
@@ -39,6 +40,7 @@ object App {
             .setInterpolateVariables(true)
             .registerCommonConverters()
             .setUsageHelpWidth(150)
+            .installValidationExecutionHandler()
     }
 
 

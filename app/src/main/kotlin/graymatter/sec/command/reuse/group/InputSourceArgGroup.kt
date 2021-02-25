@@ -1,10 +1,11 @@
 package graymatter.sec.command.reuse.group
 
 import graymatter.sec.App
-import graymatter.sec.common.cli.CliValidationTarget
 import graymatter.sec.common.io.StandardInputInputStream
 import graymatter.sec.common.resourceAt
-import picocli.CommandLine
+import graymatter.sec.common.validation.ValidationTarget
+import picocli.CommandLine.Option
+import picocli.CommandLine.Parameters
 import java.io.File
 import java.io.InputStream
 
@@ -12,41 +13,47 @@ import java.io.InputStream
  * Requirement to capture an input source for a specific command.
  */
 @Suppress("unused", "MemberVisibilityCanBePrivate")
-class InputSourceArgGroup : CliValidationTarget {
+class InputSourceArgGroup : ValidationTarget {
 
-    private data class InputFrom(val uri: String, val open: () -> InputStream)
+    private data class Target(val uri: String?, val open: () -> InputStream)
 
-    private var inputFrom: InputFrom? = null
+    private var target: Target? = null
 
-    @CommandLine.Parameters(
+    @Parameters(
         description = [
             "File to read from."
         ],
         paramLabel = "FILE"
     )
     fun setInputFile(file: File) {
-        inputFrom = InputFrom(file.toURI().toString(), file::inputStream)
+        target = Target(file.toURI().toString(), file::inputStream)
     }
 
+    @Option(
+        names = ["--stdin"],
+        description = [
+            "Read from STDIN"
+        ]
+    )
     fun setInputStdIn(stdIn: Boolean) {
         if (stdIn) {
-            inputFrom = InputFrom("stdin://", ::StandardInputInputStream)
+            target = Target(null, ::StandardInputInputStream)
         }
     }
 
+    @Option(names = ["--input-resource"])
     fun setInputFromClassPath(classPathResource: String) {
-        inputFrom = InputFrom("classpath:/$classPathResource") {
+        target = Target("classpath:/$classPathResource") {
             resourceAt<App>(classPathResource).openStream()
         }
     }
 
+    val uri: String? get() = requireNotNull(target).uri
 
-    val uri: String get() = requireNotNull(inputFrom).uri
+    fun openInputStream() = requireNotNull(target).open()
 
-    fun openInputStream() = requireNotNull(inputFrom).open()
-
-    override fun validate(failWith: (error: String) -> String) {
-        inputFrom ?: failWith("No input has been specified.")
+    override fun performValidation(validation: ValidationTarget.ValidationError) {
+        target ?: validation.error("Please provide input.")
     }
 }
 

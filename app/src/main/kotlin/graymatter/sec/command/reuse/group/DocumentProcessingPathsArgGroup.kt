@@ -1,6 +1,8 @@
 package graymatter.sec.command.reuse.group
 
-import graymatter.sec.common.memoize
+import graymatter.sec.App
+import graymatter.sec.common.queueOf
+import graymatter.sec.common.resourceAt
 import picocli.CommandLine.Option
 import java.io.File
 
@@ -54,7 +56,18 @@ class DocumentProcessingPathsArgGroup {
     }
 
     fun expandPats(): List<String> {
-        TODO()
+        return mutableListOf<String>().run {
+            val queue = queueOf(paths)
+            while (queue.isNotEmpty()) {
+                when (val p = queue.remove()) {
+                    is Path.PathClasspathResource -> resourceAt<App>(p.resource).readText().lines().forEach(this::add)
+                    is Path.PathCollection -> p.forEach(queue::add)
+                    is Path.PathFile -> p.file.readLines().forEach(this::add)
+                    is Path.Value -> add(p.value)
+                }
+            }
+            toList()
+        }
     }
 
     private sealed class Path {

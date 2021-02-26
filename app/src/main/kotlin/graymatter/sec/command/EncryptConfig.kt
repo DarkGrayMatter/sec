@@ -78,7 +78,7 @@ class EncryptConfig : Runnable {
             inputFormat = format,
             outputFormat = resolveOutputFormat(format),
             keyWithType = resolveKeyWithType(),
-            encryptablePaths = processPathGroup.expandPats()
+            encryptablePaths = processPathGroup.expandPaths()
         ).run()
     }
 

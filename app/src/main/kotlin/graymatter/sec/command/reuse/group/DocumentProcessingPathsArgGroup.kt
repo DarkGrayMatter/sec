@@ -55,7 +55,7 @@ class DocumentProcessingPathsArgGroup {
         paths += Path.PathClasspathResource(resource)
     }
 
-    fun expandPats(): List<String> {
+    fun expandPaths(): List<String> {
         return mutableListOf<String>().run {
             val queue = queueOf(paths)
             while (queue.isNotEmpty()) {

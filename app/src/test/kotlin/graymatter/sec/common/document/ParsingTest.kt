@@ -1,8 +1,8 @@
 package graymatter.sec.common.document
 
-import becode.sec.common.BinaryEncoding
-import becode.sec.common.encodeBinary
 import com.fasterxml.jackson.databind.node.ObjectNode
+import graymatter.sec.common.crypto.BinaryEncoding
+import graymatter.sec.common.encodeBinary
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import kotlin.test.assertEquals
@@ -38,7 +38,7 @@ class ParsingTest {
 
         val edited = visitNodePathsOf(sample()) {
             if (path.endsWith("/keystore/password")) {
-                replace(textNode(encodedPassword))
+                set(textNode(encodedPassword))
             }
         }
 

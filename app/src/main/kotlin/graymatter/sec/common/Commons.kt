@@ -2,20 +2,29 @@
 
 package graymatter.sec.common
 
+import graymatter.sec.common.crypto.BinaryEncoding
+import java.io.File
+import java.io.FileNotFoundException
+import java.net.URI
+import java.net.URL
 import java.util.*
-import org.apache.commons.codec.binary.Base16 as ABase16
-import org.apache.commons.codec.binary.Base32 as ABase32
-import org.apache.commons.codec.binary.Hex as AHex
 
-fun String.tr(): String {
-    return when {
-        isEmpty() -> this
-        else -> lineSequence()
-            .map { it.trim() }
-            .filterNot { it.isEmpty() }
-            .let { parts -> buildString { parts.joinTo(this, separator = " ") } }
+private const val EMPTY_TEXT = ""
+
+private val Char.isPrintableNonWhitespace: Boolean get() = !(isISOControl() || isWhitespace())
+
+fun <T> Boolean.value(truth: T, notTrue: T): T {
+    return when (this) {
+        true -> truth
+        else -> notTrue
     }
 }
+
+private fun Sequence<String>.join() = joinToString("")
+
+fun String.trimToLine() = lineSequence().map { it.trim() }.join()
+fun String.trimIndentToLine() = trimIndent().lineSequence().join()
+fun String.trimMarginToLine(marginPrefix: String = "|") = trimMargin(marginPrefix).lineSequence().join()
 
 inline fun requiresStateOf(inState: Boolean, errorMessage: () -> String) {
     if (!inState) {
@@ -56,63 +65,8 @@ enum class Separator(val char: Char) {
 }
 
 
-fun ByteArray.encodeBinary(encoding: BinaryEncoding): String = encoding.encode(this)
+fun ByteArray.encodeBinary(encoding: BinaryEncoding = BinaryEncoding.Base64): String = encoding.encode(this)
 fun String.decodeBinary(encoding: BinaryEncoding): ByteArray = encoding.decode(this)
-
-
-enum class BinaryEncoding(name: String, vararg alternates: String) {
-
-    Base64("64", "base64") {
-        override fun encode(bytes: ByteArray): String {
-            return java.util.Base64.getEncoder().encodeToString(bytes)
-        }
-
-        override fun decode(byteString: String): ByteArray {
-            return java.util.Base64.getDecoder().decode(byteString)
-        }
-    },
-    Base32("32", "base32") {
-        override fun encode(bytes: ByteArray): String {
-            return ABase32().encodeAsString(bytes)
-        }
-
-        override fun decode(byteString: String): ByteArray {
-            return ABase32().decode(byteString)
-        }
-    },
-    Hex("hex") {
-        override fun encode(bytes: ByteArray): String {
-            return AHex.encodeHexString(bytes)
-        }
-
-        override fun decode(byteString: String): ByteArray {
-            return AHex.decodeHex(byteString)
-        }
-    },
-    Base16("16", "base16") {
-
-        override fun encode(bytes: ByteArray): String {
-            return ABase16().encodeAsString(bytes)
-        }
-
-        override fun decode(byteString: String): ByteArray {
-            return ABase16().decode(byteString.toLowerCase())
-        }
-    },
-    ;
-
-
-    abstract fun encode(bytes: ByteArray): String
-    abstract fun decode(byteString: String): ByteArray
-    private val names = setOf(name) + alternates
-
-    companion object {
-
-        fun fromName(namedEncoding: String): BinaryEncoding {
-            return values().first { encoding -> namedEncoding in encoding.names }
-        }
-    }
-}
 
 
 fun <T> queueOf(vararg initial: T): Queue<T> {
@@ -171,6 +125,25 @@ inline fun <T> memoize(crossinline get: () -> T): () -> T {
 data class
 Holder<out T>(val value: T)
 
+
+class ClassPathResourceNotFoundException(resourcePath: String) : FileNotFoundException(resourcePath)
+class UndefinedLocalFileUriException(uri: URI) : FileNotFoundException("Undefined uri: $uri")
+
+inline fun <reified T> resourceAt(resourcePath: String): URL {
+    return T::class.java.getResource(resourcePath) ?: throw ClassPathResourceNotFoundException(resourcePath)
+}
+
+inline fun <reified T> resourceFile(resourcePath: String): File = resourceAt<T>(resourcePath).file()
+
+
+fun URL.file(): File {
+    return toURI().let { uri ->
+        when (val file = uri?.let(::File)?.canonicalFile) {
+            null -> throw UndefinedLocalFileUriException(uri)
+            else -> file
+        }
+    }
+}
 
 
 

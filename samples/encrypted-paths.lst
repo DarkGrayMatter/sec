@@ -1,0 +1,13 @@
+/postgres/user
+/postgres/password
+/hashId/salt
+/legacyJwt/signingKey
+/jwt/signingKey
+/event/key
+/event/keyAlgorithm
+/recaptcha/secret
+/mongo/username
+/mongo/password
+/maskConfiguration/*
+/identityEncryptionKeys/*/key
+/identityEncryptionKeys/*/encoding

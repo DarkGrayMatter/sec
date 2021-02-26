@@ -1,6 +1,6 @@
 object Product {
     const val version = "0.0.1-SNAPSHOT"
-    const val group = "org.becode.sec"
+    const val group = "graymatter.sec"
 }
 
 

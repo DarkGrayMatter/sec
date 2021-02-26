@@ -1,6 +1,10 @@
 @file:Suppress("SpellCheckingInspection")
 
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.io.IOException
+import java.io.StringWriter
+import java.time.LocalDateTime
+import java.util.*
 
 
 plugins {
@@ -42,17 +46,25 @@ dependencies {
     // JUnit5
     val junitVersion = "5.7.0"
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:$junitVersion")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
 
-    // YAML - Jackson
+    // Jackson Data Formats
     implementation(platform("com.fasterxml.jackson:jackson-bom:2.12.1"))
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-properties")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-csv")
 
-    // Apache Commons Codecs compile group: 'commons-codec', name: 'commons-codec', version: '1.15'
-    val apacheCommonsCodevVersion = "1.15"
-    implementation("commons-codec:commons-codec:$apacheCommonsCodevVersion")
+    // Apache Commons 
+    val apacheCommonsCodecVersion = "1.15"
+    implementation("commons-codec:commons-codec:$apacheCommonsCodecVersion")
+
+    // Ant Style Path Matcher
+    implementation("io.github.azagniotov:ant-style-path-matcher:1.0.0")
+
+    // Validation JSR-380
+    implementation("org.hibernate.validator:hibernate-validator:6.0.22.Final")
+    implementation("org.glassfish:javax.el:3.0.1-b09")
 
 }
 
@@ -74,11 +86,11 @@ tasks.withType<JavaCompile> {
 }
 
 
+
 tasks.withType<KotlinCompile>().configureEach {
-    kotlinOptions {
-        jvmTarget = this@Build_gradle.jvmTarget
-    }
+    kotlinOptions.jvmTarget = jvmTarget
 }
+
 
 tasks.withType<Jar> { archiveBaseName.set("sec") }
 
@@ -115,3 +127,25 @@ publishing {
         }
     }
 }
+
+tasks.create("generateToolBuildInfo") {
+    description = "Generates tool version file for command line inpsection."
+    group = "Build"
+    doLast {
+        val versionFile = file("/build/resources/main/graymatter/sec/version.properties").apply {
+            if (!parentFile.exists() && !parentFile.mkdirs()) {
+                throw IOException("Failed to create directory: $parent")
+            }
+        }
+        versionFile.writeText(Properties().run {
+            put("version", "${project.version}")
+            put("build.ts", "${LocalDateTime.now()}")
+            put("build.platform.os.name", System.getProperty("os.name"))
+            put("build.platform.os.version", System.getProperty("os.version"))
+            put("build.platform.os.arch", System.getProperty("os.arch"))
+            StringWriter().also { store(it, "SEC tool version file.") }.toString()
+        })
+    }
+}
+
+tasks.named("processResources") { dependsOn("generateToolBuildInfo") }

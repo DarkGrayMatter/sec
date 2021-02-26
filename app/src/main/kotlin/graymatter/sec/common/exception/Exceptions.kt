@@ -1,6 +1,8 @@
 package graymatter.sec.common.exception
 
 import picocli.CommandLine.ExitCode
+import picocli.CommandLine.Model.CommandSpec
+import picocli.CommandLine.ParameterException
 
 sealed class CommonToolException(override val message: String) : RuntimeException(message)
 
@@ -17,4 +19,9 @@ fun failCommandOn(condition: Boolean, exitCode: Int, message: String) {
     if (condition) {
         failCommand(exitCode, message)
     }
+}
+
+
+fun CommandSpec.failedWithHelp(error: String): Nothing {
+    throw ParameterException(commandLine(), error)
 }

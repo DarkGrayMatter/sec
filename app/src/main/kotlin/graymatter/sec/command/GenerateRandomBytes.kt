@@ -1,6 +1,7 @@
 package graymatter.sec.command
 
-import graymatter.sec.common.BinaryEncoding
+import graymatter.sec.command.reuse.mixin.GivenSeed
+import graymatter.sec.common.crypto.BinaryEncoding
 import graymatter.sec.common.exception.failCommandOn
 import picocli.CommandLine.*
 import java.security.SecureRandom
@@ -9,9 +10,19 @@ import java.security.SecureRandom
 class GenerateRandomBytes : Runnable {
 
     private var numberOfChunks: Int = 1
-    private lateinit var generateRandomBytes: ByteArray.() -> Unit
     private var byteSize: Int = -1
     private lateinit var encoding: BinaryEncoding
+
+    @ArgGroup(validate = false, heading = "If you want specify a seed, use the following options:%n")
+    private var givenSeed: GivenSeed? = null
+
+    private val secureRandom by lazy(LazyThreadSafetyMode.NONE) {
+        when (val seedAsBytes = givenSeed?.asBytes()) {
+            null -> SecureRandom()
+            else -> SecureRandom(seedAsBytes)
+        }
+    }
+
 
     @Option(
         names = ["-b", "--base"],
@@ -44,16 +55,17 @@ class GenerateRandomBytes : Runnable {
     }
 
     override fun run() {
-
-        val randomGeneratedChunks = generateSequence {
-            ByteArray(byteSize).run {
-                val rnd = SecureRandom()
-                rnd.nextBytes(this)
-                encoding.encode(this)
-            }
+        if (numberOfChunks == 1) {
+            println(generateEncodedRandomBytes())
+        } else generateSequence { generateEncodedRandomBytes() }.take(numberOfChunks).forEach {
+            println(it)
         }
-
-        randomGeneratedChunks.take(numberOfChunks).forEach { println(it) }
     }
 
+    private fun generateEncodedRandomBytes() = secureRandom.run {
+        ByteArray(byteSize).run {
+            nextBytes(this)
+            encoding.encode(this)
+        }
+    }
 }

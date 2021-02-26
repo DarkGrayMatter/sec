@@ -8,40 +8,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 /**
- * Visiting some thing on path
- */
-interface VisitingPath<T> {
-
-    /**
-     * Stop visiting asap
-     */
-    fun stop()
-
-    /**
-     * Item being visited
-     */
-    val item: T
-
-    /**
-     * The path being visited.
-     */
-    val path: String
-
-
-}
-
-interface JsonNodePathVisitor : VisitingPath<JsonNode>, JsonNodeCreator {
-    /**
-     * Replaces [item] with [new] if the new item is not the same as current item.
-     *
-     * @param new The item to replace the current item being visited.
-     * @return The replaced item or `null` if the new item is the same as current item.
-     */
-    fun replace(new: JsonNode): JsonNode?
-
-}
-
-/**
  * This container keeps track of content, as well as maintaining a relation to the parent [Container]. This
  * arrangement enables the container to build a path to the node on demand via the [Container.path] calculate/lazy
  * property.
@@ -102,7 +68,7 @@ private class PathVisitor(
     var visiting = true; private set
     private var container: Container? = null
 
-    override val item: JsonNode
+    override val subject: JsonNode
         get() = connectedContainer.content
 
     override val path: String
@@ -121,7 +87,7 @@ private class PathVisitor(
         }
     }
 
-    override fun replace(new: JsonNode): JsonNode? = connectedContainer.replace(new)
+    override fun set(new: JsonNode): JsonNode? = connectedContainer.replace(new)
 
     private val connectedContainer: Container
         get() = container.takeIf { visiting } ?: throw IllegalStateException()

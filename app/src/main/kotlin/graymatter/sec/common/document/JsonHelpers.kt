@@ -2,32 +2,10 @@
 
 package graymatter.sec.common.document
 
-import graymatter.sec.common.tr
+import graymatter.sec.common.trimToLine
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.dataformat.csv.CsvMapper
-import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
 import java.io.InputStream
-
-object Mappers {
-
-    val json = ObjectMapper().configure()
-    val csv = CsvMapper().configure()
-    val properties = JavaPropsMapper().configure()
-    val yaml = YAMLMapper().configure()
-
-    private fun ObjectMapper.configure(): ObjectMapper = findAndRegisterModules()
-
-    operator fun get(format: DocumentFormat): ObjectMapper {
-        return when (format) {
-            DocumentFormat.JSON -> json
-            DocumentFormat.YAML -> yaml
-            DocumentFormat.PROPERTIES -> properties
-            DocumentFormat.CSV -> csv
-        }
-    }
-}
 
 fun <T : JsonNode> ObjectMapper.treeFromContent(content: String, expectedContentNodeClass: Class<out T>): T {
 
@@ -39,7 +17,7 @@ fun <T : JsonNode> ObjectMapper.treeFromContent(content: String, expectedContent
             """
             Unexpected content type parsed. Expected ${expectedContentNodeClass.simpleName}, but found 
             ${node.javaClass.simpleName} instead. (see [${node.toPrettyString()}])"
-            """.tr()
+            """.trimToLine()
         )
     }
 
@@ -57,11 +35,11 @@ fun String.asTree(mapper: ObjectMapper): JsonNode = mapper.treeFromContent(this)
 
 
 inline fun <reified T : JsonNode> InputStream.readTree(format: DocumentFormat): T {
-    return Mappers[format].readTree(this) as T
+    return ObjectMappers.of(format).readTree(this) as T
 }
 
 inline fun <reified T : JsonNode> treeOf(format: DocumentFormat, content: String): T {
-    return Mappers[format].treeFromContent(content) as T
+    return ObjectMappers.of(format).treeFromContent(content) as T
 }
 
 inline fun <reified T : JsonNode> jsonOf(content: String): T = treeOf(DocumentFormat.JSON, content)

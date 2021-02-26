@@ -2,7 +2,7 @@
 
 package graymatter.sec.common.document
 
-import graymatter.sec.common.trimToLine
+import graymatter.sec.common.tr
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import java.io.InputStream
@@ -17,7 +17,7 @@ fun <T : JsonNode> ObjectMapper.treeFromContent(content: String, expectedContent
             """
             Unexpected content type parsed. Expected ${expectedContentNodeClass.simpleName}, but found 
             ${node.javaClass.simpleName} instead. (see [${node.toPrettyString()}])"
-            """.trimToLine()
+            """.tr()
         )
     }
 
@@ -35,11 +35,11 @@ fun String.asTree(mapper: ObjectMapper): JsonNode = mapper.treeFromContent(this)
 
 
 inline fun <reified T : JsonNode> InputStream.readTree(format: DocumentFormat): T {
-    return ObjectMappers.of(format).readTree(this) as T
+    return ObjectMappers[format].readTree(this) as T
 }
 
 inline fun <reified T : JsonNode> treeOf(format: DocumentFormat, content: String): T {
-    return ObjectMappers.of(format).treeFromContent(content) as T
+    return ObjectMappers[format].treeFromContent(content) as T
 }
 
 inline fun <reified T : JsonNode> jsonOf(content: String): T = treeOf(DocumentFormat.JSON, content)

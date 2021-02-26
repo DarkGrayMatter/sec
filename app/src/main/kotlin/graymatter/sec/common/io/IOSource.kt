@@ -1,9 +1,6 @@
 package graymatter.sec.common.io
 
-import java.io.FileNotFoundException
-import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
+import java.io.*
 import java.io.File as JavaFile
 
 /**
@@ -15,13 +12,11 @@ sealed class IOSource<out T> {
     abstract fun open(): T
     abstract val uri: String
 
-    final override fun toString(): String = "${javaClass.simpleName.toLowerCase()}@:$uri"
+    final override fun toString(): String = uri
 
     sealed class Input : IOSource<InputStream>() {
 
-        val isStdIn: Boolean get() = this is StdIn
-
-        class File(val file: JavaFile) : Input() {
+        class File(val file: java.io.File) : Input() {
             override val uri: String get() = file.toURI().toString()
             override fun open(): InputStream = file.inputStream()
         }
@@ -41,12 +36,19 @@ sealed class IOSource<out T> {
                 internal const val PREFIX = ":classpath"
             }
         }
+
+        companion object {
+            fun fromString(inputSpec: String): Input {
+                return when {
+                    inputSpec == STDIO_IDENTIFIER -> StdIn()
+                    inputSpec.startsWith(ClassPath.PREFIX) -> ClassPath(inputSpec.substringAfter(ClassPath.PREFIX))
+                    else -> File(JavaFile(inputSpec))
+                }
+            }
+        }
     }
 
     sealed class Output : IOSource<OutputStream>() {
-
-        val isNull: Boolean get() = this is NULL
-        val isStdOut: Boolean get() = this is StdOut
 
         class File(val file: java.io.File) : Output() {
             override val uri: String get() = file.toURI().toString()
@@ -59,7 +61,7 @@ sealed class IOSource<out T> {
         }
 
         object NULL : Output() {
-            private object NullOut : OutputStream() {
+            object NullOut : OutputStream() {
                 override fun write(b: Int) = Unit
                 override fun close() = Unit
                 override fun toString(): String = "@NULL"
@@ -68,6 +70,15 @@ sealed class IOSource<out T> {
             override val uri: String = NullOut.toString()
         }
 
+        companion object {
+            fun fromString(outputSpec: String): Output {
+                return when (outputSpec) {
+                    STDIO_IDENTIFIER -> StdOut()
+                    "NULL" -> NULL
+                    else -> File(JavaFile(outputSpec))
+                }
+            }
+        }
     }
 
     fun tryOpen(): T? {
@@ -76,5 +87,7 @@ sealed class IOSource<out T> {
             .getOrNull()
     }
 
-
+    companion object {
+        private const val STDIO_IDENTIFIER = "-"
+    }
 }

@@ -1,31 +1,99 @@
 package graymatter.sec.usecase
 
+import com.fasterxml.jackson.databind.node.ObjectNode
 import com.palantir.config.crypto.KeyWithType
+import graymatter.sec.common.*
 import graymatter.sec.common.document.DocumentFormat
-import graymatter.sec.common.resourceFile
-import graymatter.sec.common.trimIndentToLine
+import graymatter.sec.common.document.readTree
 import io.github.azagniotov.matcher.AntPathMatcher
 import org.junit.jupiter.api.*
-import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.util.*
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class EncryptConfigurationUseCaseTest {
 
+    private lateinit var unencryptedDocFormat: DocumentFormat
+    private lateinit var unencryptedDoc: ObjectNode
+    private lateinit var unencrypted: Map<String, String?>
     private lateinit var matcher: AntPathMatcher
     private lateinit var publicKey: File
     private lateinit var unencryptedConfigFile: File
-    private lateinit var encryptionPaths: List<String>
+    private lateinit var encryptablePathsExpressions: List<String>
+    private lateinit var encrypted: Map<String, String?>
 
     @BeforeEach
     fun setUp() {
         matcher = AntPathMatcher.Builder().build()
         publicKey = resourceFile<EncryptConfigurationUseCase>("/keys/test")
         unencryptedConfigFile = resourceFile<EncryptConfigurationUseCase>("/samples/unencryptedConfig.yaml")
-        encryptionPaths = listOf(
+        unencryptedDocFormat = requireNotNull(DocumentFormat.ofFile(unencryptedConfigFile))
+        encryptablePathsExpressions = emptyList()
+        unencryptedDoc = unencryptedConfigFile.inputStream().use { it.readTree(unencryptedDocFormat) }
+        unencrypted = Properties(unencryptedDoc).toSimpleMap()
+    }
+
+    @Test
+    fun testNonTextNodesShouldNotCrashEncryption() {
+        givenEncryptablePaths("/magicLinkChallenge/**")
+        thenEncrypt()
+    }
+
+    @Test
+    fun testAllExpectedPathsShouldBeEncrypted() {
+
+        givenExpectedEncryptedPaths()
+        thenEncrypt()
+
+        val keyToPathPairs = unencrypted.keys.map { key -> key to key.keyToPath() }.toList()
+
+        fun label(index: Int, expression: String) = "[${index + 1}: $expression]"
+
+        val matches = AntPathMatcher.Builder().build()::isMatch
+
+        assertAll(encryptablePathsExpressions.withIndex().map { (index, expression) ->
+            {
+                val matchedKey =
+                    keyToPathPairs.firstOrNull { (_, path) -> matches(expression, path) }?.first
+
+                val processedValue = encrypted[matchedKey]
+
+                println("${label(index, expression)} -> [${matchedKey?.keyToPath()} -> $processedValue]")
+
+                assertNotNull(matchedKey)
+                assertNotNull(processedValue)
+                assertTrue(processedValue.startsWith("{enc:") && processedValue.endsWith('}'))
+            }
+        })
+    }
+
+    private fun thenEncrypt() {
+        encrypted = assertDoesNotThrow {
+            Properties().run {
+                load(ByteArrayOutputStream().apply {
+                    EncryptConfigurationUseCase(
+                        openInput = unencryptedConfigFile::inputStream,
+                        openOutput = { this },
+                        inputFormat = unencryptedDocFormat,
+                        keyWithType = KeyWithType.fromString(publicKey.readText()),
+                        encryptablePaths = encryptablePathsExpressions,
+                        outputFormat = DocumentFormat.JAVA_PROPERTIES
+                    ).run()
+                })
+                toSimpleMap()
+            }
+        }
+    }
+
+    private fun givenEncryptablePaths(vararg paths: String) {
+        encryptablePathsExpressions = paths.toList()
+    }
+
+    private fun givenExpectedEncryptedPaths() {
+        givenEncryptablePaths(
             "/postgres/user",
             "/postgres/password",
             "/hashId/salt",
@@ -38,92 +106,9 @@ internal class EncryptConfigurationUseCaseTest {
             "/mongo/password",
             "/maskConfiguration/*",
             "/identityEncryptionKeys/*/key",
-            "/identityEncryptionKeys/*/encoding"
+            "/identityEncryptionKeys/*/encoding",
         )
-    }
-
-    @Test
-    fun testEncrypt() {
-        val encrypted: Map<String, String?> = assertDoesNotThrow {
-            Properties().run {
-                val output = ByteArrayOutputStream()
-                EncryptConfigurationUseCase(
-                    openInput = unencryptedConfigFile::inputStream,
-                    openOutput = { output },
-                    inputFormat = requireNotNull(DocumentFormat.ofFile(unencryptedConfigFile)),
-                    keyWithType = KeyWithType.fromString(publicKey.readText()),
-                    outputFormat = DocumentFormat.JAVA_PROPERTIES,
-                    encryptablePaths = encryptionPaths
-                ).run()
-                load(ByteArrayInputStream(output.toByteArray()))
-                println("Encrypted Document")
-                println("------------------")
-                forEach { (k, v) -> println("$k = $v") }
-                toMap()
-            }
-        }
-        assertExpectedPathsAreEncrypted(encrypted)
-    }
-
-    private fun assertExpectedPathsAreEncrypted(encrypted: Map<String, String?>) {
-
-        println(
-            """
-            *********************************************** 
-            * Asserting that required paths are encrypted *
-            ***********************************************
-            """.trimIndent()
-        )
-
-        val pathToKeyValuePair = encrypted.keys.map { k -> propertyKeyToPath(k) to (k to encrypted[k]) }.toMap()
-
-        fun findMatched(pathSelection: String): Pair<String, String?>? {
-            val matchedPath = pathToKeyValuePair.keys.firstOrNull { path -> matcher.isMatch(pathSelection, path) }
-            return matchedPath?.let(pathToKeyValuePair::get)
-        }
-
-        fun labelSpec(i: Int, pathSelection: String) = "[$i:$pathSelection]"
-
-        fun assertPathIsEncrypted(i: Int, pathSelection: String) {
-
-            val (matchedKey, matchedValue) =
-                findMatched(pathSelection)
-                    ?: fail {
-                        "${
-                            labelSpec(
-                                i,
-                                pathSelection
-                            )
-                        } Expected to encrypt something in doc, but non was found."
-                    }
-
-
-            println("${labelSpec(i, pathSelection)} -> $matchedValue")
-
-            val matchedValueIsEncrypted =
-                matchedValue != null && matchedValue.startsWith("{enc:") && matchedValue.endsWith("}")
-
-            assertTrue(
-                matchedValueIsEncrypted,
-                """
-                  Matched [$matchedKey] with ${labelSpec(i, pathSelection)}, but expected encrypted value
-                    instead of [$matchedValue]
-                """.trimIndentToLine()
-            )
-        }
-
-        val assertions =
-            encryptionPaths.withIndex()
-                .map { (i, pathSelection) -> { assertPathIsEncrypted(i, pathSelection) } }
-
-        assertAll("Expected all specified paths to be encrypted.", assertions)
-    }
-
-    companion object {
-
-        private fun propertyKeyToPath(key: String): String = "/${key.replace('.', '/')}"
-
-        private fun Properties.toMap(): Map<String, String?> =
-            entries.map { (k, v) -> k as String to v as String? }.toMap()
     }
 }
+
+private fun String.keyToPath(): String = "/${replace('.', '/')}"

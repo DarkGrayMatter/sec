@@ -68,7 +68,7 @@ private class PathVisitor(
     var visiting = true; private set
     private var container: Container? = null
 
-    override val subject: JsonNode
+    override val node: JsonNode
         get() = connectedContainer.content
 
     override val path: String

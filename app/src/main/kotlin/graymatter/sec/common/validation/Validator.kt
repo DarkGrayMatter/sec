@@ -13,6 +13,7 @@ interface Validator {
     interface Validation
 
     fun requires(validationPassed: Boolean, errorMessage: () -> String): Validation
+
     fun clear(validation: Validation): Validation?
     fun clear()
 

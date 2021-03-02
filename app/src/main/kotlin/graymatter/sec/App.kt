@@ -21,7 +21,8 @@ import kotlin.system.exitProcess
         EncryptValue::class,
         DecryptValue::class,
         GenerateRandomBytes::class,
-        EncryptConfig::class
+        EncryptConfig::class,
+        DecryptConfig::class,
     ]
 )
 object App {

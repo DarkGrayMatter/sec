@@ -2,13 +2,14 @@ package graymatter.sec.common.cli
 
 import graymatter.sec.common.validation.DefaultValidator
 import graymatter.sec.common.validation.ValidationTarget
+import graymatter.sec.common.validation.Validator
 import picocli.CommandLine
 
-fun CommandLine.Model.CommandSpec.validate(target: ValidationTarget) {
+fun CommandLine.Model.CommandSpec.verify(target: ValidationTarget) {
 
     val validations =
         DefaultValidator()
-            .apply { with(target) { validate() } }
+            .also(target::validate)
             .takeIf { !it.passed() }
             ?.failures()
             ?: return
@@ -22,4 +23,8 @@ fun CommandLine.Model.CommandSpec.validate(target: ValidationTarget) {
     ) { (index, hint) -> "${index + 1}. $hint" }
 
     throw CommandLine.ParameterException(commandline, userMessage)
+}
+
+fun CommandLine.Model.CommandSpec.verify(action: Validator.() -> Unit) {
+    verify(ValidationTarget { it.action() })
 }

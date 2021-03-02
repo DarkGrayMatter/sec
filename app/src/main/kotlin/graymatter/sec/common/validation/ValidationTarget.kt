@@ -1,6 +1,6 @@
 package graymatter.sec.common.validation
 
-interface ValidationTarget {
+fun interface ValidationTarget {
 
     fun Validator.validate()
 

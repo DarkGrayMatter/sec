@@ -18,7 +18,7 @@ fun CommandLine.Model.CommandSpec.validate(target: ValidationTarget) {
     val userMessage = validations.withIndex().joinToString(
         prefix = "\nUnable to process \"${command}\". The following errors were reported:\n\n",
         separator = "\n",
-        postfix = "\n\nFor your convenience please review the options for $command\n"
+        postfix = "\n\nFor your convenience please review the usage for \"$command\"\n"
     ) { (index, hint) -> "${index + 1}. $hint" }
 
     throw CommandLine.ParameterException(commandline, userMessage)

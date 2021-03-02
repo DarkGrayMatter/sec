@@ -4,9 +4,7 @@ import graymatter.sec.common.io.StandardOutputStream
 import picocli.CommandLine.Option
 import picocli.CommandLine.Parameters
 import java.io.File
-import java.io.InputStream
 import java.io.OutputStream
-import javax.validation.constraints.NotNull
 
 /**
  * Requirement to capture an output target for a specific command.
@@ -14,7 +12,6 @@ import javax.validation.constraints.NotNull
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 class OutputTargetArgGroup  {
 
-    @NotNull
     private var target: Target? = null
 
     @Parameters(

@@ -1,19 +1,25 @@
 package graymatter.sec.command
 
 import com.palantir.config.crypto.KeyWithType
-import graymatter.sec.command.reuse.group.DocumentProcessingPathsArgGroup
+import graymatter.sec.command.reuse.group.ProcessingPathsArgGroup
 import graymatter.sec.command.reuse.group.InputSourceArgGroup
 import graymatter.sec.command.reuse.group.KeyProviderArgGroup
 import graymatter.sec.command.reuse.group.OutputTargetArgGroup
+import graymatter.sec.common.cli.validate
 import graymatter.sec.common.document.DocumentFormat
 import graymatter.sec.common.exception.failCommand
+import graymatter.sec.common.validation.ValidationTarget
+import graymatter.sec.common.validation.Validator
 import graymatter.sec.usecase.EncryptConfigurationUseCase
 import picocli.CommandLine
 import picocli.CommandLine.ArgGroup
 import picocli.CommandLine.Option
 
 @CommandLine.Command(name = "encrypt-config", description = ["Encrypt a configuration document given a key"])
-class EncryptConfig : Runnable {
+class EncryptConfig : Runnable, ValidationTarget {
+
+    @CommandLine.Spec
+    lateinit var spec: CommandLine.Model.CommandSpec
 
     private var configInputFormat: DocumentFormat? = null
     private var configOutputFormat: DocumentFormat? = null
@@ -39,7 +45,7 @@ class EncryptConfig : Runnable {
         validate = false,
         heading = "Use any of the following options to choose which paths in the document to encrypt:%n"
     )
-    lateinit var processPathGroup: DocumentProcessingPathsArgGroup
+    lateinit var processPaths: ProcessingPathsArgGroup
 
     @ArgGroup(
         heading = "Provide encryption key by using one the following options:%n",
@@ -70,27 +76,87 @@ class EncryptConfig : Runnable {
         this.configOutputFormat = format
     }
 
+    override fun Validator.validate() {
+
+        val cmd = this@EncryptConfig
+
+        val keyProviderValidation = requires(cmd::keyProvider.isInitialized) {
+            "Please supply an encryption parameter"
+        }
+
+        val sourceDocValidation = requires(cmd::configInput.isInitialized) {
+            "Source document to encrypt needs to be provided."
+        }
+
+        if (passed(sourceDocValidation)) {
+            requires(resolveInputFormat() != null) {
+                buildString {
+                    appendLine("No valid source document format detected: ")
+                    when {
+                        configInput.uri == null && configInputFormat == null -> {
+                            appendLine(
+                                "\t- Document source does not specify an regular file (such as STDIN) " +
+                                        "to derive the file format from."
+                            )
+                        }
+                        configInput.uri != null && configInputFormat == null -> {
+                            appendLine(
+                                "\t- Document `${configInput.uri}` does not have any known " +
+                                        "standard supported extensions."
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        if (passed(keyProviderValidation)) {
+            val r = keyProvider.runCatching { keyWithType }
+            requires(r.isSuccess && r.getOrNull() != null) {
+                buildString {
+                    append("Unable to load key from ${keyProvider.keyUri}")
+                    val cause = r.exceptionOrNull()
+                    if (cause != null) {
+                        append(" cause [${cause.javaClass.simpleName}]")
+                        cause.message?.also { message ->
+                            append(": $message")
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     override fun run() {
-        val format = resolveInputFormat()
+        ensureProcessingPathsAvailability()
+        spec.validate(this)
+        val format = requireNotNull(resolveInputFormat())
         EncryptConfigurationUseCase(
             openInput = configInput::openInputStream,
             openOutput = configOutput::openOutput,
             inputFormat = format,
             outputFormat = resolveOutputFormat(format),
             keyWithType = resolveKeyWithType(),
-            encryptablePaths = processPathGroup.expandPaths()
+            encryptablePaths = processPaths.expandPaths()
         ).run()
+    }
+
+    private fun ensureProcessingPathsAvailability() {
+        if (!this::processPaths.isInitialized) {
+            processPaths = ProcessingPathsArgGroup()
+            processPaths.setPaths(emptyList())
+        }
     }
 
     private fun resolveKeyWithType(): KeyWithType {
         return keyProvider.keyWithType ?: failCommand("No key specified.")
     }
 
-    private fun resolveInputFormat(): DocumentFormat {
+    private fun resolveInputFormat(): DocumentFormat? {
         return configInputFormat
             ?: configInput.uri?.let { DocumentFormat.ofName(it) }
-            ?: failCommand("Unable to determine inputFormat")
     }
+
 
     private fun resolveOutputFormat(inputFormat: DocumentFormat) = configOutputFormat ?: inputFormat
 

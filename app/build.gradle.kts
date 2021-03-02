@@ -62,9 +62,8 @@ dependencies {
     // Ant Style Path Matcher
     implementation("io.github.azagniotov:ant-style-path-matcher:1.0.0")
 
-    // Validation JSR-380
-    implementation("org.hibernate.validator:hibernate-validator:6.0.22.Final")
-    implementation("org.glassfish:javax.el:3.0.1-b09")
+    // ID Generator (used internally to geneate opaque keys by the validation framework)
+    implementation("org.hashids:hashids:1.0.3")
 
 }
 

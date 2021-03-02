@@ -2,7 +2,6 @@
 package graymatter.sec.common
 
 import graymatter.sec.common.crypto.BinaryEncoding
-import io.github.azagniotov.matcher.AntPathMatcher
 import java.io.File
 import java.io.FileNotFoundException
 import java.net.URI
@@ -144,4 +143,3 @@ fun URL.file(): File {
         }
     }
 }
-

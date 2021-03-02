@@ -10,7 +10,7 @@ enum class DocumentFormat(vararg validExtensions: String) {
     JAVA_PROPERTIES("properties");
 
     val fileExtensions = validExtensions.map(String::toLowerCase).toList()
-    val fileExtension: String get() = fileExtensions.first()
+    val defaultFileExtension: String get() = fileExtensions.first()
 
     companion object {
 

@@ -66,7 +66,17 @@ class DecryptConfig : Runnable {
             if (passed(keyProviderValidation)) {
                 val r = keyProvider.runCatching { keyWithType }
                 val cause = r.exceptionOrNull()
-                requires(cause == null && r.isSuccess && r.getOrNull() != null) { "Error loading encryption key (${cause?.message})" }
+                requires(cause == null && r.isSuccess && r.getOrNull() != null) {
+                    buildString {
+                        append("Error loading encryption key from ${keyProvider.keyUri}.")
+                        if (cause != null) {
+                            append(" This was caused by a ${cause.javaClass.simpleName} error.")
+                            if (cause.message?.isNotBlank() == false) {
+                                append(" (${cause.message})")
+                            }
+                        }
+                    }
+                }
             }
         }
     }

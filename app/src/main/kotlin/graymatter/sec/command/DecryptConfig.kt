@@ -71,7 +71,7 @@ class DecryptConfig : Runnable {
                         append("Error loading encryption key from ${keyProvider.keyUri}.")
                         if (cause != null) {
                             append(" This was caused by a ${cause.javaClass.simpleName} error.")
-                            if (cause.message?.isNotBlank() == false) {
+                            if (cause.message?.isNotBlank() == true) {
                                 append(" (${cause.message})")
                             }
                         }

@@ -33,7 +33,7 @@ internal class EncryptConfigurationUseCaseTest {
         unencryptedDocFormat = requireNotNull(DocumentFormat.ofFile(unencryptedConfigFile))
         encryptablePathsExpressions = emptyList()
         unencryptedDoc = unencryptedConfigFile.inputStream().use { it.readTree(unencryptedDocFormat) }
-        unencrypted = Properties(unencryptedDoc).toSimpleMap()
+        unencrypted = Properties(unencryptedDoc).toPropertiesMap()
     }
 
     @Test
@@ -83,7 +83,7 @@ internal class EncryptConfigurationUseCaseTest {
                         outputFormat = DocumentFormat.JAVA_PROPERTIES
                     ).run()
                 })
-                toSimpleMap()
+                toPropertiesMap()
             }
         }
     }

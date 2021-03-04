@@ -17,6 +17,7 @@ class InputSourceArgGroup {
     private data class Target(val uri: String?, val open: () -> InputStream)
 
     private var target: Target? = null
+    var isStdIn: Boolean = false; private set
 
     @Parameters(
         description = [
@@ -51,7 +52,7 @@ class InputSourceArgGroup {
         }
     }
 
-    val uri: String? get() = requireNotNull(target).uri
+    val uri: String? get() = target?.uri
 
     fun openInputStream() = requireNotNull(target).open()
 

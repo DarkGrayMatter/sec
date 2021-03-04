@@ -36,7 +36,7 @@ class OutputTargetArgGroup  {
 
     val uri: String? get() = target?.uri
 
-    fun openOutput(): OutputStream {
+    fun openOutputStream(): OutputStream {
         return requireNotNull(target).open()
     }
 

@@ -9,13 +9,13 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class DefaultValidatorTest {
+internal class DefaultValidationContextTest {
 
-    private lateinit var validator: DefaultValidator
+    private lateinit var validator: DefaultValidationContext
 
     @BeforeEach
     fun setUp() {
-        validator = DefaultValidator()
+        validator = DefaultValidationContext()
     }
 
     @Test
@@ -69,7 +69,7 @@ internal class DefaultValidatorTest {
     }
 
 
-    private fun String.givenAsFailure(): Pair<Validator.Validation, String> {
+    private fun String.givenAsFailure(): Pair<ValidationContext.Validation, String> {
         return (validator.requires(validationPassed = false) { this } to this).also { (validation, _) ->
             assertFalse("expecting-validation-failed-for: [${validation}:$this]") { validator.passed(validation) }
             println("GIVEN-FAILURE-<$validation: $this>")

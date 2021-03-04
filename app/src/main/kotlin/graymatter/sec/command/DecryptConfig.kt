@@ -5,8 +5,12 @@ import graymatter.sec.command.reuse.group.KeyProviderArgGroup
 import graymatter.sec.command.reuse.group.OutputTargetArgGroup
 import graymatter.sec.command.reuse.mixin.InputFormatMixin
 import graymatter.sec.command.reuse.mixin.OutputFormatMixin
-import graymatter.sec.common.cli.verify
+import graymatter.sec.common.cli.validate
+import graymatter.sec.common.document.DocumentFormat
+import graymatter.sec.common.trimIndentToLine
+import graymatter.sec.usecase.DecryptConfigUseCase
 import picocli.CommandLine.*
+import java.io.IOException
 
 @Command(
     name = "decrypt-config",
@@ -27,7 +31,7 @@ class DecryptConfig : Runnable {
     @ArgGroup(
         exclusive = true,
         order = 1,
-        heading = "Provide a destination of the decrypted document using of the following arguments%n"
+        heading = "Provide use one these arguments to determine where decrypted documents should be written to:%n"
     )
     lateinit var destination: OutputTargetArgGroup
 
@@ -39,47 +43,69 @@ class DecryptConfig : Runnable {
     lateinit var keyProvider: KeyProviderArgGroup
 
     @Mixin
-    val inputFormatMixin = InputFormatMixin()
+    val inputFormatOverride = InputFormatMixin()
 
     @Mixin
-    val outputFormatMixin = OutputFormatMixin()
+    val outputFormatOverride = OutputFormatMixin()
 
     override fun run() {
-        verify()
+        validate()
+        DecryptConfigUseCase(
+            keyWithType = keyProvider.keyWithType!!,
+            source = source::openInputStream,
+            sourceFormat = requireNotNull(resolveInputFormat()),
+            destination = destination::openOutputStream,
+            destinationFormat = requireNotNull(resolveInputFormat())
+        ).run()
     }
 
-    private fun verify() {
-        spec.verify {
+    private fun validate() {
+        validate(spec) {
 
-            requires(this@DecryptConfig::source.isInitialized) {
+            val inputIsPresent = requires(this@DecryptConfig::source.isInitialized) {
                 "No source document to decrypt was supplied."
             }
 
-            requires(this@DecryptConfig::destination.isInitialized) {
+            val outputIsPresent = requires(this@DecryptConfig::destination.isInitialized) {
                 "No destination provided to output the decrypted document to."
             }
 
-            val keyProviderValidation = requires(this@DecryptConfig::keyProvider.isInitialized) {
+            val encryptionKeyIsPresent = requires(this@DecryptConfig::keyProvider.isInitialized) {
                 "No decryption key supplied."
             }
 
-            if (passed(keyProviderValidation)) {
-                val r = keyProvider.runCatching { keyWithType }
-                val cause = r.exceptionOrNull()
-                requires(cause == null && r.isSuccess && r.getOrNull() != null) {
-                    buildString {
-                        append("Error loading encryption key from ${keyProvider.keyUri}.")
-                        if (cause != null) {
-                            append(" This was caused by a ${cause.javaClass.simpleName} error.")
-                            if (cause.message?.isNotBlank() == true) {
-                                append(" (${cause.message})")
-                            }
-                        }
-                    }
+            requires(passed(inputIsPresent) && resolveInputFormat() != null) {
+                """
+                Unable to determine input configuration format.
+                Please provide an input format via the command line. 
+                """.trimIndentToLine()
+            }
+
+            requires(passed(outputIsPresent) && resolveOutputFormat() != null) {
+                """
+                Unable to determine output configuration format. Neither an input format
+                nor output format override has been specified. 
+                """.trimIndentToLine()
+            }
+
+            if (passed(encryptionKeyIsPresent)) {
+                try {
+                    val loadedKey = keyProvider.keyWithType
+                    requires(loadedKey != null) { "No encryption key source provided" }
+                } catch (e: IOException) {
+                    requires(false) { "Error reading encryption key from ${keyProvider.keyUri}: ${e.message}" }
                 }
             }
+
         }
     }
 
+    private fun resolveInputFormat(): DocumentFormat? {
+        return inputFormatOverride.value ?: source.uri?.let { DocumentFormat.ofUri(it) }
+    }
+
+    private fun resolveOutputFormat(): DocumentFormat? {
+        return outputFormatOverride.value ?: resolveInputFormat()
+    }
 
 }

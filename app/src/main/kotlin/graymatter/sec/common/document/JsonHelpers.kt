@@ -36,17 +36,17 @@ fun String.asTree(mapper: ObjectMapper): JsonNode = mapper.treeFromContent(this)
 
 
 inline fun <reified T : JsonNode> InputStream.readTree(format: DocumentFormat): T {
-    return DocumentMapping.of(format).readTree(this) as T
+    return DocumentMapper.of(format).readTree(this) as T
 }
 
 inline fun <reified T : JsonNode> treeOf(format: DocumentFormat, content: String): T {
-    return DocumentMapping.of(format).treeFromContent(content) as T
+    return DocumentMapper.of(format).treeFromContent(content) as T
 }
 
 inline fun <reified T : JsonNode> jsonOf(content: String): T = treeOf(DocumentFormat.JSON, content)
 
 fun OutputStream.writeTree(tree: JsonNode, format: DocumentFormat) {
-    val mapper = DocumentMapping.of(format)
+    val mapper = DocumentMapper.of(format)
     mapper.writeTree(mapper.createGenerator(this), tree)
     flush()
 }

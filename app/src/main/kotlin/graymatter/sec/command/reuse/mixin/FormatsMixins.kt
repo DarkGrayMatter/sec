@@ -5,7 +5,7 @@ import picocli.CommandLine.Option
 
 class InputFormatMixin {
     @Option(
-        names = ["-F", "--format"],
+        names =  ["--format"],
         required = false,
         description = [
             "Optionally override the input format, or set it if the format cannot " +

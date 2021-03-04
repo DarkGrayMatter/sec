@@ -30,7 +30,7 @@ class KeyProviderArgGroup {
 
     @Option(
         names = ["--key-file"],
-        description = ["Get ket from key file."],
+        description = ["Retrieves key from a file."],
         required = true
     )
     fun setKeyFile(file: File) {
@@ -41,7 +41,7 @@ class KeyProviderArgGroup {
     @Option(
         names = ["--key-resource"],
         required = true,
-        description = ["Gets key from file on the application classpath."]
+        description = ["Retrieve key from file on the application classpath."]
     )
     fun setKeyFileFromClassPath(resource: String) {
         keyUri = Any::class.java.getResource(resource)?.file()?.path
@@ -51,7 +51,7 @@ class KeyProviderArgGroup {
     @Option(
         names = ["--key"],
         required = true,
-        description = ["Gets key from directly from the command line."]
+        description = ["Retrieves key from directly from the command line."]
     )
     fun setKeyValue(string: String) {
         keySupplier = { KeyWithType.fromString(string) }

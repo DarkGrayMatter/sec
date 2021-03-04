@@ -8,7 +8,7 @@ package graymatter.sec.common.validation
  * specific message, or all of them via the [clear] functions.
  *
  */
-interface Validator {
+interface ValidationContext {
 
     interface Validation
 

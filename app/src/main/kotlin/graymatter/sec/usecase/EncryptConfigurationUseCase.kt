@@ -3,8 +3,9 @@ package graymatter.sec.usecase
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.palantir.config.crypto.KeyWithType
+import graymatter.sec.common.crypto.CryptoConstants
 import graymatter.sec.common.document.DocumentFormat
-import graymatter.sec.common.document.DocumentMapping
+import graymatter.sec.common.document.DocumentMapper
 import graymatter.sec.common.document.readTree
 import graymatter.sec.common.document.visitNodePathsOf
 import io.github.azagniotov.matcher.AntPathMatcher
@@ -26,13 +27,12 @@ class EncryptConfigurationUseCase @JvmOverloads constructor(
 
         val doc: ObjectNode = openInput().use { it.readTree(inputFormat) }
         val encryptedDoc = encrypt(doc)
-        val encryptedDocMapper = DocumentMapping.of(outputFormat)
+        val encryptedDocMapper = DocumentMapper.of(outputFormat)
 
-        openOutput().bufferedWriter(charset).use { output ->
-            encryptedDocMapper.writeTree(
-                encryptedDocMapper.createGenerator(output),
-                encryptedDoc
-            )
+        encryptedDocMapper.writerWithDefaultPrettyPrinter().apply {
+            openOutput().bufferedWriter(charset).use { output ->
+                writeValue(output, encryptedDoc)
+            }
         }
     }
 
@@ -50,8 +50,15 @@ class EncryptConfigurationUseCase @JvmOverloads constructor(
         return visitNodePathsOf(doc) {
             if (isEncryptable(node)) {
                 encryptablePaths.firstOrNull { expression -> matches(expression, path) }?.also {
-                    val encrypted = encrypt(keyWithType, node.asText())
-                    val encryptedNode = textNode("{$encrypted}")
+                    val encryptedText = encrypt(keyWithType, node.asText())
+                    val encryptedNode =
+                        textNode(
+                            buildString {
+                                append(CryptoConstants.ENCRYPTED_VALUE_PREFIX)
+                                append(encryptedText)
+                                append(CryptoConstants.ENCRYPTED_VALUE_SUFFIX)
+                            }
+                        )
                     set(encryptedNode)
                 }
             }

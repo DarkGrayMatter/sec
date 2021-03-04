@@ -7,11 +7,11 @@ import graymatter.sec.command.reuse.group.KeyProviderArgGroup
 import graymatter.sec.command.reuse.group.OutputTargetArgGroup
 import graymatter.sec.command.reuse.mixin.InputFormatMixin
 import graymatter.sec.command.reuse.mixin.OutputFormatMixin
-import graymatter.sec.common.cli.verify
+import graymatter.sec.common.cli.validate
 import graymatter.sec.common.document.DocumentFormat
 import graymatter.sec.common.exception.failCommand
 import graymatter.sec.common.validation.ValidationTarget
-import graymatter.sec.common.validation.Validator
+import graymatter.sec.common.validation.ValidationContext
 import graymatter.sec.usecase.EncryptConfigurationUseCase
 import picocli.CommandLine
 import picocli.CommandLine.*
@@ -59,7 +59,7 @@ class EncryptConfig : Runnable, ValidationTarget {
     @Mixin
     val outputFormatMixin = OutputFormatMixin()
 
-    override fun validate(validation: Validator) {
+    override fun validate(validation: ValidationContext) {
 
         val cmd = this
 
@@ -112,11 +112,11 @@ class EncryptConfig : Runnable, ValidationTarget {
 
     override fun run() {
         ensureProcessingPathsAvailability()
-        spec.verify(this)
+        spec.validate(this)
         val format = requireNotNull(resolveInputFormat())
         EncryptConfigurationUseCase(
             openInput = configInput::openInputStream,
-            openOutput = configOutput::openOutput,
+            openOutput = configOutput::openOutputStream,
             inputFormat = format,
             outputFormat = resolveOutputFormat(format),
             keyWithType = resolveKeyWithType(),
@@ -137,7 +137,7 @@ class EncryptConfig : Runnable, ValidationTarget {
 
     private fun resolveInputFormat(): DocumentFormat? {
         return inputFormatMixin.value
-            ?: configInput.uri?.let { DocumentFormat.ofName(it) }
+            ?: configInput.uri?.let { DocumentFormat.ofUri(it) }
     }
 
     private fun resolveOutputFormat(inputFormat: DocumentFormat): DocumentFormat = outputFormatMixin.value ?: inputFormat

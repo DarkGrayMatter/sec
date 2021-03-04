@@ -134,6 +134,10 @@ inline fun <reified T> resourceAt(resourcePath: String): URL {
 
 inline fun <reified T> resourceFile(resourcePath: String): File = resourceAt<T>(resourcePath).file()
 
+fun Any.resourceFile(path: String): File {
+    return javaClass.getResource(path)?.file() ?: throw ClassPathResourceNotFoundException(path)
+}
+
 
 fun URL.file(): File {
     return toURI().let { uri ->

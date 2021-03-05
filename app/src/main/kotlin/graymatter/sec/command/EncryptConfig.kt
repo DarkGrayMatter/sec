@@ -120,7 +120,7 @@ class EncryptConfig : Runnable, ValidationTarget {
             inputFormat = format,
             outputFormat = resolveOutputFormat(format),
             keyWithType = resolveKeyWithType(),
-            encryptablePaths = processPaths.expandPaths()
+            encryptedPaths = processPaths.expandPaths()
         ).run()
     }
 

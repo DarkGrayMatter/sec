@@ -12,7 +12,6 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.util.*
 import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class EncryptConfigurationUseCaseTest {
@@ -80,7 +79,7 @@ internal class EncryptConfigurationUseCaseTest {
                         openOutput = { this },
                         inputFormat = unencryptedDocFormat,
                         keyWithType = KeyWithType.fromString(publicKey.readText()),
-                        encryptablePaths = encryptablePathsExpressions,
+                        encryptedPaths= encryptablePathsExpressions,
                         outputFormat = DocumentFormat.JAVA_PROPERTIES
                     ).run()
                 })

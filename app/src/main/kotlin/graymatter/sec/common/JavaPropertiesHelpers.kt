@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import graymatter.sec.common.document.DocumentFormat
 import graymatter.sec.common.document.writeTree
 import java.io.*
+import java.net.URL
 import java.util.*
 
 fun Properties.load(bytes: ByteArray) = ByteArrayInputStream(bytes).use(this::load)
@@ -18,6 +19,9 @@ fun Properties(tree: ObjectNode): Properties {
     return Properties().apply { load(source) }
 }
 
+
+fun Properties(url: URL): Properties = url.openStream().use { Properties(it) }
+fun Properties(input:InputStream): Properties = Properties().apply { load(input) }
 fun Properties(text: String): Properties = Properties().apply { load(text) }
 fun Properties(map: Map<String, String?>): Properties = Properties().apply { putAll(map) }
 fun Properties(vararg pairs: Pair<String, String?>): Properties = java.util.Properties().apply {

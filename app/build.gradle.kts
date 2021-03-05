@@ -131,11 +131,14 @@ tasks.create("generateToolBuildInfo") {
     description = "Generates tool version file for command line inpsection."
     group = "Build"
     doLast {
-        val versionFile = file("/build/resources/main/graymatter/sec/version.properties").apply {
+        val versionFile = file("build/resources/main/graymatter/sec/version.properties").apply {
             if (!parentFile.exists() && !parentFile.mkdirs()) {
                 throw IOException("Failed to create directory: $parent")
             }
         }
+
+        logger.info("Generating version file : [$versionFile]")
+
         versionFile.writeText(Properties().run {
             put("version", "${project.version}")
             put("build.ts", "${LocalDateTime.now()}")

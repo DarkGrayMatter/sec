@@ -3,6 +3,7 @@ package graymatter.sec.usecase
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.palantir.config.crypto.EncryptedValue
 import com.palantir.config.crypto.KeyWithType
+import graymatter.sec.common.crypto.tryExtractEncryptedContent
 import graymatter.sec.common.document.DocumentFormat
 import graymatter.sec.common.document.DocumentMapper
 import graymatter.sec.common.document.readTree
@@ -18,10 +19,7 @@ class DecryptConfigUseCase(
     private val destinationFormat: DocumentFormat
 ) {
 
-    fun run() {
-        val doc = decrypt()
-        output(doc)
-    }
+    fun run() = output(decrypt())
 
     private fun decrypt(): ObjectNode {
 
@@ -29,24 +27,23 @@ class DecryptConfigUseCase(
 
         return visitNodePathsOf(doc) {
 
-            val encrypted = node.asText(null)
-                ?.takeIf(EncryptedValue::isEncryptedValue)
+            val encryptedContent = node
+                .asText(null)
+                .tryExtractEncryptedContent()
                 ?.let(EncryptedValue::fromString)
 
-            val decrypted = encrypted
-                ?.decrypt(keyWithType)
-
-           if (decrypted != null) {
-               set(textNode(decrypted))
-           }
+            if (encryptedContent != null) {
+                val decryptedContent = encryptedContent.decrypt(keyWithType)
+                set(textNode(decryptedContent))
+            }
         }
     }
 
     private fun output(doc: ObjectNode) {
-        destination().bufferedWriter().use {
+        destination().bufferedWriter().use { out ->
             DocumentMapper.of(destinationFormat)
                 .writerWithDefaultPrettyPrinter()
-                .writeValue(it, doc)
+                .writeValue(out, doc)
         }
     }
 

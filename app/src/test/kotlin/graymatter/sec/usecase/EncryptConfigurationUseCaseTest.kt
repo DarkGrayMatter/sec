@@ -3,6 +3,7 @@ package graymatter.sec.usecase
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.palantir.config.crypto.KeyWithType
 import graymatter.sec.common.*
+import graymatter.sec.common.crypto.tryExtractEncryptedContent
 import graymatter.sec.common.document.DocumentFormat
 import graymatter.sec.common.document.readTree
 import io.github.azagniotov.matcher.AntPathMatcher
@@ -65,7 +66,7 @@ internal class EncryptConfigurationUseCaseTest {
 
                 assertNotNull(matchedKey)
                 assertNotNull(processedValue)
-                assertTrue(processedValue.startsWith("{enc:") && processedValue.endsWith('}'))
+                assertNotNull(processedValue.tryExtractEncryptedContent())
             }
         })
     }

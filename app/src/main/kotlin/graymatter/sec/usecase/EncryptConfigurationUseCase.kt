@@ -3,7 +3,7 @@ package graymatter.sec.usecase
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.palantir.config.crypto.KeyWithType
-import graymatter.sec.common.crypto.CryptoConstants
+import graymatter.sec.common.crypto.encodeToString
 import graymatter.sec.common.document.DocumentFormat
 import graymatter.sec.common.document.DocumentMapper
 import graymatter.sec.common.document.readTree
@@ -50,15 +50,8 @@ class EncryptConfigurationUseCase @JvmOverloads constructor(
         return visitNodePathsOf(doc) {
             if (isEncryptable(node)) {
                 encryptablePaths.firstOrNull { expression -> matches(expression, path) }?.also {
-                    val encryptedText = encrypt(keyWithType, node.asText())
-                    val encryptedNode =
-                        textNode(
-                            buildString {
-                                append(CryptoConstants.ENCRYPTED_VALUE_PREFIX)
-                                append(encryptedText)
-                                append(CryptoConstants.ENCRYPTED_VALUE_SUFFIX)
-                            }
-                        )
+                    val encrypted = encrypt(keyWithType, node.asText())
+                    val encryptedNode = textNode(encrypted.encodeToString())
                     set(encryptedNode)
                 }
             }

@@ -26,15 +26,11 @@ class DecryptConfigUseCase(
         val doc = source().use { it.readTree<ObjectNode>(sourceFormat) }
 
         return visitNodePathsOf(doc) {
-
-            val encryptedContent = node
-                .asText(null)
-                .tryExtractEncryptedContent()
-                ?.let(EncryptedValue::fromString)
-
-            if (encryptedContent != null) {
-                val decryptedContent = encryptedContent.decrypt(keyWithType)
-                set(textNode(decryptedContent))
+            if (node.isTextual) {
+                val enc = node.asText().tryExtractEncryptedContent()
+                if (enc != null) {
+                    println("$path -> $enc")
+                }
             }
         }
     }

@@ -9,32 +9,14 @@ import graymatter.sec.common.toPropertiesMap
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.io.ByteArrayOutputStream
+import kotlin.test.assertEquals
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class DecryptConfigUseCaseTest {
 
-
     @Test
     fun testAllPropertiesAreDecrypted() {
 
-        val encryptedPropertiesFile = resourceFile("/samples/encryptedConfig.properties")
-
-        val encryptedPropertiesMap = Properties(encryptedPropertiesFile).toPropertiesMap()
-
-        val decryptionKeyWithType = KeyWithType(resourceFile("/keys/test.private"))
-
-        val decryptedPropertiesMap = ByteArrayOutputStream().let { bytesOut ->
-            DecryptConfigUseCase(
-                keyWithType = decryptionKeyWithType,
-                source = encryptedPropertiesFile::inputStream,
-                sourceFormat = DocumentFormat.JAVA_PROPERTIES,
-                destination = { bytesOut },
-                destinationFormat = DocumentFormat.JAVA_PROPERTIES
-            ).run()
-            Properties(bytesOut).toPropertiesMap()
-        }
-
-        decryptedPropertiesMap.forEach { (k, v) -> println("$k -> $v") }
     }
 }
 

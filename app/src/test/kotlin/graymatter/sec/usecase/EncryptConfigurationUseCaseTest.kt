@@ -29,7 +29,7 @@ internal class EncryptConfigurationUseCaseTest {
     fun setUp() {
         matcher = AntPathMatcher.Builder().build()
         publicKey = resourceFile<EncryptConfigurationUseCase>("/keys/test")
-        unencryptedConfigFile = resourceFile<EncryptConfigurationUseCase>("/samples/unencryptedConfig.yaml")
+        unencryptedConfigFile = resourceFile<EncryptConfigurationUseCase>("/samples/sample-config.yaml")
         unencryptedDocFormat = requireNotNull(DocumentFormat.ofFile(unencryptedConfigFile))
         encryptablePathsExpressions = emptyList()
         unencryptedDoc = unencryptedConfigFile.inputStream().use { it.readTree(unencryptedDocFormat) }

@@ -16,6 +16,8 @@ class InputSourceArgGroup {
 
     private data class Target(val uri: String?, val open: () -> InputStream)
 
+    val isSupplied: Boolean get() = target != null
+
     private var target: Target? = null
     var isStdIn: Boolean = false; private set
 

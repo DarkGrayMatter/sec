@@ -11,15 +11,16 @@ private const val PREFIX_ID = "\$"
 private const val ENCRYPTED_VALUE_OPEN_TAG = '{'
 private const val ENCRYPTED_VALUE_PREFIX = "$PREFIX_ID{enc:"
 private const val ENCRYPTED_VALUE_CLOSE_TAG = "}"
+private const val START_POSITION_OF_ENCODED_BLOCK = 2
 
 fun String?.tryExtractEncryptedContent(): String? {
     return when {
         this == null -> null
-        endsWith(ENCRYPTED_VALUE_CLOSE_TAG) && startsWith(ENCRYPTED_VALUE_PREFIX) ->
+        startsWith(ENCRYPTED_VALUE_PREFIX) and endsWith(ENCRYPTED_VALUE_CLOSE_TAG) ->
             substring(
-                ENCRYPTED_VALUE_PREFIX.length,
-                length - ENCRYPTED_VALUE_CLOSE_TAG.length
-            ).takeUnless { it.isBlank() || it.isEmpty() }
+                startIndex = START_POSITION_OF_ENCODED_BLOCK,
+                endIndex = length - ENCRYPTED_VALUE_CLOSE_TAG.length
+            )
         else -> null
     }
 }

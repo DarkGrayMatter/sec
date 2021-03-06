@@ -27,9 +27,10 @@ class DecryptConfigUseCase(
 
         return visitNodePathsOf(doc) {
             if (node.isTextual) {
-                val enc = node.asText().tryExtractEncryptedContent()
-                if (enc != null) {
-                    println("$path -> $enc")
+                val encryptedPart = node.asText().tryExtractEncryptedContent()?.let(EncryptedValue::fromString)
+                if (encryptedPart != null) {
+                    val decrypted = encryptedPart.decrypt(keyWithType)
+                    set(textNode(decrypted))
                 }
             }
         }

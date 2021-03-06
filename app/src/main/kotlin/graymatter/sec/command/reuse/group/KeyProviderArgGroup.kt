@@ -23,6 +23,7 @@ import java.io.File
  */
 class KeyProviderArgGroup {
 
+    val isSupplied: Boolean get() = keySupplier != null
     var keyUri: String? = null
         private set
 
@@ -58,7 +59,7 @@ class KeyProviderArgGroup {
     }
 
     @Option(
-        names = ["--key-var"],
+        names = ["--key-env"],
         description = ["Retrieves key from an environment variable."],
         required = true
     )

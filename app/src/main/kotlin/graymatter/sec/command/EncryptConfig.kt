@@ -111,7 +111,7 @@ class EncryptConfig : Runnable, ValidationTarget {
     }
 
     override fun run() {
-        ensureProcessingPathsAvailability()
+        applyDefaults()
         spec.validate(this)
         val format = requireNotNull(resolveInputFormat())
         EncryptConfigurationUseCase(
@@ -124,11 +124,21 @@ class EncryptConfig : Runnable, ValidationTarget {
         ).run()
     }
 
-    private fun ensureProcessingPathsAvailability() {
+    private fun applyDefaults() {
+
         if (!this::processPaths.isInitialized) {
             processPaths = ProcessingPathsArgGroup()
             processPaths.setPaths(emptyList())
         }
+
+        if (!this::configOutput.isInitialized) {
+            configOutput = OutputTargetArgGroup()
+        }
+
+        if (!configOutput.isAvailable) {
+            configOutput.setOutputToStdOut(true)
+        }
+
     }
 
     private fun resolveKeyWithType(): KeyWithType {

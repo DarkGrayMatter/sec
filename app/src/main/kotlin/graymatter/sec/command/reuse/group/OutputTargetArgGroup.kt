@@ -35,7 +35,7 @@ class OutputTargetArgGroup  {
     }
 
     val uri: String? get() = target?.uri
-
+    val isAvailable: Boolean get() = target != null
     fun openOutputStream(): OutputStream {
         return requireNotNull(target).open()
     }

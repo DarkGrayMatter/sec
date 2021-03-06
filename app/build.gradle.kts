@@ -62,9 +62,8 @@ dependencies {
     // Ant Style Path Matcher
     implementation("io.github.azagniotov:ant-style-path-matcher:1.0.0")
 
-    // Validation JSR-380
-    implementation("org.hibernate.validator:hibernate-validator:6.0.22.Final")
-    implementation("org.glassfish:javax.el:3.0.1-b09")
+    // ID Generator (used internally to geneate opaque keys by the validation framework)
+    implementation("org.hashids:hashids:1.0.3")
 
 }
 
@@ -132,11 +131,14 @@ tasks.create("generateToolBuildInfo") {
     description = "Generates tool version file for command line inpsection."
     group = "Build"
     doLast {
-        val versionFile = file("/build/resources/main/graymatter/sec/version.properties").apply {
+        val versionFile = file("build/resources/main/graymatter/sec/version.properties").apply {
             if (!parentFile.exists() && !parentFile.mkdirs()) {
                 throw IOException("Failed to create directory: $parent")
             }
         }
+
+        logger.info("Generating version file : [$versionFile]")
+
         versionFile.writeText(Properties().run {
             put("version", "${project.version}")
             put("build.ts", "${LocalDateTime.now()}")

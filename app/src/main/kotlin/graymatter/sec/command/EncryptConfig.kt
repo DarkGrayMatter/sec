@@ -1,22 +1,26 @@
 package graymatter.sec.command
 
 import com.palantir.config.crypto.KeyWithType
-import graymatter.sec.command.reuse.group.DocumentProcessingPathsArgGroup
+import graymatter.sec.command.reuse.group.ProcessingPathsArgGroup
 import graymatter.sec.command.reuse.group.InputSourceArgGroup
 import graymatter.sec.command.reuse.group.KeyProviderArgGroup
 import graymatter.sec.command.reuse.group.OutputTargetArgGroup
+import graymatter.sec.command.reuse.mixin.InputFormatMixin
+import graymatter.sec.command.reuse.mixin.OutputFormatMixin
+import graymatter.sec.common.cli.validate
 import graymatter.sec.common.document.DocumentFormat
 import graymatter.sec.common.exception.failCommand
+import graymatter.sec.common.validation.ValidationTarget
+import graymatter.sec.common.validation.ValidationContext
 import graymatter.sec.usecase.EncryptConfigurationUseCase
 import picocli.CommandLine
-import picocli.CommandLine.ArgGroup
-import picocli.CommandLine.Option
+import picocli.CommandLine.*
 
 @CommandLine.Command(name = "encrypt-config", description = ["Encrypt a configuration document given a key"])
-class EncryptConfig : Runnable {
+class EncryptConfig : Runnable, ValidationTarget {
 
-    private var configInputFormat: DocumentFormat? = null
-    private var configOutputFormat: DocumentFormat? = null
+    @CommandLine.Spec
+    lateinit var spec: Model.CommandSpec
 
     @ArgGroup(
         exclusive = true,
@@ -39,7 +43,7 @@ class EncryptConfig : Runnable {
         validate = false,
         heading = "Use any of the following options to choose which paths in the document to encrypt:%n"
     )
-    lateinit var processPathGroup: DocumentProcessingPathsArgGroup
+    lateinit var processPaths: ProcessingPathsArgGroup
 
     @ArgGroup(
         heading = "Provide encryption key by using one the following options:%n",
@@ -49,50 +53,104 @@ class EncryptConfig : Runnable {
     lateinit var keyProvider: KeyProviderArgGroup
 
 
-    @Option(
-        names = ["-F", "--format"],
-        description = [
-            "Set this option if the format cannot be derived from file/resource extension.",
-            "NB: This mandatory if you use STDIN as a source."
-        ]
-    )
-    fun setInputFormat(format: DocumentFormat) {
-        this.configInputFormat = format
-    }
+    @Mixin
+    val inputFormatMixin = InputFormatMixin()
 
-    @Option(
-        names = ["--format-out"],
-        description = [
-            "Override the output format. If not set the same format as the input will be used."
-        ]
-    )
-    fun setOutputFormat(format: DocumentFormat) {
-        this.configOutputFormat = format
+    @Mixin
+    val outputFormatMixin = OutputFormatMixin()
+
+    override fun validate(validation: ValidationContext) {
+
+        val cmd = this
+
+        val keyProviderValidation = validation.requires(cmd::keyProvider.isInitialized) {
+            "Please supply an encryption parameter"
+        }
+
+        val sourceDocValidation = validation.requires(cmd::configInput.isInitialized) {
+            "Source document to encrypt needs to be provided."
+        }
+
+        if (validation.passed(sourceDocValidation)) {
+            validation.requires(this.resolveInputFormat() != null) {
+                buildString {
+                    this.appendLine("No valid source document format detected: ")
+                    when {
+                        this@EncryptConfig.configInput.uri == null && this@EncryptConfig.inputFormatMixin.value == null -> {
+                            this.appendLine(
+                                "\t- Document source does not specify an regular file (such as STDIN) " +
+                                        "to derive the file format from."
+                            )
+                        }
+                        this@EncryptConfig.configInput.uri != null && this@EncryptConfig.inputFormatMixin.value == null -> {
+                            this.appendLine(
+                                "\t- Document `${this@EncryptConfig.configInput.uri}` does not have any known " +
+                                        "standard supported extensions."
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        if (validation.passed(keyProviderValidation)) {
+            val r = keyProvider.runCatching { keyWithType }
+            validation.requires(r.isSuccess && r.getOrNull() != null) {
+                buildString {
+                    this.append("Unable to load key from ${this@EncryptConfig.keyProvider.keyUri}")
+                    val cause = r.exceptionOrNull()
+                    if (cause != null) {
+                        this.append(" cause [${cause.javaClass.simpleName}]")
+                        cause.message?.also { message ->
+                            this.append(": $message")
+                        }
+                    }
+                }
+            }
+        }
     }
 
     override fun run() {
-        val format = resolveInputFormat()
+        applyDefaults()
+        spec.validate(this)
+        val format = requireNotNull(resolveInputFormat())
         EncryptConfigurationUseCase(
             openInput = configInput::openInputStream,
-            openOutput = configOutput::openOutput,
+            openOutput = configOutput::openOutputStream,
             inputFormat = format,
             outputFormat = resolveOutputFormat(format),
             keyWithType = resolveKeyWithType(),
-            encryptablePaths = processPathGroup.expandPats()
+            encryptedPaths = processPaths.expandPaths()
         ).run()
+    }
+
+    private fun applyDefaults() {
+
+        if (!this::processPaths.isInitialized) {
+            processPaths = ProcessingPathsArgGroup()
+            processPaths.setPaths(emptyList())
+        }
+
+        if (!this::configOutput.isInitialized) {
+            configOutput = OutputTargetArgGroup()
+        }
+
+        if (!configOutput.isAvailable) {
+            configOutput.setOutputToStdOut(true)
+        }
+
     }
 
     private fun resolveKeyWithType(): KeyWithType {
         return keyProvider.keyWithType ?: failCommand("No key specified.")
     }
 
-    private fun resolveInputFormat(): DocumentFormat {
-        return configInputFormat
-            ?: configInput.uri?.let { DocumentFormat.ofName(it) }
-            ?: failCommand("Unable to determine inputFormat")
+    private fun resolveInputFormat(): DocumentFormat? {
+        return inputFormatMixin.value
+            ?: configInput.uri?.let { DocumentFormat.ofUri(it) }
     }
 
-    private fun resolveOutputFormat(inputFormat: DocumentFormat) = configOutputFormat ?: inputFormat
+    private fun resolveOutputFormat(inputFormat: DocumentFormat): DocumentFormat = outputFormatMixin.value ?: inputFormat
 
 }
 

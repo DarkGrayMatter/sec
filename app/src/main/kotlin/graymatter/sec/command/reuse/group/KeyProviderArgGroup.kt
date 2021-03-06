@@ -3,6 +3,7 @@ package graymatter.sec.command.reuse.group
 import com.palantir.config.crypto.KeyWithType
 import graymatter.sec.App
 import graymatter.sec.common.exception.failCommand
+import graymatter.sec.common.file
 import graymatter.sec.common.resourceFile
 import picocli.CommandLine.Option
 import java.io.File
@@ -22,30 +23,35 @@ import java.io.File
  */
 class KeyProviderArgGroup {
 
+    var keyUri: String? = null
+        private set
+
     private var keySupplier: (() -> KeyWithType)? = null
 
     @Option(
         names = ["--key-file"],
-        description = ["Get ket from key file."],
+        description = ["Retrieves key from a file."],
         required = true
     )
     fun setKeyFile(file: File) {
         keySupplier = { KeyWithType.fromString(file.readText()) }
+        keyUri = file.toURI().toString()
     }
 
     @Option(
         names = ["--key-resource"],
         required = true,
-        description = ["Gets key from file on the application classpath."]
+        description = ["Retrieve key from file on the application classpath."]
     )
     fun setKeyFileFromClassPath(resource: String) {
+        keyUri = Any::class.java.getResource(resource)?.file()?.path
         keySupplier = { resourceFile<App>(resource).readText().let(KeyWithType::fromString) }
     }
 
     @Option(
         names = ["--key"],
         required = true,
-        description = ["Gets key from directly from the command line."]
+        description = ["Retrieves key from directly from the command line."]
     )
     fun setKeyValue(string: String) {
         keySupplier = { KeyWithType.fromString(string) }

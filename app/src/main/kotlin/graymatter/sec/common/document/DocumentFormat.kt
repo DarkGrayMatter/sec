@@ -10,7 +10,7 @@ enum class DocumentFormat(vararg validExtensions: String) {
     JAVA_PROPERTIES("properties");
 
     val fileExtensions = validExtensions.map(String::toLowerCase).toList()
-    val fileExtension: String get() = fileExtensions.first()
+    val defaultFileExtension: String get() = fileExtensions.first()
 
     companion object {
 
@@ -27,14 +27,14 @@ enum class DocumentFormat(vararg validExtensions: String) {
          */
         @JvmStatic
         fun ofFile(file: java.io.File): DocumentFormat? {
-            return ofName(file.name)
+            return ofUri(file.name)
         }
 
         /**
          * Determines the format denoted by the last part of a file name after the DOT ("**`.`**") character.
          */
         @JvmStatic
-        fun ofName(name: String): DocumentFormat? {
+        fun ofUri(name: String): DocumentFormat? {
             return FORMATS_WITH_SUFFIXES.firstOrNull { (_, suffix) -> name.endsWith(suffix, ignoreCase = true) }?.first
         }
     }

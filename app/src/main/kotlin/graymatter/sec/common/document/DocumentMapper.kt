@@ -6,7 +6,7 @@ import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
 
 @Suppress("MemberVisibilityCanBePrivate")
-object ObjectMappers {
+object DocumentMapper {
 
     val json = ObjectMapper().configure()
     val properties = JavaPropsMapper().configure()

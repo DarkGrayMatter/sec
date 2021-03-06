@@ -13,7 +13,7 @@ interface VisitingPath<T> {
     /**
      * Item being visited
      */
-    val subject: T
+    val node: T
 
     /**
      * The path being visited.

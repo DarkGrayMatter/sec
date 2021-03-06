@@ -7,7 +7,6 @@ import picocli.CommandLine.Option
 import picocli.CommandLine.Parameters
 import java.io.File
 import java.io.InputStream
-import javax.validation.constraints.NotNull
 
 /**
  * Requirement to capture an input source for a specific command.
@@ -17,8 +16,8 @@ class InputSourceArgGroup {
 
     private data class Target(val uri: String?, val open: () -> InputStream)
 
-    @NotNull
     private var target: Target? = null
+    var isStdIn: Boolean = false; private set
 
     @Parameters(
         description = [
@@ -53,7 +52,7 @@ class InputSourceArgGroup {
         }
     }
 
-    val uri: String? get() = requireNotNull(target).uri
+    val uri: String? get() = target?.uri
 
     fun openInputStream() = requireNotNull(target).open()
 

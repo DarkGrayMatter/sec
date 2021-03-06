@@ -17,7 +17,7 @@ import java.io.File
  * - A file containing paths (one expression per line per file)
  * - Class path resource containing paths (one expression per line per resource)
  */
-class DocumentProcessingPathsArgGroup {
+class ProcessingPathsArgGroup {
 
     private var paths: Path = Path.PathCollection()
 
@@ -55,7 +55,7 @@ class DocumentProcessingPathsArgGroup {
         paths += Path.PathClasspathResource(resource)
     }
 
-    fun expandPats(): List<String> {
+    fun expandPaths(): List<String> {
         return mutableListOf<String>().run {
             val queue = queueOf(paths)
             while (queue.isNotEmpty()) {

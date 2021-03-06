@@ -1,15 +1,14 @@
 package graymatter.sec.common.cli
 
+import graymatter.sec.common.Properties
 import picocli.CommandLine
-import java.util.*
-
 
 object ToolVersionProvider : CommandLine.IVersionProvider {
 
     private val resource = javaClass.getResource("/graymatter/sec/version.properties")
     private val info by lazy {
         resource?.openStream()
-            ?.use { Properties().apply { load(it) } }
+            ?.use { Properties(it) }
             ?.run {
                 arrayOf(
                     "version: ${getProperty("version")}",

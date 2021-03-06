@@ -7,3 +7,7 @@ build
 .idea
 
 /keys
+
+.DS_Store
+
+/temp

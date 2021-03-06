@@ -6,6 +6,7 @@ import graymatter.sec.common.trimToLine
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import java.io.InputStream
+import java.io.OutputStream
 
 fun <T : JsonNode> ObjectMapper.treeFromContent(content: String, expectedContentNodeClass: Class<out T>): T {
 
@@ -35,11 +36,17 @@ fun String.asTree(mapper: ObjectMapper): JsonNode = mapper.treeFromContent(this)
 
 
 inline fun <reified T : JsonNode> InputStream.readTree(format: DocumentFormat): T {
-    return ObjectMappers.of(format).readTree(this) as T
+    return DocumentMapper.of(format).readTree(this) as T
 }
 
 inline fun <reified T : JsonNode> treeOf(format: DocumentFormat, content: String): T {
-    return ObjectMappers.of(format).treeFromContent(content) as T
+    return DocumentMapper.of(format).treeFromContent(content) as T
 }
 
 inline fun <reified T : JsonNode> jsonOf(content: String): T = treeOf(DocumentFormat.JSON, content)
+
+fun OutputStream.writeTree(tree: JsonNode, format: DocumentFormat) {
+    val mapper = DocumentMapper.of(format)
+    mapper.writeTree(mapper.createGenerator(this), tree)
+    flush()
+}

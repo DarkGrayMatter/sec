@@ -3,7 +3,6 @@ package graymatter.sec
 import graymatter.sec.command.*
 import graymatter.sec.common.cli.CommandFactory
 import graymatter.sec.common.cli.ToolVersionProvider
-import graymatter.sec.common.cli.installValidationExecutionHandler
 import graymatter.sec.common.crypto.BinaryEncoding
 import graymatter.sec.common.exception.CommandFailedException
 import picocli.CommandLine
@@ -22,7 +21,8 @@ import kotlin.system.exitProcess
         EncryptValue::class,
         DecryptValue::class,
         GenerateRandomBytes::class,
-        EncryptConfig::class
+        EncryptConfig::class,
+        DecryptConfig::class,
     ]
 )
 object App {
@@ -32,15 +32,15 @@ object App {
         exitProcess(createCommandLine().execute(* args))
     }
 
-    fun createCommandLine(cmd: Any = this): CommandLine{
-        return CommandLine(cmd, CommandFactory)
+    @Suppress("MemberVisibilityCanBePrivate")
+    fun createCommandLine(): CommandLine{
+        return CommandLine(this, CommandFactory)
             .registerExceptionHandlers()
             .setExpandAtFiles(true)
             .setCaseInsensitiveEnumValuesAllowed(true)
             .setInterpolateVariables(true)
             .registerCommonConverters()
             .setUsageHelpWidth(150)
-            .installValidationExecutionHandler()
     }
 
 

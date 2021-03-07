@@ -21,11 +21,12 @@ class InputSourceArgGroup {
     private var target: Target? = null
     var isStdIn: Boolean = false; private set
 
-    @Parameters(
+
+    @Option(
+        names = ["--file"],
         description = [
-            "File to read from."
-        ],
-        paramLabel = "FILE_IN"
+            "File as input for \${COMMAND-NAME}"
+        ]
     )
     fun setInputFile(file: File) {
         target = Target(file.toURI().toString(), file::inputStream)

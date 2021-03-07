@@ -16,7 +16,7 @@ import graymatter.sec.usecase.EncryptConfigurationUseCase
 import picocli.CommandLine
 import picocli.CommandLine.*
 
-@CommandLine.Command(name = "encrypt-config", description = ["Encrypt a configuration document given a key"])
+@CommandLine.Command(name = "encrypt-config", description = ["Encrypt a configuration document given an appropriate key"])
 class EncryptConfig : Runnable, ValidationTarget {
 
     @CommandLine.Spec
@@ -150,7 +150,9 @@ class EncryptConfig : Runnable, ValidationTarget {
             ?: configInput.uri?.let { DocumentFormat.ofUri(it) }
     }
 
-    private fun resolveOutputFormat(inputFormat: DocumentFormat): DocumentFormat = outputFormatMixin.value ?: inputFormat
+    private fun resolveOutputFormat(inputFormat: DocumentFormat): DocumentFormat {
+        return outputFormatMixin.value ?: inputFormat
+    }
 
 }
 

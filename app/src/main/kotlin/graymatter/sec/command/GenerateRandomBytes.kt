@@ -1,6 +1,8 @@
 package graymatter.sec.command
 
+import graymatter.sec.command.reuse.group.OutputTargetArgGroup
 import graymatter.sec.command.reuse.mixin.GivenSeed
+import graymatter.sec.common.cli.validate
 import graymatter.sec.common.crypto.BinaryEncoding
 import graymatter.sec.common.exception.failCommandOn
 import picocli.CommandLine.*
@@ -13,7 +15,10 @@ class GenerateRandomBytes : Runnable {
     private var byteSize: Int = -1
     private lateinit var encoding: BinaryEncoding
 
-    @ArgGroup(validate = false, heading = "If you want specify a seed, use the following options:%n")
+    @Spec
+    lateinit var spec: Model.CommandSpec
+
+    @ArgGroup(validate = true, heading = "If you want specify a seed, use the following options:%n")
     private var givenSeed: GivenSeed? = null
 
     private val secureRandom by lazy(LazyThreadSafetyMode.NONE) {
@@ -23,9 +28,8 @@ class GenerateRandomBytes : Runnable {
         }
     }
 
-
     @Option(
-        names = ["-b", "--base"],
+        names = ["-e", "--enc", "--encoding"],
         required = true,
         description = ["Binary encoding use to represents random bytes"],
         showDefaultValue = Help.Visibility.ALWAYS,
@@ -44,21 +48,29 @@ class GenerateRandomBytes : Runnable {
         this.byteSize = bytesSize
     }
 
-    @Option(names = ["-n"], required = false, description = ["How many random values should be generated."])
+    @Option(names = ["-N"], required = false, description = ["How many random values should be generated."])
     fun setNumberToGenerate(n: Int) {
-        failCommandOn(
-            n <= 0,
-            ExitCode.USAGE,
-            "Number of chunks or random bytes to generate must be zero or more."
-        )
         numberOfChunks = n
     }
 
     override fun run() {
+        validateCli()
+        generateRandomBytes()
+    }
+
+    private fun generateRandomBytes() {
         if (numberOfChunks == 1) {
             println(generateEncodedRandomBytes())
         } else generateSequence { generateEncodedRandomBytes() }.take(numberOfChunks).forEach {
             println(it)
+        }
+    }
+
+    private fun validateCli() {
+        validate(spec) {
+            requires(numberOfChunks >= 0) {
+                "Number of generated values should always be 1 or more."
+            }
         }
     }
 

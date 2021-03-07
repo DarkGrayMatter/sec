@@ -14,10 +14,9 @@ class OutputTargetArgGroup  {
 
     private var target: Target? = null
 
-    @Parameters(
-        paramLabel = "FILE_OUT",
-        description = ["File to output to."],
-        arity = "1"
+    @Option(
+        names = ["--file-out"],
+        description = ["Output to a specific file."]
     )
     fun setOutputToFile(file: File) {
         target = Target(file.toURI().toString(), file::outputStream)

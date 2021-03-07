@@ -2,9 +2,9 @@
 
 _SEC_ offers an companion to the use with the  [Palantar Configuration Values](https://github.com/palantir/encrypted-config-value) is an open source library which provides an easy way to secure configuration for Java server side applications written in DropWizard.
 
-The Palantar's library is excellent to use, but lacks an eloquent command line tool to work with encrypted configurations. SEC attempts to fill this gap by providing, in addition to core encrypting encrypting of single value, the following additional capabilities:
+The Palantar's library is excellent to use, but lacks an eloquent command line tool to work with encrypted configurations. SEC attempt to fill this gap by providing, in addition a core encrypting command line tool, also the following capabilities:
 
-- Ability to also decrypt not also a single value, but also a complete document.
+- Ability to also decrypt not only a single value, but also a complete configuration document.
 - Ability to encrypt a values within a configuration document based on ant style property path selections.
 - Optionally convert an encrypted/decrypted configuration document to JSON, and Java Properties.
 -  Generate secure random binary values with, or without seed values.
@@ -57,7 +57,7 @@ If you want see help on specific command you may type in `sec help encrypt-confi
    
    This will produce a `.tar` and `.zip` distribution in the following locations:
    
-   ```shell
+   ```
    app/build/distributions/app-<version>.tar
    app/build/distributions/app-<version>.zip
    ```

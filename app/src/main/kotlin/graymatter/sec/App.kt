@@ -12,7 +12,9 @@ import kotlin.system.exitProcess
 
 @Command(
     name = "sec",
-    description = ["SEC is a configuration companion to the excellent Palantir library."],
+    description = [
+        "SEC is a configuration companion to Palantir library for handling encrypting/decryption",
+        "of various configuration file formats such as YAML, JSON and Java Properties."],
     versionProvider = ToolVersionProvider::class,
     mixinStandardHelpOptions = true,
     subcommands = [
@@ -33,7 +35,7 @@ object App {
     }
 
     @Suppress("MemberVisibilityCanBePrivate")
-    fun createCommandLine(): CommandLine{
+    fun createCommandLine(): CommandLine {
         return CommandLine(this, CommandFactory)
             .registerExceptionHandlers()
             .setExpandAtFiles(true)

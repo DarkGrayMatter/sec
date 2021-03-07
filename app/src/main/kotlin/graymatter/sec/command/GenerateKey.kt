@@ -14,7 +14,7 @@ import java.nio.file.Path
 
 @Command(
     name = "generate-key",
-    description = ["Generates private-public key pair"]
+    description = ["Generates AES key, or RSA private-public key pair"]
 )
 class GenerateKey : Runnable {
 

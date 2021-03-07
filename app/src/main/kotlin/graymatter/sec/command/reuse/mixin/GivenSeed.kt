@@ -26,7 +26,7 @@ class GivenSeed() {
         private set
 
     @Option(
-        names = ["--seed-encoding"],
+        names = ["--seed-enc","--seed-encoding"],
         defaultValue = "64",
         description = [
             "Binary encoding scheme used to represent the seed. The following encoding schemes are available:",

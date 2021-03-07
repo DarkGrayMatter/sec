@@ -150,7 +150,9 @@ class EncryptConfig : Runnable, ValidationTarget {
             ?: configInput.uri?.let { DocumentFormat.ofUri(it) }
     }
 
-    private fun resolveOutputFormat(inputFormat: DocumentFormat): DocumentFormat = outputFormatMixin.value ?: inputFormat
+    private fun resolveOutputFormat(inputFormat: DocumentFormat): DocumentFormat {
+        return outputFormatMixin.value ?: inputFormat
+    }
 
 }
 

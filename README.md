@@ -19,7 +19,7 @@ As most command line utilities are cryptic at best (even with documentation), _S
 ## Installing
 
 1. Download the latest binary distribution.
-2. Unzip/uncompress the application to folder of our choice.
+2. Unzip/uncompress the application to folder of your choice.
 3. Add the bin folder to your path.
 
 > You can now run the tool by typing `sec` in  the command line.
@@ -29,10 +29,11 @@ As most command line utilities are cryptic at best (even with documentation), _S
 Client Requirements:
 
 1. Java 8 or above runtime.
+2. Windows, Linux or MacOS
 
 Open a command prompt, and type in `sec help`, you should see the following: 
 
-![](src/assets/sec-first-time.png)
+<img src="src/assets/sec-first-time.png" style="zoom:67%;" />
 
 Note the following: 
 
@@ -57,8 +58,12 @@ If you want see help on specific command you may type in `sec help encrypt-confi
    This will produce a `.tar` and `.zip` distribution in the following locations:
    
    ```shell
-   app/build/install
+   app/build/distributions/app-<version>.tar
+   app/build/distributions/app-<version>.zip
    ```
+   
+   > Use the _dot-tar_ for unix like operating systems such as linux and MacOS.
+   > Use the _dot-zip_ for Windows.
 
-
+5. Follow the install instructions.
 

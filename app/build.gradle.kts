@@ -108,24 +108,24 @@ tasks.withType<Test> {
 java {
     withSourcesJar()
 }
-
-publishing {
-    publications {
-        create<MavenPublication>("maven") {
-            groupId = "${project.group}"
-            artifactId = project.name
-            version = "${project.version}"
-            from(components["java"])
-        }
-    }
-    repositories {
-        maven {
-            url = uri("https://maven.pkg.jetbrains.space/graymatter/p/sec/maven")
-            credentials.username = project.property("graymatter_spaces_username") as String
-            credentials.password = project.property("graymatter_spaces_password") as String
-        }
-    }
-}
+// TODO: remove for now, need to find a home for this
+//publishing {
+//    publications {
+//        create<MavenPublication>("maven") {
+//            groupId = "${project.group}"
+//            artifactId = project.name
+//            version = "${project.version}"
+//            from(components["java"])
+//        }
+//    }
+//    repositories {
+//        maven {
+//            url = uri("https://maven.pkg.jetbrains.space/graymatter/p/sec/maven")
+//            credentials.username = project.property("graymatter_spaces_username") as String
+//            credentials.password = project.property("graymatter_spaces_password") as String
+//        }
+//    }
+//}
 
 tasks.create("generateToolBuildInfo") {
     description = "Generates tool version file for command line inpsection."

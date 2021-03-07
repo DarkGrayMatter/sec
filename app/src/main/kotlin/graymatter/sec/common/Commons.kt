@@ -8,10 +8,6 @@ import java.net.URI
 import java.net.URL
 import java.util.*
 
-private const val EMPTY_TEXT = ""
-
-private val Char.isPrintableNonWhitespace: Boolean get() = !(isISOControl() || isWhitespace())
-
 fun <T> Boolean.value(truth: T, notTrue: T): T {
     return when (this) {
         true -> truth
@@ -25,44 +21,6 @@ fun String.trimToLine() = lineSequence().map { it.trim() }.join()
 fun String.trimIndentToLine() = trimIndent().lineSequence().join()
 fun String.trimMarginToLine(marginPrefix: String = "|") = trimMargin(marginPrefix).lineSequence().join()
 
-inline fun requiresStateOf(inState: Boolean, errorMessage: () -> String) {
-    if (!inState) {
-        throw IllegalStateException(errorMessage())
-    }
-}
-
-inline fun requiresStateOf(stateLabel: String, inState: () -> Boolean) {
-    if (!inState()) {
-        throw IllegalStateException("Expected state: $stateLabel")
-    }
-}
-
-inline fun <T> T.requiresStateOf(stateLabel: String, inState: (T) -> Boolean): T {
-    if (!inState(this)) {
-        throw IllegalStateException("Expected state: $stateLabel")
-    }
-    return this
-}
-
-inline fun <T> T?.requireNonNullStateOf(stateLabel: String, inState: (T) -> Boolean): T {
-
-    if (this == null || !inState(this)) {
-        throw IllegalStateException("Expected state: $stateLabel")
-    }
-
-    return this
-}
-
-enum class Separator(val char: Char) {
-    Comma(','),
-    Dot('.'),
-    Slash('/'),
-    DosSlash('\\'),
-    Pipe('|'),
-    Tab('\t'),
-    SemiColon(';')
-}
-
 
 fun ByteArray.encodeBinary(encoding: BinaryEncoding = BinaryEncoding.Base64): String = encoding.encode(this)
 fun String.decodeBinary(encoding: BinaryEncoding): ByteArray = encoding.decode(this)
@@ -72,15 +30,6 @@ fun <T> queueOf(vararg initial: T): Queue<T> {
     return LinkedList<T>().apply { initial.forEach { add(it) } }
 }
 
-fun <T> linkedListOf(vararg initial: T): LinkedList<T> {
-    return LinkedList<T>().also { it.addAll(initial) }
-}
-
-
-fun <E, T> Iterator<E>.collect(dest: T): T where  T : MutableCollection<E> {
-    while (hasNext()) dest += next()
-    return dest
-}
 
 inline fun <E, T, V> Iterator<E>.collect(dest: T, valueOf: (E) -> T): T where T : MutableCollection<V> {
     while (hasNext()) dest += valueOf(next())
@@ -111,18 +60,6 @@ inline fun <T> Sequence<T>.consumeWhile(taking: () -> Boolean, consume: (T) -> U
 }
 
 
-inline fun <T> memoize(crossinline get: () -> T): () -> T {
-    var holder: Holder<T>? = null
-    return {
-        when (val v = holder?.value) {
-            null -> get().also { holder = Holder(it) }
-            else -> v
-        }
-    }
-}
-
-data class
-Holder<out T>(val value: T)
 
 
 class ClassPathResourceNotFoundException(resourcePath: String) : FileNotFoundException(resourcePath)

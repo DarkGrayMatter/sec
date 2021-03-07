@@ -1,53 +1,24 @@
 # SEC - Security companion to the excellent Palantar library
 
-- [SEC - Security companion to the excellent Palantir library](#sec---security-companion-to-the-excellent-palantar-library)
-  - [How to build from Source](#how-to-build-from-source)
-  - [Short Introduction](#short-introduction)
+_SEC_ offers an companion to the use of the  Palantar `Configuration Values`[^1] is an open source library which provides an easy way to secure configuration for Java server side applications written in DropWizard.
 
-## How to build from Source
+The Palantar's library is excellent to use, but lacks an eloquent command line tool to work with encrypted configurations. SEC attempts to fill this gap by providing, in addition to core encrypting encrypting of single value, the following additional capabilities:
 
-Run the following command from the command line: 
+- Ability to also decrypt not also a single value, but also a complete document.
+- Ability to encrypt a values within a configuration document based on ant style property path selections.
+- Optionally convert an encrypted/decrypted configuration document to JSON, and Java Properties.
+-  Generate secure random binary values with, or without seed values.
 
-```shell
-cd <project-folder>
-./gradlew clean installDist
-```
+As most command line utilities are cryptic at best (even with documentation), _SEC_ also attempts to provide a better user experience by supplying descriptive/detail error messages. 
 
-## Short Introduction
+## Installing
 
-The command line application can be found at `app/build/install/app`
+## Running 
 
-The easies to add the absolute path to your command path variable.
+## Build it yourself
 
-To execute the tool type in command prompt/shell the following command:
 
-  `./sec help`
+----
+[^1]: https://github.com/palantir/encrypted-config-value
 
-You should see something like this:
 
-```text
-❯ sec help
-Usage: sec [-hV] [COMMAND]
-SEC is a configuration companion to the excellent Palantir library.
-  -h, --help      Show this help message and exit.
-  -V, --version   Print version information and exit.
-Commands:
-  help          Displays help information about the specified command
-  generate-key  Generates private-public key pair
-  encrypt       Encrypt value based on the supplied public key.
-  decrypt       Decrypts a value given a private key.
-```
-
-To get help on specific command, type in `help <command-name>`, for example:
-
-```shell
-❯ sec help generate-key-pair
-Usage: sec generate-key-pair [--force-path] -a=<algorithm> -k=<keyName>
-                             DESTINATION
-Generates private-public key pair
-      DESTINATION         Where the keys file should be written to
-  -a, --alg=<algorithm>   Which algorithm to use to generate the key pair. The
-                            following are available: RSA, AES
-      --force-path        Creates path if does not exists.
-  -k, --key=<keyName>     Name of the key file.
-```

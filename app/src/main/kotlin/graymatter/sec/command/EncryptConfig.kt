@@ -12,7 +12,7 @@ import graymatter.sec.common.document.DocumentFormat
 import graymatter.sec.common.exception.failCommand
 import graymatter.sec.common.validation.ValidationTarget
 import graymatter.sec.common.validation.ValidationContext
-import graymatter.sec.usecase.EncryptConfigurationUseCase
+import graymatter.sec.usecase.EncryptConfigUseCase
 import picocli.CommandLine
 import picocli.CommandLine.*
 
@@ -114,7 +114,7 @@ class EncryptConfig : Runnable, ValidationTarget {
         applyDefaults()
         spec.validate(this)
         val format = requireNotNull(resolveInputFormat())
-        EncryptConfigurationUseCase(
+        EncryptConfigUseCase(
             openInput = configInput::openInputStream,
             openOutput = configOutput::openOutputStream,
             inputFormat = format,

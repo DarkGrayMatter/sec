@@ -14,7 +14,7 @@ import java.util.*
 import kotlin.test.assertNotNull
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class EncryptConfigurationUseCaseTest {
+internal class EncryptConfigUseCaseTest {
 
     private lateinit var unencryptedDocFormat: DocumentFormat
     private lateinit var unencryptedDoc: ObjectNode
@@ -28,8 +28,8 @@ internal class EncryptConfigurationUseCaseTest {
     @BeforeEach
     fun setUp() {
         matcher = AntPathMatcher.Builder().build()
-        publicKey = resourceFile<EncryptConfigurationUseCase>("/keys/test")
-        unencryptedConfigFile = resourceFile<EncryptConfigurationUseCase>("/samples/sample-config.yaml")
+        publicKey = resourceFile<EncryptConfigUseCase>("/keys/test")
+        unencryptedConfigFile = resourceFile<EncryptConfigUseCase>("/samples/sample-config.yaml")
         unencryptedDocFormat = requireNotNull(DocumentFormat.ofFile(unencryptedConfigFile))
         encryptablePathsExpressions = emptyList()
         unencryptedDoc = unencryptedConfigFile.inputStream().use { it.readTree(unencryptedDocFormat) }
@@ -74,7 +74,7 @@ internal class EncryptConfigurationUseCaseTest {
         encrypted = assertDoesNotThrow {
             Properties().run {
                 load(ByteArrayOutputStream().apply {
-                    EncryptConfigurationUseCase(
+                    EncryptConfigUseCase(
                         openInput = unencryptedConfigFile::inputStream,
                         openOutput = { this },
                         inputFormat = unencryptedDocFormat,

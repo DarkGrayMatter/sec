@@ -13,7 +13,7 @@ import java.io.InputStream
 import java.io.OutputStream
 import java.nio.charset.Charset
 
-class EncryptConfigurationUseCase @JvmOverloads constructor(
+class EncryptConfigUseCase @JvmOverloads constructor(
     private val openInput: () -> InputStream,
     private val openOutput: () -> OutputStream,
     private val inputFormat: DocumentFormat,

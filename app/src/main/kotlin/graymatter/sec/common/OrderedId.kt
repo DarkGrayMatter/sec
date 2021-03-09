@@ -36,7 +36,9 @@ class OrderedId private constructor(
 
         @JvmStatic
         fun of(string: String): OrderedId {
-            return requireNotNull(tryParse(string))
+            return requireNotNull(tryParse(string)) {
+                "It does not seem {$string} value has been generated as a result of validation operation."
+            }
         }
 
         private fun tryParse(string: String): OrderedId? {

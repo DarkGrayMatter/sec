@@ -1,9 +1,11 @@
 package graymatter.sec.command
 
-import com.palantir.config.crypto.KeyFileUtils
-import picocli.CommandLine.Command
-import picocli.CommandLine.Option
-import java.io.File
+import graymatter.sec.command.reuse.group.KeyProviderArgGroup
+import graymatter.sec.command.reuse.group.OutputTargetArgGroup
+import graymatter.sec.common.cli.validate
+import graymatter.sec.usecase.EncryptValueUseCase
+import picocli.CommandLine.*
+import picocli.CommandLine.Model.CommandSpec
 
 @Suppress("unused")
 @Command(
@@ -12,32 +14,40 @@ import java.io.File
 )
 class EncryptValue : Runnable {
 
-    private lateinit var plainText: String
-    private lateinit var publicKeyFile: File
+    @Spec
+    lateinit var spec: CommandSpec
 
-    @Option(
-        names = ["-k"],
-        required = true,
-        paramLabel = "PUBLIC_KEY_FILE",
-        description = ["Public key used encrypt a value."]
-    )
-    fun setKeyPublicKeyFile(file: File) {
-        this.publicKeyFile = file
-    }
+    @Parameters(index = "0", description = ["A value to encrypt."], arity = "1")
+    lateinit var plainText: String
 
-    @Option(
-        names = ["-v"],
-        required = true,
-        description = ["Value to encrypt."]
+    @ArgGroup(exclusive = true, order = 2, heading = "Supply an appropriate encryption key using:%n")
+    val keyProvider = KeyProviderArgGroup()
+
+    @ArgGroup(
+        exclusive = true,
+        order = 2,
+        heading = "Output of the encrypted value can be send to the following:%n"
     )
-    fun setClearValue(string: String) {
-        this.plainText = string
-    }
+    val output = OutputTargetArgGroup()
 
     override fun run() {
-        val kt = KeyFileUtils.keyWithTypeFromPath(publicKeyFile.toPath())
-        val encryptor = kt.type.algorithm.newEncrypter()
-        val encrypted = encryptor.encrypt(kt, plainText)
-        println(encrypted)
+        applyDefaults()
+        validateSpec()
+        EncryptValueUseCase(
+            plainText = plainText,
+            secretOut = output::openOutputStream,
+            key = requireNotNull(keyProvider.keyWithType)
+        ).run()
     }
+
+    private fun validateSpec() {
+        validate(spec) {
+            requires(keyProvider.isSupplied) { "Please provide an key to encrypt with" }
+        }
+    }
+
+    private fun applyDefaults() {
+        output.setOutputToStdOut()
+    }
+
 }

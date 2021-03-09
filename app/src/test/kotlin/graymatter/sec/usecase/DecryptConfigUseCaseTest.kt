@@ -39,7 +39,7 @@ internal class DecryptConfigUseCaseTest {
 
         val encryptedFormat = DocumentFormat.JSON
         val encrypted = ByteArrayOutputStream().run {
-            EncryptConfigurationUseCase(
+            EncryptConfigUseCase(
                 openInput = unencryptedDoc::byteInputStream,
                 openOutput = { this },
                 inputFormat = unencryptedFormat,

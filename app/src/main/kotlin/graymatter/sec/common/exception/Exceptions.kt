@@ -20,8 +20,3 @@ fun failCommandOn(condition: Boolean, exitCode: Int, message: String) {
         failCommand(exitCode, message)
     }
 }
-
-
-fun CommandSpec.failedWithHelp(error: String): Nothing {
-    throw ParameterException(commandLine(), error)
-}

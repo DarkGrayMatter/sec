@@ -2,22 +2,23 @@
 
 package graymatter.sec.command
 
-import com.palantir.config.crypto.KeyFileUtils.keyPairToFile
-import com.palantir.config.crypto.KeyPair
 import com.palantir.config.crypto.KeyPairFiles
 import com.palantir.config.crypto.algorithm.Algorithm
+import graymatter.sec.common.exception.failCommand
+import graymatter.sec.common.func.onException
+import graymatter.sec.usecase.GenerateKeyUseCase
+import graymatter.sec.usecase.GenerateKeyUseCase.KeyGenerationException
 import picocli.CommandLine.*
 import java.io.File
-import java.io.IOException
-import java.nio.file.Files
-import java.nio.file.Path
+import kotlin.math.max
 
 @Command(
     name = "generate-key",
-    description = ["Generates private-public key pair"]
+    description = ["Generates AES key, or RSA private-public key pair"]
 )
 class GenerateKey : Runnable {
 
+    private var failOnExistingKeyFiles: Boolean = false
     private lateinit var dest: File
     private var forcePath = true
     private lateinit var algorithm: Algorithm
@@ -50,6 +51,16 @@ class GenerateKey : Runnable {
         forcePath = b
     }
 
+    @Option(
+        names = ["--fail-on-existing-key-files"],
+        description = ["Generation of keys will fail if the same key are found at the destination"],
+        showDefaultValue = Help.Visibility.ALWAYS,
+        defaultValue = "false"
+    )
+    fun setFailOnExistingKeys(failOnExistingKeyFiles: Boolean) {
+        this.failOnExistingKeyFiles = failOnExistingKeyFiles
+    }
+
     @Parameters(
         index = "0",
         arity = "1",
@@ -63,41 +74,55 @@ class GenerateKey : Runnable {
 
 
     override fun run() {
-        val kp = algorithm.newKeyPair()
-        val path = dest(keyName).toAbsolutePath()
-        val keys = saveKeyPair(kp, path)
-        val keyTypeName = algorithm.name.toUpperCase()
-        when(algorithm) {
-            Algorithm.AES -> {
-                println("Generated Key [$keyTypeName]")
-                println("  Shared Secret -> ${keys.encryptionKeyFile()}")
+        GenerateKeyUseCase(
+            keyName = this.keyName,
+            keyAlgorithm = this.algorithm,
+            forceKeyLocation = this.forcePath,
+            overwriteExisting = !failOnExistingKeyFiles,
+            keyLocation = this.dest,
+        ).call().onException(this::reportKeyGenerationFailed).onSuccess(this::reportKeyFilesGenerated)
+    }
+
+    private fun reportKeyGenerationFailed(keyGenerationException: KeyGenerationException) {
+        failCommand(ExitCode.SOFTWARE, buildString {
+            appendLine("Error generating key [$keyName]")
+            appendLine(keyGenerationException.reason)
+            keyGenerationException.cause?.also { cause ->
+                val causeBy = cause.message ?: "${cause.javaClass.simpleName} (No message given)"
+                appendLine("Cause by: $causeBy")
             }
-            Algorithm.RSA -> {
-                println("Generated Key Pair [$keyTypeName]")
-                println("  -> Encryption Key (Public) : ${keys.encryptionKeyFile()}")
-                println("  -> Decryption Key (Private) : ${keys.decryptionKeyFile()}")
-            }
+        })
+    }
+
+    private fun reportKeyFilesGenerated(files: KeyPairFiles) {
+
+        val infoLines = when {
+            files.pathsEqual() -> listOf("Encryption/Decryption Key : ${files.decryptionKeyFile()}")
+            else -> listOf(
+                "Encryption (Public) key file: ${files.encryptionKeyFile()}",
+                "Decryption (Private) key file: to ${files.decryptionKeyFile()}"
+            )
         }
-    }
 
-    private fun saveKeyPair(kp: KeyPair, publicKeyPath: Path): KeyPairFiles {
-
-        val privateKeyPath = publicKeyPath.resolveSibling("${publicKeyPath.fileName}.private")
-
-        privateKeyPath.also(Files::deleteIfExists)
-        publicKeyPath.also(Files::deleteIfExists)
-
-        return keyPairToFile(kp, publicKeyPath)
-
-    }
-
-    private fun dest(path: String): Path = File(dest, path).run {
-        if (!exists() && forcePath && !parentFile.mkdirs()) {
-            throw IOException("Unable to create path for key files: $this")
+        val keyTypeLabel = when (algorithm) {
+            Algorithm.AES -> "shared key"
+            Algorithm.RSA -> "privat and public keys"
         }
-        canonicalFile
-            .toPath()
-            .toAbsolutePath()
+
+        val heading = "Generated $keyTypeLabel"
+
+        val headingLine = (max(heading.length, infoLines.maxByOrNull(String::length)!!.length) + 4)
+            .let { buildString { repeat(it) {append('=')} } }
+
+        println(headingLine)
+        println("  $heading")
+        println(headingLine)
+        infoLines.withIndex().forEach { (i,line) ->
+            println(" ${i + 1}. $line")
+        }
+
     }
+
 }
+
 

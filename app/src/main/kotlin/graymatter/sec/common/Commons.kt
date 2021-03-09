@@ -1,9 +1,9 @@
-
 package graymatter.sec.common
 
 import graymatter.sec.common.crypto.BinaryEncoding
 import java.io.File
 import java.io.FileNotFoundException
+import java.io.PrintStream
 import java.net.URI
 import java.net.URL
 import java.util.*
@@ -60,8 +60,6 @@ inline fun <T> Sequence<T>.consumeWhile(taking: () -> Boolean, consume: (T) -> U
 }
 
 
-
-
 class ClassPathResourceNotFoundException(resourcePath: String) : FileNotFoundException(resourcePath)
 class UndefinedLocalFileUriException(uri: URI) : FileNotFoundException("Undefined uri: $uri")
 
@@ -84,3 +82,5 @@ fun URL.file(): File {
         }
     }
 }
+
+val stderr: PrintStream get() = System.err

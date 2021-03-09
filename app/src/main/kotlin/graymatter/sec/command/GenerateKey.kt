@@ -97,21 +97,21 @@ class GenerateKey : Runnable {
     private fun reportKeyFilesGenerated(files: KeyPairFiles) {
 
         val infoLines = when {
-            files.pathsEqual() -> listOf("Encryption/Decryption Key : ${files.decryptionKeyFile()}")
+            files.pathsEqual() -> listOf("Shared Encryption & Decryption Key : ${files.decryptionKeyFile()}")
             else -> listOf(
                 "Encryption (Public) key file: ${files.encryptionKeyFile()}",
-                "Decryption (Private) key file: to ${files.decryptionKeyFile()}"
+                "Decryption (Private) key file: ${files.decryptionKeyFile()}"
             )
         }
 
         val keyTypeLabel = when (algorithm) {
             Algorithm.AES -> "shared key"
-            Algorithm.RSA -> "privat and public keys"
+            Algorithm.RSA -> "private and public keys"
         }
 
         val heading = "Generated $keyTypeLabel"
 
-        val headingLine = (max(heading.length, infoLines.maxByOrNull(String::length)!!.length) + 4)
+        val headingLine = (max(heading.length, infoLines.maxByOrNull(String::length)!!.length) + 6)
             .let { buildString { repeat(it) {append('=')} } }
 
         println(headingLine)

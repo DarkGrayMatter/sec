@@ -13,7 +13,6 @@ _SEC_ offers an companion to the use with the  [Palantir Configuration Values](h
 
 The Palantir's library is excellent to use, but lacks an eloquent command line tool to work with encrypted configurations. SEC attempt to fill this gap by providing, in addition a core encrypting command line tool, also the following capabilities:
 
-- Ability to decrypt not only a single value, but also a complete configuration document.
 - Ability to encrypt values within a configuration document based on ant style property path selections.
 - Optionally convert an encrypted/decrypted configuration document to JSON, and Java Properties.
 -  Generate secure random binary values with, or without seed values.
@@ -107,8 +106,8 @@ This will generate the following output:
 ==================================================================================
   Generated private and public keys
 ==================================================================================
- 1. Encryption (Public) key file: /Users/andriesfc/work/secworxs/mykey
- 2. Decryption (Private) key file: /Users/andriesfc/work/secworxs/mykey.private
+ 1. Encryption (Public) key file: /Users/andriesfc/work/secworxs/keys/key
+ 2. Decryption (Private) key file: /Users/andriesfc/work/secworxs/keys/key.private
 ```
 
 Things to note: 

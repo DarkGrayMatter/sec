@@ -4,8 +4,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.time.LocalDateTime
 
 plugins {
-    kotlin("jvm") version "1.4.30"
-    kotlin("kapt") version "1.4.30"
+    kotlin("jvm") version "1.4.31"
+    kotlin("kapt") version "1.4.31"
     id("org.jetbrains.dokka") version "1.4.20"
     application
     `maven-publish`

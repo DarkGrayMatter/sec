@@ -1,15 +1,11 @@
 @file:Suppress("SpellCheckingInspection")
 
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import java.io.IOException
-import java.io.StringWriter
 import java.time.LocalDateTime
-import java.util.*
-
 
 plugins {
-    kotlin("jvm") version "1.4.30"
-    kotlin("kapt") version "1.4.30"
+    kotlin("jvm") version "1.4.31"
+    kotlin("kapt") version "1.4.31"
     id("org.jetbrains.dokka") version "1.4.20"
     application
     `maven-publish`
@@ -108,46 +104,40 @@ tasks.withType<Test> {
 java {
     withSourcesJar()
 }
-// TODO: remove for now, need to find a home for this
-//publishing {
-//    publications {
-//        create<MavenPublication>("maven") {
-//            groupId = "${project.group}"
-//            artifactId = project.name
-//            version = "${project.version}"
-//            from(components["java"])
-//        }
-//    }
-//    repositories {
-//        maven {
-//            url = uri("https://maven.pkg.jetbrains.space/graymatter/p/sec/maven")
-//            credentials.username = project.property("graymatter_spaces_username") as String
-//            credentials.password = project.property("graymatter_spaces_password") as String
-//        }
-//    }
-//}
 
-tasks.create("generateToolBuildInfo") {
-    description = "Generates tool version file for command line inpsection."
-    group = "Build"
-    doLast {
-        val versionFile = file("build/resources/main/graymatter/sec/version.properties").apply {
-            if (!parentFile.exists() && !parentFile.mkdirs()) {
-                throw IOException("Failed to create directory: $parent")
-            }
+
+tasks.withType<ProcessResources> {
+
+    val resourceReplacements = mapOf(
+        "application.version" to project.version.toString(),
+        "application.build.arch" to "${System.getProperty("os.name")}-${System.getProperty("os.arch")}",
+        "application.build.date" to LocalDateTime.now().toLocalDate().toString()
+    )
+
+    fun replacment(key: String, variable:String): String {
+
+        val replacement = when {
+            project.hasProperty(variable) -> project.property(variable).toString()
+            else -> resourceReplacements[variable]
+        } ?: throw GradleException("No value found for $variable")
+
+        return "$key=$replacement"
+    }
+
+    filter { property ->
+
+        val (key,value) = when (val position = property.indexOf('=')) {
+            -1 -> property to null
+            else -> property.substring(0, position) to property.substring(position + 1)
         }
 
-        logger.info("Generating version file : [$versionFile]")
-
-        versionFile.writeText(Properties().run {
-            put("version", "${project.version}")
-            put("build.ts", "${LocalDateTime.now()}")
-            put("build.platform.os.name", System.getProperty("os.name"))
-            put("build.platform.os.version", System.getProperty("os.version"))
-            put("build.platform.os.arch", System.getProperty("os.arch"))
-            StringWriter().also { store(it, "SEC tool version file.") }.toString()
-        })
+        when {
+            value == null -> property
+            value.startsWith("\${") and value.endsWith("}") -> {
+                val variable = value.substring(2, value.length - 1)
+                replacment(key, variable)
+            }
+            else -> property
+        }
     }
 }
-
-tasks.named("processResources") { dependsOn("generateToolBuildInfo") }

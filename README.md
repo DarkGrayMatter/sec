@@ -1,8 +1,8 @@
 # SEC - Security companion to the Palantir library
 
 - [SEC - Security companion to the Palantir library](#sec---security-companion-to-the-palantir-library)
-  - [Overview - Why?](#overview---why)
-  - [Installing](#installing)
+  - [Why?](#why)
+  - [Installing the tool](#installing-the-tool)
   - [Running](#running)
   - [Build it yourself](#build-it-yourself)
   - [Simple quick start](#simple-quick-start)
@@ -10,14 +10,14 @@
     - [Encrypting a YAML configuration](#encrypting-a-yaml-configuration)
     - [Decrypting a YAML configuration](#decrypting-a-yaml-configuration)
 
-## Overview - Why?
+## Why?
 
 _SEC_ offers an companion to the use with the [Palantir Configuration Values](https://github.com/palantir/encrypted-config-value). This open source library offers an easy way to secure configuration files for Java server side applications written in DropWizard.
 
-Using this, a developer can actually keep encrypted configuration in public source code repositories.
+Using this, a developer:
 
-The Palantir library is excellent to use, but lacks an eloquent command line tool to work with encrypted configurations. SEC attempt to fill this gap by providing, in addition a core encrypting command line tool, also the following capabilities:
-
+- Can safely keep encrypted configuration in public source code repositories.
+- The Palantir library is excellent to use, but lacks an eloquent command line tool to work with encrypted configurations. SEC attempt to fill this gap by providing, in addition a core encrypting command line tool, also the following capabilities:
 - Ability to encrypt values within a configuration document based on ant style property path selections.
 - Optionally convert an encrypted/decrypted configuration document to JSON, and Java Properties.
 - Generate secure random binary values with, or without seed values.
@@ -28,7 +28,7 @@ On a pure non functional manner, the tool also attempts to make it an easy comma
 - Attempts to use a consistent command line arguments/options throughout.
 - Infer formats and settings based on user input.
 
-## Installing
+## Installing the tool
 
 1. Download the latest binary distribution.
 2. Unzip/un-compress the application to folder of your choice.
@@ -47,7 +47,7 @@ Open a command prompt, and type in `sec help`, you should see the following:
 
 ![](src/assets/sample-cli-spec-encrypt-config.png)
 
-Note the following:
+> **Note** the following:
 
 If you want see help on specific command you may type in `sec help encrypt-config`, for example, the above request will produce detailed help on what to pass to the command:
 

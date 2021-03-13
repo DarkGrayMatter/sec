@@ -136,7 +136,7 @@ class EncryptConfig : Runnable, ValidationTarget {
         }
 
         if (!configOutput.isAvailable) {
-            configOutput.setOutputToStdOut(true)
+            configOutput.setOutputToStdOut()
         }
 
     }

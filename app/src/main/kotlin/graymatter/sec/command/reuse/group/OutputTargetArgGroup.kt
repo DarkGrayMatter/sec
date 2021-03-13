@@ -29,7 +29,7 @@ class OutputTargetArgGroup  {
         defaultValue = "true"
     )
     fun setOutputToStdOut(stdOut: Boolean) {
-        if (stdOut) {
+        if (stdOut && !isAvailable) {
             target = Target("stdout://") { StandardOutputStream() }
         }
     }
@@ -38,6 +38,7 @@ class OutputTargetArgGroup  {
 
     val uri: String? get() = target?.uri
     val isAvailable: Boolean get() = target != null
+
     fun openOutputStream(): OutputStream {
         return requireNotNull(target).open()
     }

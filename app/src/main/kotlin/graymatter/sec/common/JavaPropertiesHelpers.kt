@@ -5,9 +5,13 @@ import graymatter.sec.common.document.DocumentFormat
 import graymatter.sec.common.document.writeTree
 import java.io.*
 import java.net.URL
+import java.nio.charset.Charset
 import java.util.*
 
-fun Properties.load(bytes: ByteArray) = ByteArrayInputStream(bytes).use(this::load)
+fun Properties.load(bytes: ByteArray, charset: Charset = Charsets.UTF_8) {
+    ByteArrayInputStream(bytes).reader(charset).use { load(it) }
+}
+
 fun Properties.load(text: String) = StringReader(text).use(this::load)
 fun Properties.load(bytes: ByteArrayOutputStream) = load(bytes.toByteArray())
 fun Properties.load(text: StringWriter) = load(text.toString())
@@ -21,7 +25,7 @@ fun Properties(tree: ObjectNode): Properties {
 
 
 fun Properties(url: URL): Properties = url.openStream().use { Properties(it) }
-fun Properties(input:InputStream): Properties = Properties().apply { load(input) }
+fun Properties(input: InputStream): Properties = Properties().apply { load(input) }
 fun Properties(text: String): Properties = Properties().apply { load(text) }
 fun Properties(map: Map<String, String?>): Properties = Properties().apply { putAll(map) }
 fun Properties(vararg pairs: Pair<String, String?>): Properties = java.util.Properties().apply {
@@ -32,6 +36,8 @@ fun Properties.toPropertiesMap(): Map<String, String?> {
     return entries.asSequence().map { (k, v) -> k as String to v as String? }.toMap()
 }
 
-fun Properties(bytes: ByteArray) = Properties().also { it.load(ByteArrayInputStream(bytes)) }
-fun Properties(file: File) = Properties().apply { file.inputStream().use { load(it) } }
+fun Properties(bytes: ByteArray, charset: Charset = Charsets.UTF_8) =
+    Properties().also { it.load(ByteArrayInputStream(bytes).reader(charset)) }
+
+fun Properties(file: File) = Properties().apply { file.bufferedReader().use { load(it) } }
 fun Properties(source: ByteArrayOutputStream) = Properties(source.toByteArray())

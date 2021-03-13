@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import java.io.InputStream
 import java.io.OutputStream
+import java.nio.charset.Charset
 
 fun <T : JsonNode> ObjectMapper.treeFromContent(content: String, expectedContentNodeClass: Class<out T>): T {
 
@@ -35,8 +36,8 @@ inline fun <reified T : JsonNode> ObjectMapper.treeFrom(input: InputStream): T {
 fun String.asTree(mapper: ObjectMapper): JsonNode = mapper.treeFromContent(this)
 
 
-inline fun <reified T : JsonNode> InputStream.readTree(format: DocumentFormat): T {
-    return DocumentMapper.of(format).readTree(this) as T
+inline fun <reified T : JsonNode> InputStream.readTree(format: DocumentFormat, charset: Charset = Charsets.UTF_8): T {
+    return DocumentMapper.of(format).readTree(reader(charset)) as T
 }
 
 inline fun <reified T : JsonNode> treeOf(format: DocumentFormat, content: String): T {

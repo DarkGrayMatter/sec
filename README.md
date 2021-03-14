@@ -1,8 +1,9 @@
-# SEC - Security companion to the Palantir library
+# SEC - Security companion to the Palantir Configuration Values Library
 
-- [SEC - Security companion to the Palantir library](#sec---security-companion-to-the-palantir-library)
-  - [Why?](#why)
-  - [Installing the tool](#installing-the-tool)
+- [SEC - Security companion to the Palantir Configuration Values Library](#sec---security-companion-to-the-palantir-configuration-values-library)
+  - [Introduction - What & Why](#introduction---what--why)
+  - [Client Requirements](#client-requirements)
+  - [Installation](#installation)
   - [Running](#running)
   - [Build it yourself](#build-it-yourself)
   - [Simple quick start](#simple-quick-start)
@@ -10,25 +11,22 @@
     - [Encrypting a YAML configuration](#encrypting-a-yaml-configuration)
     - [Decrypting a YAML configuration](#decrypting-a-yaml-configuration)
 
-## Why?
+## Introduction - What & Why
 
-_SEC_ offers an companion to the use with the [Palantir Configuration Values](https://github.com/palantir/encrypted-config-value). This open source library offers an easy way to secure configuration files for Java server side applications written in DropWizard.
+_SEC_ offers an companion to the use with the [Palantir Configuration Values](https://github.com/palantir/encrypted-config-value). This open source library offers an secure way for developer to keep sensitive configuration values even on public repositories.
 
-Using this, a developer:
+In addition to this core functionality provided by the _Palantir Configuration Values_ library, this tools also offers an easy command line friendly interface to some extended he use original library such as:
 
-- Can safely keep encrypted configuration in public source code repositories.
-- The Palantir library is excellent to use, but lacks an eloquent command line tool to work with encrypted configurations. SEC attempt to fill this gap by providing, in addition a core encrypting command line tool, also the following capabilities:
-- Ability to encrypt values within a configuration document based on ant style property path selections.
-- Optionally convert an encrypted/decrypted configuration document to JSON, and Java Properties.
-- Generate secure random binary values with, or without seed values.
+- The ability to encrypt sensitive information pieces across the whole configuration file based on a pattern.
+- Understanding common configuration formats such as java properties, and JSON.
+- Ability to decrypt (given the correct key) configuration document.
 
-On a pure non functional manner, the tool also attempts to make it an easy command line application to use by:
+## Client Requirements
 
-- Extensive error messages with hints to fix incorrect usages.
-- Attempts to use a consistent command line arguments/options throughout.
-- Infer formats and settings based on user input.
+1. Java 8 or above runtime.
+2. Windows, Linux or MacOS
 
-## Installing the tool
+## Installation
 
 1. Download the latest binary distribution.
 2. Unzip/un-compress the application to folder of your choice.
@@ -37,11 +35,6 @@ On a pure non functional manner, the tool also attempts to make it an easy comma
 > You can now run the tool by typing `sec` in the command line.
 
 ## Running
-
-Client Requirements:
-
-1. Java 8 or above runtime.
-2. Windows, Linux or MacOS
 
 Open a command prompt, and type in `sec help`, you should see the following:
 
@@ -108,7 +101,7 @@ sec generate-key --force-path -a rsa -k test keys
 
 This will generate the following output:
 
-```
+```text
 ==================================================================================
   Generated private and public keys
 ==================================================================================

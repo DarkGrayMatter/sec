@@ -35,8 +35,8 @@ object App {
     }
 
     @Suppress("MemberVisibilityCanBePrivate")
-    fun createCommandLine(): CommandLine {
-        return CommandLine(this, CommandFactory)
+    fun createCommandLine(cmd: Any = this): CommandLine {
+        return CommandLine(cmd, CommandFactory)
             .registerExceptionHandlers()
             .setExpandAtFiles(true)
             .setCaseInsensitiveEnumValuesAllowed(true)

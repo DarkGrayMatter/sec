@@ -15,17 +15,19 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class EncryptConfigTest {
+internal class EncryptConfigTest : AbstractCommandTest<EncryptConfig>() {
 
     private lateinit var givenUnencryptedProperties: Properties
     private lateinit var givenEncryptionKeyFile: File
     private lateinit var givenUnencryptedPropertiesFile: File
-    private lateinit var givenCurrentWorkingDir: File
-    private lateinit var givenCommand: EncryptConfig
+
+    override fun setupCommand(): EncryptConfig {
+        return EncryptConfig()
+    }
 
     @BeforeEach
-    fun setUp(@TempDir tempDir: File) {
-        givenCurrentWorkingDir = tempDir
+    override fun setUp() {
+        super.setUp()
         givenUnencryptedPropertiesFile = resourceFile("/samples/sample-config.properties")
         givenUnencryptedProperties = Properties(givenUnencryptedPropertiesFile)
         givenEncryptionKeyFile = resourceFile("/keys/test")
@@ -43,21 +45,14 @@ internal class EncryptConfigTest {
     }
 
     private fun givenCommandToEncryptToFile(): File {
-        val fileOut = File(givenCurrentWorkingDir, "encrypted.properties")
-        givenCommandLineArgsOf(
-            "--file", givenUnencryptedPropertiesFile,
-            "--key", givenEncryptionKeyFile,
-            "--file-out", fileOut
+        val fileOut = File(givenWorkingDir, "encrypted.properties")
+        givenCommandLineOf(
+            "--file", "$givenUnencryptedPropertiesFile",
+            "--key", "$givenEncryptionKeyFile",
+            "--file-out", "$fileOut"
         )
         return fileOut
     }
-
-    private fun givenCommandLineArgsOf(vararg commandLine: Any) = assertDoesNotThrow {
-        givenCommand = EncryptConfig()
-        val commandLineArgs = commandLine.map(Any::toString).toTypedArray()
-        CommandLine(givenCommand).parseArgs(* commandLineArgs)
-    }
-
 
     private fun thenAssertEncryptedPropertiesFileProvidedKeys(encryptedPropertiesFile: File) {
 

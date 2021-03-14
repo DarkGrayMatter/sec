@@ -4,11 +4,7 @@ import graymatter.sec.common.Properties
 import graymatter.sec.common.document.DocumentFormat
 import graymatter.sec.common.resourceFile
 import graymatter.sec.common.toPropertiesMap
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.MethodSource
+import org.junit.jupiter.api.*
 import java.io.File
 import java.util.*
 import kotlin.test.assertEquals
@@ -48,7 +44,7 @@ internal class EncryptConfigTest : AbstractCommandTest<EncryptConfig>() {
     private fun givenCommandToEncryptToFile(): File {
         val fileOut = File(givenWorkingDir, "encrypted.properties")
         givenCommandLineOf(
-            "--file", "$givenUnencryptedPropertiesFile",
+            "--file-in", "$givenUnencryptedPropertiesFile",
             "--key", "$givenEncryptionKeyFile",
             "--file-out", "$fileOut"
         )
@@ -89,38 +85,49 @@ internal class EncryptConfigTest : AbstractCommandTest<EncryptConfig>() {
      * 2. If I name the output file with a known/valid extension then choose a format based on the output extension.
      * 3. As a last resort us the input format.
      */
-    @ParameterizedTest
-    @MethodSource("outputFormatResolutionTestParameters")
-    fun outputFormatResolutionTest(
-        useCaseRule: String,
-        expectedFormat: DocumentFormat,
-        givenCommandLine: Array<String>,
-    ) {
-        givenCommandLineOf(*givenCommandLine)
-        val selectedOutputFormat = givenCommand.selectedDefaultOutputFormat
-        assertEquals(expectedFormat, selectedOutputFormat, "Fail on rule: $useCaseRule")
-    }
+    @Test
+    fun outputFormatResolutionTest() {
 
+        var assertions = 0
 
-    @MethodSource
-    fun outputFormatResolutionTestParameters(): List<List<Any>> {
-        val inputSelection = arrayOf("--key-res", "/keys/test", "--file-out")
-        return listOf(
-            listOf(
-                "If I explicitly set the `--format-out` value, choose it.",
-                DocumentFormat.JAVA_PROPERTIES,
-                inputSelection + arrayOf("--format-out", "java_properties", "--stdout")
+        fun assertOutputSelected(
+            rule: String,
+            expectedFormat: DocumentFormat,
+            vararg commandLine: String,
+        ): () -> Unit = {
+            val assertionIndex = ++assertions
+            println("----[$assertionIndex -> ${expectedFormat.defaultFileExtension}]------------------------------------------------------------------------------------------------")
+            println(rule)
+            println("-----------------------------------------------------------------------------------------------------------------")
+            print("\n\n")
+            givenCommandLineOf(* commandLine)
+            whenRunningCommand()
+            assertEquals(givenCommand.outputFormat, expectedFormat, " Failed[$assertionIndex] : $rule")
+        }
+
+        assertAll(
+            assertOutputSelected(
+                rule = "If I explicitly set the `--format-out` value, choose it.",
+                expectedFormat = DocumentFormat.JAVA_PROPERTIES,
+                "--format-out", "java_properties",
+                "--key-res", "/keys/test",
+                "--res-in", "/samples/sample-config.yaml"
             ),
-            listOf(
-                "If I name the output file with a known/valid extension then choose a format based on the output extension.",
-                DocumentFormat.JSON,
-                inputSelection + arrayOf("file-out", "${File(givenWorkingDir, "encrypted-file-out.json")}")
+            assertOutputSelected(
+                rule = "If I name the output file with a known/valid extension then choose a format based on the output extension.",
+                expectedFormat = DocumentFormat.JSON,
+                "--key-res", "/keys/test",
+                "--res-in", "/samples/sample-config.yaml",
+                "--file-out", "${File(givenWorkingDir, "config.json")}"
             ),
-            listOf(
-                "As a last resort us the input format",
-                DocumentFormat.YAML,
-                inputSelection + arrayOf("--stdout")
+            assertOutputSelected(
+                rule = "As a last resort us the input format",
+                expectedFormat = DocumentFormat.YAML,
+                "--key-res", "/keys/test",
+                "--res-in", "/samples/sample-config.yaml",
+                "--stdout"
             ),
         )
+
     }
 }

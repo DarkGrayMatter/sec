@@ -16,14 +16,14 @@ class InputSourceArgGroup {
 
     private data class Target(val uri: String?, val open: () -> InputStream)
 
-    val isSupplied: Boolean get() = target != null
+    val isAvailable: Boolean get() = target != null
 
     private var target: Target? = null
     var isStdIn: Boolean = false; private set
 
 
     @Option(
-        names = ["--file"],
+        names = ["--file-in"],
         description = [
             "File as input for \${COMMAND-NAME}"
         ]
@@ -45,7 +45,7 @@ class InputSourceArgGroup {
     }
 
     @Option(
-        names = ["--input-res"],
+        names = ["--res-in"],
         required = true,
         description = ["Read input from a resource on the classpath."]
     )

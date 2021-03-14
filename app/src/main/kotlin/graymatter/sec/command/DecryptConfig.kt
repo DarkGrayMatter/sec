@@ -3,8 +3,8 @@ package graymatter.sec.command
 import graymatter.sec.command.reuse.group.InputSourceArgGroup
 import graymatter.sec.command.reuse.group.KeyProviderArgGroup
 import graymatter.sec.command.reuse.group.OutputTargetArgGroup
-import graymatter.sec.command.reuse.mixin.InputFormatMixin
-import graymatter.sec.command.reuse.mixin.OutputFormatMixin
+import graymatter.sec.command.reuse.mixin.InputFormatOption
+import graymatter.sec.command.reuse.mixin.OutputFormatOption
 import graymatter.sec.common.cli.validate
 import graymatter.sec.common.document.DocumentFormat
 import graymatter.sec.common.trimIndentToLine
@@ -43,10 +43,10 @@ class DecryptConfig : Runnable {
     lateinit var keyProvider: KeyProviderArgGroup
 
     @Mixin
-    val inputFormatOverride = InputFormatMixin()
+    val inputFormatOverride = InputFormatOption()
 
     @Mixin
-    val outputFormatOverride = OutputFormatMixin()
+    val outputFormatOverride = OutputFormatOption()
 
     override fun run() {
         validate()

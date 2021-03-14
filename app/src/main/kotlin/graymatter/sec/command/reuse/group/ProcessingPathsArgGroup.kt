@@ -22,19 +22,21 @@ class ProcessingPathsArgGroup {
     private var paths: Path = Path.PathCollection()
 
     @Option(
-        names = ["--path"],
+        names = ["--path-val"],
         arity = "0..*",
+        split = ";",
+        paramLabel = "path",
         description = [
             "Ant style path expression to match"
         ],
     )
-    fun setPaths(paths: List<String>) {
-        paths.map { path -> Path.Value(path) }
+    fun setPaths(pathList: List<String>) {
+        pathList.map { path -> Path.Value(path) }
             .forEach { path -> this.paths += path }
     }
 
     @Option(
-        names = ["--path-file"],
+        names = ["--path"],
         arity = "0..*",
         description = [
             "A file which list one path match expression per line."
@@ -45,8 +47,9 @@ class ProcessingPathsArgGroup {
     }
 
     @Option(
-        names = ["--path-resource"],
+        names = ["--path-res"],
         arity = "0..*",
+        paramLabel = "pathFileOnClassPath",
         description = [
             "A file available on the class path. Contains one match expression per line."
         ]
@@ -69,6 +72,14 @@ class ProcessingPathsArgGroup {
             toList()
         }
     }
+
+    val isAvailable: Boolean
+        get() = when (val p = paths) {
+            is Path.PathClasspathResource -> true
+            is Path.PathCollection -> p.isNotEmpty()
+            is Path.PathFile -> true
+            is Path.Value -> true
+        }
 
     private sealed class Path {
 

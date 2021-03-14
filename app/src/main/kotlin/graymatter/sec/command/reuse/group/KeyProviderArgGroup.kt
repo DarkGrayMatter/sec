@@ -23,7 +23,7 @@ import java.io.File
  */
 class KeyProviderArgGroup {
 
-    val isSupplied: Boolean get() = keySupplier != null
+    val isAvailable: Boolean get() = keySupplier != null
 
     var keyUri: String? = null
         private set

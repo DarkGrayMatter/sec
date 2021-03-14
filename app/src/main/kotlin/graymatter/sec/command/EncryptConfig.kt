@@ -52,6 +52,8 @@ class EncryptConfig : Runnable, ValidationTarget {
     )
     lateinit var keyProvider: KeyProviderArgGroup
 
+    internal lateinit var selectedDefaultOutputFormat: DocumentFormat
+        private set
 
     @Mixin
     val inputFormatMixin = InputFormatMixin()

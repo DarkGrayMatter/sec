@@ -13,11 +13,11 @@
 
 ## Introduction - What & Why
 
-_SEC_ offers an companion to the use with the [Palantir Configuration Values](https://github.com/palantir/encrypted-config-value). This open source library offers an secure way for developer to keep sensitive configuration values even on public repositories.
+_SEC_ offers a companion to the use with the [Palantir Configuration Values](https://github.com/palantir/encrypted-config-value). This open source library offers a secure way for the developer to keep sensitive configuration values even on public repositories.
 
-In addition to this core functionality provided by the _Palantir Configuration Values_ library, this tools also offers an easy command line friendly interface to some extended he use original library such as:
+In addition to this core functionality provided by the _Palantir Configuration Values_ library, this tools also offers an easy command line friendly interface which extends the original library by:
 
-- The ability to encrypt sensitive information pieces across the whole configuration file based on a pattern.
+- Providing the ability to encrypt sensitive information pieces across the _whole configuration_ file based on a pattern.
 - Understanding common configuration formats such as java properties, and JSON.
 - Ability to decrypt (given the correct key) configuration document.
 
@@ -70,7 +70,7 @@ If you want see help on specific command you may type in `sec help encrypt-confi
    > Use the _dot-tar_ for unix like operating systems such as linux and MacOS.
    > Use the _dot-zip_ for Windows.
 
-5. Follow the install instructions.
+5. Follow the installation instructions.
 
 ## Simple quick start
 

@@ -40,6 +40,7 @@ internal class EncryptConfigTest : AbstractCommandTest<EncryptConfig>() {
         thenAssertEncryptedPropertiesFileProvidedKeys(expectedEncryptedPropertiesFile)
     }
 
+
     private fun whenRunningCommand() {
         givenCommand.run()
     }

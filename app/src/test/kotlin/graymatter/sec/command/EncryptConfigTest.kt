@@ -46,7 +46,7 @@ internal class EncryptConfigTest {
         val fileOut = File(givenCurrentWorkingDir, "encrypted.properties")
         givenCommandLineArgsOf(
             "--file", givenUnencryptedPropertiesFile,
-            "--key-file", givenEncryptionKeyFile,
+            "--key", givenEncryptionKeyFile,
             "--file-out", fileOut
         )
         return fileOut

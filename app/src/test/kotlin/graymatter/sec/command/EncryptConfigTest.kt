@@ -5,6 +5,7 @@ import graymatter.sec.common.document.DocumentFormat
 import graymatter.sec.common.resourceFile
 import graymatter.sec.common.toPropertiesMap
 import org.junit.jupiter.api.*
+import picocli.CommandLine
 import java.io.File
 import java.util.*
 import kotlin.test.assertEquals
@@ -129,5 +130,15 @@ internal class EncryptConfigTest : AbstractCommandTest<EncryptConfig>() {
             ),
         )
 
+    }
+
+    @Test
+    fun commandWithNoArgsShouldFailOnValidation() {
+        givenCommandLineOf()
+        val expected = assertThrows<CommandLine.ParameterException> { whenRunningCommand() }
+        println(expected.message)
+        assertTrue(expected.message?.contains(
+            "For your assistance please consult the usage below:",
+            ignoreCase = true) == true)
     }
 }

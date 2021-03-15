@@ -27,7 +27,7 @@ class EncryptConfig : Runnable {
         validate = true,
         heading = "Choose one of the following unencrypted configuration sources:%n"
     )
-    lateinit var configInput: InputSourceArgGroup
+    val configInput: InputSourceArgGroup = InputSourceArgGroup()
 
     @ArgGroup(
         exclusive = true,

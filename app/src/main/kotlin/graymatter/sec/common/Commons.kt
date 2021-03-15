@@ -84,3 +84,7 @@ fun URL.file(): File {
 }
 
 val stderr: PrintStream get() = System.err
+
+fun UUID(): UUID = UUID.randomUUID()
+fun UUID(named: String): UUID = UUID.fromString(named)
+fun UUID(namedByBytes: ByteArray): UUID = UUID.nameUUIDFromBytes(namedByBytes)

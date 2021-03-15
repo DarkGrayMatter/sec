@@ -77,14 +77,14 @@ class DecryptConfig : Runnable {
             requires(passed(inputIsPresent) && resolveInputFormat() != null) {
                 """
                 Unable to determine input configuration format.
-                Please provide an input format via the command line. 
+                 Please provide an input format via the command line. 
                 """.trimIndentToLine()
             }
 
             requires(passed(outputIsPresent) && resolveOutputFormat() != null) {
                 """
                 Unable to determine output configuration format. Neither an input format
-                nor output format override has been specified. 
+                 nor output format override has been specified. 
                 """.trimIndentToLine()
             }
 

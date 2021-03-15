@@ -2,10 +2,14 @@ package graymatter.sec.command
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import graymatter.sec.App
+import graymatter.sec.common.Properties
 import graymatter.sec.common.UUID
 import graymatter.sec.common.document.DocumentFormat
+import graymatter.sec.common.document.jsonOf
 import graymatter.sec.common.document.treeOf
+import graymatter.sec.common.document.visitNodePathsOf
 import graymatter.sec.common.resourceAt
+import graymatter.sec.common.toPropertiesMap
 import org.junit.jupiter.api.*
 import java.io.File
 import java.util.*
@@ -31,15 +35,17 @@ internal class DecryptConfigTest : AbstractCommandTest<DecryptConfig>() {
 
         @BeforeEach
         fun initTest() {
+            givenEncryptedResource = res("/samples/sample-config.yaml")
             givenDecryptedCommandLine = mutableListOf()
             givenDecryptionKeyResource = res("/keys/test.private")
+            decryptedFileOut = file("decrypted-config-${UUID()}")
         }
 
         @Test
         @DisplayName("If I explicitly set the --format-out value, choose it.")
         fun userExplicitlySetsOutputFormat() {
-            givenDecryptedSampleResourceWithFormat(DocumentFormat.JAVA_PROPERTIES)
-            whenAddingToCommandLineExplicitFormatOfYaml()
+            givenDecryptedSampleResourceWithFormat(DocumentFormat.YAML)
+            whenAddingToCommandLineExplicitFormatOfProps()
             whenRunningCommand()
             thenAssertOutputIsFileIsOfType(DocumentFormat.YAML)
         }
@@ -47,7 +53,7 @@ internal class DecryptConfigTest : AbstractCommandTest<DecryptConfig>() {
         @Test
         @DisplayName("If I name the output file with a known/valid extension then choose a format based on the output extension.")
         fun userImpliedFormatByNamingTheFileWithExtension() {
-            whenAddingToCommandLineNameWithExtensionOfJavaProperties()
+            givenDecryptedSampleResourceWithFormat(DocumentFormat.YAML)
             whenRunningCommand()
             thenAssertOutputIsFileIsOfType(DocumentFormat.JAVA_PROPERTIES)
         }
@@ -64,17 +70,12 @@ internal class DecryptConfigTest : AbstractCommandTest<DecryptConfig>() {
             givenDecryptedCommandLine.addAll(args)
         }
 
-        private fun whenAddingToCommandLineNameWithExtensionOfJavaProperties() {
-            decryptedFileOut = file("decrypted-config-${UUID()}.properties")
-            addToCommandLine("--file-out", "$decryptedFileOut")
-        }
-
         private fun whenUserEnterCommandToDecryptSampleYamlConfig() {
             givenDecryptedSampleResourceWithFormat(DocumentFormat.YAML)
         }
 
-        private fun whenAddingToCommandLineExplicitFormatOfYaml() {
-            addToCommandLine("--format-out", "yaml")
+        private fun whenAddingToCommandLineExplicitFormatOfProps() {
+            addToCommandLine("--format-out", "java_properties")
         }
 
         private fun givenDecryptedSampleResourceWithFormat(format: DocumentFormat) {
@@ -82,17 +83,15 @@ internal class DecryptConfigTest : AbstractCommandTest<DecryptConfig>() {
         }
 
         private fun thenAssertOutputIsFileIsOfType(format: DocumentFormat) {
-            assertAll("Expected $decryptedFileOut is of type ${format.name}",
+            
+            assertAll(
+                "Expected $decryptedFileOut is of type ${format.name}",
                 { assertTrue(decryptedFileOut.length() > 0) },
-                {
-                    println("Reading decrypted content format of ${format.name.toLowerCase()} from $decryptedFileOut")
-                    val content = treeOf<ObjectNode>(format, decryptedFileOut.readText())
-                    assertTrue(content.size() > 0)
-                },
             )
         }
 
         private fun whenRunningCommand() {
+            addToCommandLine("--file-out", decryptedFileOut.toString())
             addToCommandLine("--res-in", givenEncryptedResource)
             addToCommandLine("--key-res", givenDecryptionKeyResource)
             givenCommandLineOf(*givenDecryptedCommandLine.toTypedArray())

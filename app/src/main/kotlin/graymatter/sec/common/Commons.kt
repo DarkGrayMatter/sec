@@ -15,7 +15,7 @@ fun <T> Boolean.value(truth: T, notTrue: T): T {
     }
 }
 
-private fun Sequence<String>.join() = joinToString("")
+private fun Sequence<String>.join() = joinToString(" ")
 
 fun String.trimToLine() = lineSequence().map { it.trim() }.join()
 fun String.trimIndentToLine() = trimIndent().lineSequence().join()

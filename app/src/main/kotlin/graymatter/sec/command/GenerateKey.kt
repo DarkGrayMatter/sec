@@ -43,17 +43,17 @@ class GenerateKey : Runnable {
     }
 
     @Option(
-        names = ["--force-path"],
+        names = ["--do-not-force-path"],
         description = ["Creates path if does not exists."],
         defaultValue = "false"
     )
     fun setForcePath(b: Boolean) {
-        forcePath = b
+        forcePath = !b
     }
 
     @Option(
-        names = ["--fail-on-existing-key-files"],
-        description = ["Generation of keys will fail if the same key are found at the destination"],
+        names = ["--do-not-replace"],
+        description = ["Generation of keys will fail if the same key(or keys), are found at the same destination"],
         showDefaultValue = Help.Visibility.ALWAYS,
         defaultValue = "false"
     )
@@ -66,7 +66,8 @@ class GenerateKey : Runnable {
         arity = "1",
         description = ["Where the keys file should be written to"],
         defaultValue = ".",
-        paramLabel = "DESTINATION",
+        paramLabel = "DIRECTORY",
+        showDefaultValue = Help.Visibility.ALWAYS
     )
     fun setDestination(path: File) {
         this.dest = path
@@ -80,7 +81,9 @@ class GenerateKey : Runnable {
             forceKeyLocation = this.forcePath,
             overwriteExisting = !failOnExistingKeyFiles,
             keyLocation = this.dest,
-        ).call().onException(this::reportKeyGenerationFailed).onSuccess(this::reportKeyFilesGenerated)
+        ).call()
+            .onException(this::reportKeyGenerationFailed)
+            .onSuccess(this::reportKeyFilesGenerated)
     }
 
     private fun reportKeyGenerationFailed(keyGenerationException: KeyGenerationException) {
@@ -110,9 +113,8 @@ class GenerateKey : Runnable {
         }
 
         val heading = "Generated $keyTypeLabel"
-
-        val headingLine = (max(heading.length, infoLines.maxByOrNull(String::length)!!.length) + 6)
-            .let { buildString { repeat(it) {append('=')} } }
+        val headingLineWidth = max(heading.length, infoLines.maxByOrNull(String::length)!!.length) + 6
+        val headingLine = headingLineWidth.let { buildString { repeat(it) {append('=')} } }
 
         println(headingLine)
         println("  $heading")

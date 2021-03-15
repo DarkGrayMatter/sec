@@ -14,6 +14,10 @@ enum class DocumentFormat(vararg validExtensions: String) {
 
     companion object {
 
+        fun ofExt(ext: String): DocumentFormat {
+            return values().first { ext.toLowerCase() in it.fileExtensions }
+        }
+
         private val FORMATS_WITH_SUFFIXES: List<Pair<DocumentFormat, String>> =
             values().flatMap { format ->
                 format.fileExtensions.map { ext ->

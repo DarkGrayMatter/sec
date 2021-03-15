@@ -42,7 +42,7 @@ class EncryptValue : Runnable {
 
     private fun validateSpec() {
         validate(spec) {
-            requires(keyProvider.isSupplied) { "Please provide an key to encrypt with" }
+            requires(keyProvider.isAvailable) { "Please provide an key to encrypt with" }
         }
     }
 

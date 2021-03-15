@@ -3,7 +3,7 @@ package graymatter.sec.command.reuse.mixin
 import graymatter.sec.common.document.DocumentFormat
 import picocli.CommandLine.Option
 
-class InputFormatMixin {
+class InputFormatOption {
     @Option(
         names =  ["--format"],
         required = false,
@@ -14,7 +14,7 @@ class InputFormatMixin {
     var value: DocumentFormat? = null
 }
 
-class OutputFormatMixin {
+class OutputFormatOption {
     @Option(
         names = ["--format-out"],
         required = false,

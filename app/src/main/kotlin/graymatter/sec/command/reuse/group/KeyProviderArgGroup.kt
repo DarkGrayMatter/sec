@@ -23,14 +23,15 @@ import java.io.File
  */
 class KeyProviderArgGroup {
 
-    val isSupplied: Boolean get() = keySupplier != null
+    val isAvailable: Boolean get() = keySupplier != null
+
     var keyUri: String? = null
         private set
 
     private var keySupplier: (() -> KeyWithType)? = null
 
     @Option(
-        names = ["--key-file"],
+        names = ["--key","-k"],
         description = ["Retrieves key from a file."],
         required = true
     )
@@ -40,17 +41,17 @@ class KeyProviderArgGroup {
     }
 
     @Option(
-        names = ["--key-resource"],
+        names = ["--key-res"],
         required = true,
         description = ["Retrieve key from file on the application classpath."]
     )
     fun setKeyFileFromClassPath(resource: String) {
-        keyUri = Any::class.java.getResource(resource)?.file()?.path
+        keyUri = Any::class.java.getResource(resource)?.toURI()?.toString()
         keySupplier = { resourceFile<App>(resource).readText().let(KeyWithType::fromString) }
     }
 
     @Option(
-        names = ["--key"],
+        names = ["--key-val"],
         required = true,
         description = ["Retrieves key from directly from the command line."]
     )

@@ -88,3 +88,8 @@ val stderr: PrintStream get() = System.err
 fun UUID(): UUID = UUID.randomUUID()
 fun UUID(named: String): UUID = UUID.fromString(named)
 fun UUID(namedByBytes: ByteArray): UUID = UUID.nameUUIDFromBytes(namedByBytes)
+
+fun <T> MutableCollection<T>.add(item: T, vararg more: T) {
+    this.add(item)
+    more.forEach { this.add(it) }
+}

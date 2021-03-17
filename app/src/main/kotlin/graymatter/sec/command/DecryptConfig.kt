@@ -18,8 +18,8 @@ import java.io.IOException
 )
 class DecryptConfig : Runnable {
 
-    private var resolvedOutputFormat: DocumentFormat? = null
-    private var resolvedInputFormat: DocumentFormat? = null
+    private var actualFormatOut: DocumentFormat? = null
+    private var actualFormatIn: DocumentFormat? = null
 
     @Spec
     lateinit var spec: Model.CommandSpec
@@ -52,20 +52,24 @@ class DecryptConfig : Runnable {
     val outputFormatOverride = OutputFormatOption()
 
     override fun run() {
-        resolveDefaults()
+        applyDefaults()
         validate()
+        runUseCase()
+    }
+
+    private fun runUseCase() {
         DecryptConfigUseCase(
             keyWithType = keyProvider.keyWithType!!,
             source = source::openInputStream,
-            sourceFormat = resolvedInputFormat!!,
+            sourceFormat = actualFormatIn!!,
             destination = destination::openOutputStream,
-            destinationFormat = resolvedOutputFormat!!
+            destinationFormat = actualFormatOut!!
         ).run()
     }
 
-    private fun resolveDefaults() {
-        resolveInputFormat()
-        resolveOutputFormat()
+    private fun applyDefaults() {
+        setActualInputFormat()
+        setActualOutputFormat()
     }
 
     /**
@@ -74,39 +78,38 @@ class DecryptConfig : Runnable {
      * 2. If I name the output file with a known/valid extension then choose a format based on the output extension.
      * 3. As a last resort us the input format.
      */
-    private fun resolveOutputFormat() {
-        resolvedOutputFormat ?: run {
-            resolvedOutputFormat = when {
-                outputFormatOverride.value != null -> {
-                    outputFormatOverride.value
-                }
-                destination.isAvailable && !destination.isStdOut && destination.uri != null -> {
-                    destination.uri?.let { DocumentFormat.ofUri(it) }
-                }
-                else -> {
-                    resolveInputFormat()
-                    resolvedInputFormat
-                }
-            }
+    private fun setActualOutputFormat() {
+
+        if (actualFormatOut != null) {
+            return
+        }
+
+        actualFormatOut = outputFormatOverride.value
+
+        if (actualFormatOut == null && destination.isAvailable && !destination.isStdOut) {
+            actualFormatOut = destination.uri?.let { DocumentFormat.ofUri(it) }
+        }
+
+        if (actualFormatOut == null) {
+            setActualInputFormat()
+            actualFormatOut = actualFormatIn
         }
     }
 
-    private fun resolveInputFormat() {
-        resolvedInputFormat ?: run {
-            resolvedInputFormat = when {
-                inputFormatOverride.value != null -> {
-                    inputFormatOverride.value
-                }
-                source.isAvailable && !source.isStdIn && source.uri != null -> {
-                    val uri = source.uri!!
-                    val format = DocumentFormat.ofUri(uri)
-                    format
-                }
-                else -> {
-                    null
-                }
-            }
+    private fun setActualInputFormat() {
+
+        if (actualFormatIn != null) {
+            return
         }
+
+        if (actualFormatIn == null) {
+            actualFormatIn = inputFormatOverride.value
+        }
+
+        if (actualFormatIn == null && source.isAvailable && !source.isStdIn) {
+            actualFormatIn = source.uri?.let { DocumentFormat.ofUri(it) }
+        }
+
     }
 
     private fun validate() {
@@ -124,14 +127,14 @@ class DecryptConfig : Runnable {
                 "No decryption key supplied."
             }
 
-            requires(passed(inputIsPresent) && resolvedInputFormat != null) {
+            requires(passed(inputIsPresent) && actualFormatIn != null) {
                 """
                 Unable to determine input configuration format.
                  Please provide an input format via the command line. 
                 """.trimIndentToLine()
             }
 
-            requires(passed(outputIsPresent) && resolvedOutputFormat != null) {
+            requires(passed(outputIsPresent) && actualFormatOut != null) {
                 """
                 Unable to determine output configuration format. Neither an input format
                  nor output format override has been specified. 

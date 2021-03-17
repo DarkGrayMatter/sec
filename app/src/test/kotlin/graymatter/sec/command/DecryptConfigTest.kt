@@ -1,6 +1,5 @@
 package graymatter.sec.command
 
-import com.github.stefanbirkner.systemlambda.SystemLambda
 import com.github.stefanbirkner.systemlambda.SystemLambda.tapSystemOut
 import graymatter.sec.common.UUID
 import graymatter.sec.common.document.DocumentFormat

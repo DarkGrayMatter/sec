@@ -61,6 +61,8 @@ dependencies {
     // ID Generator (used internally to geneate opaque keys by the validation framework)
     implementation("org.hashids:hashids:1.0.3")
 
+    // System lamdba to for testing
+    testImplementation("com.github.stefanbirkner:system-lambda:1.2.0")
 }
 
 val secToolAppMain = "graymatter.sec.App"
@@ -119,7 +121,7 @@ tasks.withType<ProcessResources> {
         val replacement = when {
             project.hasProperty(variable) -> project.property(variable).toString()
             else -> resourceReplacements[variable]
-        } ?: throw GradleException("No value found for $variable")
+        }
 
         return "$key=$replacement"
     }
@@ -135,7 +137,7 @@ tasks.withType<ProcessResources> {
             value == null -> property
             value.startsWith("\${") and value.endsWith("}") -> {
                 val variable = value.substring(2, value.length - 1)
-                replacment(key, variable)
+                replacment(key, variable) ?: property
             }
             else -> property
         }

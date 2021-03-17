@@ -1,7 +1,9 @@
 package graymatter.sec.command
 
+import com.github.stefanbirkner.systemlambda.SystemLambda.tapSystemOut
 import graymatter.sec.common.Properties
 import graymatter.sec.common.document.DocumentFormat
+import graymatter.sec.common.io.assertFileHasContentOf
 import graymatter.sec.common.resourceFile
 import graymatter.sec.common.toPropertiesMap
 import org.junit.jupiter.api.*
@@ -9,6 +11,7 @@ import picocli.CommandLine
 import java.io.File
 import java.util.*
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -37,14 +40,19 @@ internal class EncryptConfigTest : AbstractCommandTest<EncryptConfig>() {
         thenAssertEncryptedPropertiesFileProvidedKeys(expectedEncryptedPropertiesFile)
     }
 
-
-    private fun whenRunningCommand() {
-        givenCommand.run()
+    @Test
+    fun alwaysDefaultToStdOutIfUserHasNotSelectedExplicitOutput() {
+        cliArgs("--key", givenEncryptionKeyFile.toString())
+        cliArgs("--file-in", givenUnencryptedPropertiesFile.toString())
+        val out = tapSystemOut { whenRunningCommand() }.also { println(it) }
+        assertNotNull(out)
+        assertTrue(out.isNotEmpty())
     }
 
+
     private fun givenCommandToEncryptToFile(): File {
-        val fileOut = File(givenWorkingDir, "encrypted.properties")
-        givenCommandLineOf(
+        val fileOut = file("encrypted.properties")
+        cliArgs(
             "--file-in", "$givenUnencryptedPropertiesFile",
             "--key", "$givenEncryptionKeyFile",
             "--file-out", "$fileOut"
@@ -73,6 +81,15 @@ internal class EncryptConfigTest : AbstractCommandTest<EncryptConfig>() {
                 "contain all the keys in the given properties file ($givenUnencryptedPropertiesFile)"))
     }
 
+    @Test
+    fun commandWithNoArgsShouldFailOnValidation() {
+        val expected = assertThrows<CommandLine.ParameterException> { whenRunningCommand() }
+        println(expected.message)
+        assertTrue(expected.message?.contains(
+            "For your assistance please consult the usage below:",
+            ignoreCase = true) == true)
+    }
+
 
     /**
      * This test asserts that output format based on [issue-#17](https://github.com/DarkGrayMatter/sec/issues/17#issue-830945985)
@@ -86,59 +103,64 @@ internal class EncryptConfigTest : AbstractCommandTest<EncryptConfig>() {
      * 2. If I name the output file with a known/valid extension then choose a format based on the output extension.
      * 3. As a last resort us the input format.
      */
-    @Test
-    fun outputFormatResolutionTest() {
+    @Nested
+    @DisplayName("Smart handling of output format based on user input")
+    inner class TestSmartHandlingOfOutputHandling {
 
-        var assertions = 0
+        private val yamlConfigFile = resourceFile("/samples/sample-config.yaml")
+        private lateinit var fileOutName: String
+        private lateinit var fileOut: File
 
-        fun assertOutputSelected(
-            rule: String,
-            expectedFormat: DocumentFormat,
-            vararg commandLine: String,
-        ): () -> Unit = {
-            val assertionIndex = ++assertions
-            println("----[$assertionIndex -> ${expectedFormat.defaultFileExtension}]------------------------------------------------------------------------------------------------")
-            println(rule)
-            println("-----------------------------------------------------------------------------------------------------------------")
-            print("\n\n")
-            givenCommandLineOf(* commandLine)
-            whenRunningCommand()
-            assertEquals(givenCommand.outputFormat, expectedFormat, " Failed[$assertionIndex] : $rule")
+        @BeforeEach
+        fun setUp() {
+            fileOutName = "encrypted-config"
         }
 
-        assertAll(
-            assertOutputSelected(
-                rule = "If I explicitly set the `--format-out` value, choose it.",
-                expectedFormat = DocumentFormat.JAVA_PROPERTIES,
-                "--format-out", "java_properties",
-                "--key-res", "/keys/test",
-                "--res-in", "/samples/sample-config.yaml"
-            ),
-            assertOutputSelected(
-                rule = "If I name the output file with a known/valid extension then choose a format based on the output extension.",
-                expectedFormat = DocumentFormat.JSON,
-                "--key-res", "/keys/test",
-                "--res-in", "/samples/sample-config.yaml",
-                "--file-out", "${File(givenWorkingDir, "config.json")}"
-            ),
-            assertOutputSelected(
-                rule = "As a last resort us the input format",
-                expectedFormat = DocumentFormat.YAML,
-                "--key-res", "/keys/test",
-                "--res-in", "/samples/sample-config.yaml",
-                "--stdout"
-            ),
-        )
+        @Test
+        @DisplayName("If I explicitly set the `--format-out` value, choose it.")
+        fun userSelectExplicitFormatOut() {
+            givenFileOutFormatAsJson()
+            whenEncrypting()
+            thenAssertFileOutContainsJson()
+        }
 
-    }
+        @Test
+        @DisplayName("If I name the output file with a known/valid extension then choose a format based on the output extension.")
+        fun userSuppliedFileNameWithKnownExtension() {
+            givenFileHashJsonExtension()
+            whenEncrypting()
+            thenAssertFileOutContainsJson()
+        }
 
-    @Test
-    fun commandWithNoArgsShouldFailOnValidation() {
-        givenCommandLineOf()
-        val expected = assertThrows<CommandLine.ParameterException> { whenRunningCommand() }
-        println(expected.message)
-        assertTrue(expected.message?.contains(
-            "For your assistance please consult the usage below:",
-            ignoreCase = true) == true)
+        @Test
+        @DisplayName("As a last resort to the input format.")
+        fun userNotSetAnyOutputFormat() {
+            whenEncrypting()
+            thenAssertFileOutContainsYaml()
+        }
+
+        private fun thenAssertFileOutContainsJson() {
+            assertFileHasContentOf(DocumentFormat.JSON, fileOut)
+        }
+
+        private fun thenAssertFileOutContainsYaml() {
+            assertFileHasContentOf(DocumentFormat.YAML, fileOut)
+        }
+
+        private fun givenFileOutFormatAsJson() {
+            cliArgs("--format-out", "json")
+        }
+
+        private fun givenFileHashJsonExtension() {
+            fileOutName += ".${DocumentFormat.JSON.defaultFileExtension}"
+        }
+
+        private fun whenEncrypting() {
+            fileOut = file(fileOutName)
+            cliArgs("--key", givenEncryptionKeyFile.toString())
+            cliArgs("--file-in", yamlConfigFile.toString())
+            cliArgs("--file-out", fileOut.toString())
+            whenRunningCommand()
+        }
     }
 }

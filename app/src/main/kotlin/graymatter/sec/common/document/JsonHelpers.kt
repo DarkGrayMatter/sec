@@ -18,23 +18,15 @@ fun <T : JsonNode> ObjectMapper.treeFromContent(content: String, expectedContent
         else -> throw IllegalArgumentException(
             """
             Unexpected content type parsed. Expected ${expectedContentNodeClass.simpleName}, but found 
-            ${node.javaClass.simpleName} instead. (see [${node.toPrettyString()}])"
+             ${node.javaClass.simpleName} instead. (see [${node.toPrettyString()}])"
             """.trimToLine()
         )
     }
-
 }
 
 inline fun <reified T : JsonNode> ObjectMapper.treeFromContent(content: String): T {
     return this.treeFromContent(content, T::class.java)
 }
-
-inline fun <reified T : JsonNode> ObjectMapper.treeFrom(input: InputStream): T {
-    return readTree(input) as T
-}
-
-fun String.asTree(mapper: ObjectMapper): JsonNode = mapper.treeFromContent(this)
-
 
 inline fun <reified T : JsonNode> InputStream.readTree(format: DocumentFormat, charset: Charset = Charsets.UTF_8): T {
     return DocumentMapper.of(format).readTree(reader(charset)) as T

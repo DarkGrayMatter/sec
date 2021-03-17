@@ -10,7 +10,7 @@ import picocli.CommandLine.populateCommand
 import java.io.File
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-abstract class AbstractCommandTest<T:Any> {
+abstract class AbstractCommandTest<T : Runnable> {
 
     protected lateinit var givenWorkingDir: File
         private set
@@ -38,6 +38,18 @@ abstract class AbstractCommandTest<T:Any> {
     protected abstract fun setupCommand(): T
 
     protected fun givenCommandLineOf(vararg args: String) {
-        this.givenCommandLine = populateCommand(givenCommandLine, * args)
+        this.givenCommandLine = App.createCommandLine(givenCommand)
+        this.givenCommandLine.parseArgs(* args)
+        println("""
+            +--------------------------------------------------->
+            | sec ${givenCommandLine.commandSpec.name()} ${buildString { args.joinTo(this, " ") }}
+            +--------------------------------------------------->
+            """.trimIndent())
     }
+
+    protected open fun whenRunningCommand() {
+        givenCommand.run()
+    }
+
+    protected fun file(name: String): File = File(givenWorkingDir, name)
 }

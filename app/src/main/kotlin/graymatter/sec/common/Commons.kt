@@ -15,7 +15,7 @@ fun <T> Boolean.value(truth: T, notTrue: T): T {
     }
 }
 
-private fun Sequence<String>.join() = joinToString("")
+private fun Sequence<String>.join() = joinToString(" ", transform = {it.trimEnd()}).trim()
 
 fun String.trimToLine() = lineSequence().map { it.trim() }.join()
 fun String.trimIndentToLine() = trimIndent().lineSequence().join()
@@ -84,3 +84,12 @@ fun URL.file(): File {
 }
 
 val stderr: PrintStream get() = System.err
+
+fun UUID(): UUID = UUID.randomUUID()
+fun UUID(named: String): UUID = UUID.fromString(named)
+fun UUID(namedByBytes: ByteArray): UUID = UUID.nameUUIDFromBytes(namedByBytes)
+
+fun <T> MutableCollection<T>.add(item: T, vararg more: T) {
+    this.add(item)
+    more.forEach { this.add(it) }
+}

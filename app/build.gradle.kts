@@ -119,7 +119,7 @@ tasks.withType<ProcessResources> {
         val replacement = when {
             project.hasProperty(variable) -> project.property(variable).toString()
             else -> resourceReplacements[variable]
-        } ?: throw GradleException("No value found for $variable")
+        }
 
         return "$key=$replacement"
     }
@@ -135,7 +135,7 @@ tasks.withType<ProcessResources> {
             value == null -> property
             value.startsWith("\${") and value.endsWith("}") -> {
                 val variable = value.substring(2, value.length - 1)
-                replacment(key, variable)
+                replacment(key, variable) ?: property
             }
             else -> property
         }

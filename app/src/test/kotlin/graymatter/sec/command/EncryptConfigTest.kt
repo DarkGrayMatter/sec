@@ -38,10 +38,6 @@ internal class EncryptConfigTest : AbstractCommandTest<EncryptConfig>() {
     }
 
 
-    private fun whenRunningCommand() {
-        givenCommand.run()
-    }
-
     private fun givenCommandToEncryptToFile(): File {
         val fileOut = File(givenWorkingDir, "encrypted.properties")
         givenCommandLineOf(

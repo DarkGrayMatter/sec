@@ -12,6 +12,9 @@ import java.io.OutputStream
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 class OutputTargetArgGroup  {
 
+    val isStdOut: Boolean
+        get() = target != null && uri == "stdout://"
+
     private var target: Target? = null
 
     @Option(

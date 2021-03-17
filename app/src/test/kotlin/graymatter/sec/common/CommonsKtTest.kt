@@ -26,7 +26,7 @@ internal class CommonsKtTest {
                 t
                 """.trimToLine()
             )
-            thenExpectLine("1234JQt")
+            thenExpectLine("1 2 3 4 J Q t")
         }
 
         @Test
@@ -41,7 +41,7 @@ internal class CommonsKtTest {
                 6
             """.trimIndentToLine()
             )
-            thenExpectLine("12    3    456")
+            thenExpectLine("1 2     3     4 5 6")
         }
 
         @Test
@@ -56,7 +56,7 @@ internal class CommonsKtTest {
                 |
                 |7
             """.trimMarginToLine())
-            thenExpectLine("1234 5 67")
+            thenExpectLine("1 2 3 4  5  6  7")
         }
 
         private fun givenTextBlockOf(s: String) {

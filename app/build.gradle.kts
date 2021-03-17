@@ -61,6 +61,8 @@ dependencies {
     // ID Generator (used internally to geneate opaque keys by the validation framework)
     implementation("org.hashids:hashids:1.0.3")
 
+    // System lamdba to for testing
+    testImplementation("com.github.stefanbirkner:system-lambda:1.2.0")
 }
 
 val secToolAppMain = "graymatter.sec.App"

@@ -36,14 +36,14 @@ class DecryptConfig : Runnable {
         order = 1,
         heading = "Provide use one these arguments to determine where decrypted documents should be written to:%n"
     )
-    lateinit var destination: OutputTargetArgGroup
+    val destination: OutputTargetArgGroup = OutputTargetArgGroup()
 
     @ArgGroup(
         exclusive = true,
         order = 2,
         heading = "Use any of the following arguments or options to specify a key for decryption:%n"
     )
-    lateinit var keyProvider: KeyProviderArgGroup
+    val keyProvider: KeyProviderArgGroup = KeyProviderArgGroup()
 
     @Mixin
     val inputFormatOverride = InputFormatOption()
@@ -68,8 +68,13 @@ class DecryptConfig : Runnable {
     }
 
     private fun applyDefaults() {
+        setDefaultToStdOutInAbsenceOfUserInput()
         setActualInputFormat()
         setActualOutputFormat()
+    }
+
+    private fun setDefaultToStdOutInAbsenceOfUserInput() {
+        destination.takeUnless { it.isAvailable }?.also { it.setOutputToStdOut() }
     }
 
     /**
@@ -115,15 +120,15 @@ class DecryptConfig : Runnable {
     private fun validate() {
         validate(spec) {
 
-            val inputIsPresent = requires(this@DecryptConfig::source.isInitialized) {
+            val inputIsPresent = requires(source.isAvailable) {
                 "No source document to decrypt was supplied."
             }
 
-            val outputIsPresent = requires(this@DecryptConfig::destination.isInitialized) {
+            val outputIsPresent = requires(destination.isAvailable) {
                 "No destination provided to output the decrypted document to."
             }
 
-            val encryptionKeyIsPresent = requires(this@DecryptConfig::keyProvider.isInitialized) {
+            val encryptionKeyIsPresent = requires(keyProvider.isAvailable) {
                 "No decryption key supplied."
             }
 

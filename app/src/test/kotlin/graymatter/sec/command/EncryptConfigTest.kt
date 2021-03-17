@@ -1,5 +1,6 @@
 package graymatter.sec.command
 
+import com.github.stefanbirkner.systemlambda.SystemLambda.tapSystemOut
 import graymatter.sec.common.Properties
 import graymatter.sec.common.document.DocumentFormat
 import graymatter.sec.common.io.assertFileHasContentOf
@@ -10,6 +11,7 @@ import picocli.CommandLine
 import java.io.File
 import java.util.*
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -38,9 +40,18 @@ internal class EncryptConfigTest : AbstractCommandTest<EncryptConfig>() {
         thenAssertEncryptedPropertiesFileProvidedKeys(expectedEncryptedPropertiesFile)
     }
 
+    @Test
+    fun alwaysDefaultToStdOutIfUserHasNotSelectedExplicitOutput() {
+        cliArgs("--key", givenEncryptionKeyFile.toString())
+        cliArgs("--file-in", givenUnencryptedPropertiesFile.toString())
+        val out = tapSystemOut { whenRunningCommand() }.also { println(it) }
+        assertNotNull(out)
+        assertTrue(out.isNotEmpty())
+    }
+
 
     private fun givenCommandToEncryptToFile(): File {
-        val fileOut = File(givenWorkingDir, "encrypted.properties")
+        val fileOut = file("encrypted.properties")
         cliArgs(
             "--file-in", "$givenUnencryptedPropertiesFile",
             "--key", "$givenEncryptionKeyFile",

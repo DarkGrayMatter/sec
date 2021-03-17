@@ -7,7 +7,7 @@ import graymatter.sec.command.reuse.mixin.InputFormatOption
 import graymatter.sec.command.reuse.mixin.OutputFormatOption
 import graymatter.sec.common.cli.validate
 import graymatter.sec.common.document.DocumentFormat
-import graymatter.sec.common.trimIndentToLine
+import graymatter.sec.common.trimIndentToSentence
 import graymatter.sec.usecase.DecryptConfigUseCase
 import picocli.CommandLine.*
 import java.io.IOException
@@ -131,14 +131,14 @@ class DecryptConfig : Runnable {
                 """
                 Unable to determine input configuration format.
                  Please provide an input format via the command line. 
-                """.trimIndentToLine()
+                """.trimIndentToSentence()
             }
 
             requires(passed(outputIsPresent) && actualFormatOut != null) {
                 """
                 Unable to determine output configuration format. Neither an input format
                  nor output format override has been specified. 
-                """.trimIndentToLine()
+                """.trimIndentToSentence()
             }
 
             if (passed(encryptionKeyIsPresent)) {

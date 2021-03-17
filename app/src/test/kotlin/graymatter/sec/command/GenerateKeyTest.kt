@@ -23,7 +23,7 @@ internal class GenerateKeyTest : AbstractCommandTest<GenerateKey>() {
             "--key", givenKeyName,
             "$expectedKeyDir"
         )
-        givenCommand.run()
+        whenRunningCommand()
         assertTrue(
             expectedKeyDir.exists(),
             "Expect generate-key command to create keys directory [$expectedKeyDir]"

@@ -39,5 +39,5 @@ fun Properties.toPropertiesMap(): Map<String, String?> {
 fun Properties(bytes: ByteArray, charset: Charset = Charsets.UTF_8) =
     Properties().also { it.load(ByteArrayInputStream(bytes).reader(charset)) }
 
-fun Properties(file: File) = Properties().apply { file.bufferedReader().use { load(it) } }
+fun Properties(file: File) = Properties().apply { file.bufferedReader(Charsets.UTF_8).use { load(it) } }
 fun Properties(source: ByteArrayOutputStream) = Properties(source.toByteArray())

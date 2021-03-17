@@ -6,7 +6,7 @@ package graymatter.sec.common.document
 enum class DocumentFormat(vararg validExtensions: String) {
 
     JSON("json"),
-    YAML("yml", "yaml"),
+    YAML("yaml","yml"),
     JAVA_PROPERTIES("properties");
 
     val fileExtensions = validExtensions.map(String::toLowerCase).toList()

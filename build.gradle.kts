@@ -1,5 +1,5 @@
 object Product {
-    const val version = "0.0.2"
+    const val version = "0.0.3-snapshot"
     const val group = "graymatter.sec"
 }
 

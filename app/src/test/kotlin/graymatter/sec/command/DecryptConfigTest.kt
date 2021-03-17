@@ -24,15 +24,15 @@ internal class DecryptConfigTest : AbstractCommandTest<DecryptConfig>() {
     @DisplayName("Automatically detect output format when decrypting a document.")
     inner class TestAutoDetectingOutputConfigFormat {
 
-        private val encryptedConfigFile: File = resourceFile("/samples/sample-config.properties")
-        private val decryptionKeyFile: File = resourceFile("/samples/sample-config.properties")
+        private val encryptedConfigFile: File = resourceFile("/samples/sample-config.yaml")
+        private val decryptionKeyFile: File = resourceFile("/keys/test.private")
         private lateinit var commandLineArgs: MutableList<String>
         private lateinit var decryptedContentFileName: String
         private lateinit var fileOut: File
 
         @BeforeEach
         fun prepareTest() {
-            decryptedContentFileName = "decrypted-content-${UUID().toString().replace("-","")}"
+            decryptedContentFileName = "decrypted-content-${UUID().toString().replace("-", "")}"
             commandLineArgs = mutableListOf()
         }
 
@@ -44,29 +44,31 @@ internal class DecryptConfigTest : AbstractCommandTest<DecryptConfig>() {
             thenDecryptedFileContainsJsonConfiguration()
         }
 
-        private fun thenDecryptedFileContainsJsonConfiguration() {
-            fileOut.assertFileHasContentOf(DocumentFormat.JSON)
-        }
-/*
         @Test
         @DisplayName("If I name the output file with a known/valid extension then choose a format based on the output extension.")
         fun userImpliedFormatByNamingTheFileWithExtension() {
+            decryptedContentFileName += ".json"
+            whenDecrypting()
+            thenDecryptedFileContainsJsonConfiguration()
         }
 
         @Test
         @DisplayName("As a last resort us the input format.")
         fun userDidNotHintAtAnyOutputFormat() {
-        }*/
+            whenDecrypting()
+            tenDecryptingFormatIsYaml()
+        }
+
+
+        private fun thenDecryptedFileContainsJsonConfiguration() {
+            assertFileHasContentOf(DocumentFormat.JSON, fileOut)
+        }
+
+        private fun tenDecryptingFormatIsYaml() {
+            assertFileHasContentOf(DocumentFormat.YAML, fileOut)
+        }
 
         private fun whenDecrypting() {
-
-            println("""
-                +--------------------------------------------------->
-                 \   DECRYPTING - $encryptedConfigFile
-                  \-------------------------------------------------->
-                  
-            """.trimIndent())
-
             fileOut = file(decryptedContentFileName)
             givenCommandLineOf(
                 *commandLineArgs.apply {
@@ -76,7 +78,6 @@ internal class DecryptConfigTest : AbstractCommandTest<DecryptConfig>() {
                 }.toTypedArray()
             )
             whenRunningCommand()
-
         }
     }
 

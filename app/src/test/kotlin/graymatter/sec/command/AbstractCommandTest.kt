@@ -38,17 +38,15 @@ abstract class AbstractCommandTest<T : Runnable> {
     protected abstract fun setupCommand(): T
 
     protected fun givenCommandLineOf(vararg args: String) {
-        println("GIVEN-COMMAND-LINE:  ${givenCommand.javaClass.simpleName} - ${
-            buildString {
-                append("[")
-                args.joinTo(this, separator = " ")
-                append("]")
-            }
-        }")
         this.givenCommandLine = populateCommand(givenCommandLine, * args)
+        println("""
+            +--------------------------------------------------->
+            | sec ${givenCommandLine.commandSpec.name()} ${buildString { args.joinTo(this, " ") }}
+            +--------------------------------------------------->
+            """.trimIndent())
     }
 
-    protected fun whenRunningCommand() {
+    protected open fun whenRunningCommand() {
         givenCommand.run()
     }
 

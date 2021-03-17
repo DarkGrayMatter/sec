@@ -18,6 +18,9 @@ import java.io.IOException
 )
 class DecryptConfig : Runnable {
 
+    private var resolvedOutputFormat: DocumentFormat? = null
+    private var resolvedInputFormat: DocumentFormat? = null
+
     @Spec
     lateinit var spec: Model.CommandSpec
 
@@ -49,14 +52,61 @@ class DecryptConfig : Runnable {
     val outputFormatOverride = OutputFormatOption()
 
     override fun run() {
+        resolveDefaults()
         validate()
         DecryptConfigUseCase(
             keyWithType = keyProvider.keyWithType!!,
             source = source::openInputStream,
-            sourceFormat = requireNotNull(resolveInputFormat()),
+            sourceFormat = resolvedInputFormat!!,
             destination = destination::openOutputStream,
-            destinationFormat = requireNotNull(resolveInputFormat())
+            destinationFormat = resolvedOutputFormat!!
         ).run()
+    }
+
+    private fun resolveDefaults() {
+        resolveInputFormat()
+        resolveOutputFormat()
+    }
+
+    /**
+     * As a User I want the tool to detect the output format based on (in order of precedence):
+     * 1. If I explicitly set the `--format-out` value, choose it.
+     * 2. If I name the output file with a known/valid extension then choose a format based on the output extension.
+     * 3. As a last resort us the input format.
+     */
+    private fun resolveOutputFormat() {
+        resolvedOutputFormat ?: run {
+            resolvedOutputFormat = when {
+                outputFormatOverride.value != null -> {
+                    outputFormatOverride.value
+                }
+                destination.isAvailable && !destination.isStdOut && destination.uri != null -> {
+                    destination.uri?.let { DocumentFormat.ofUri(it) }
+                }
+                else -> {
+                    resolveInputFormat()
+                    resolvedInputFormat
+                }
+            }
+        }
+    }
+
+    private fun resolveInputFormat() {
+        resolvedInputFormat ?: run {
+            resolvedInputFormat = when {
+                inputFormatOverride.value != null -> {
+                    inputFormatOverride.value
+                }
+                source.isAvailable && !source.isStdIn && source.uri != null -> {
+                    val uri = source.uri!!
+                    val format = DocumentFormat.ofUri(uri)
+                    format
+                }
+                else -> {
+                    null
+                }
+            }
+        }
     }
 
     private fun validate() {
@@ -74,14 +124,14 @@ class DecryptConfig : Runnable {
                 "No decryption key supplied."
             }
 
-            requires(passed(inputIsPresent) && resolveInputFormat() != null) {
+            requires(passed(inputIsPresent) && resolvedInputFormat != null) {
                 """
                 Unable to determine input configuration format.
                  Please provide an input format via the command line. 
                 """.trimIndentToLine()
             }
 
-            requires(passed(outputIsPresent) && resolveOutputFormat() != null) {
+            requires(passed(outputIsPresent) && resolvedOutputFormat != null) {
                 """
                 Unable to determine output configuration format. Neither an input format
                  nor output format override has been specified. 
@@ -100,12 +150,6 @@ class DecryptConfig : Runnable {
         }
     }
 
-    private fun resolveInputFormat(): DocumentFormat? {
-        return inputFormatOverride.value ?: source.uri?.let { DocumentFormat.ofUri(it) }
-    }
 
-    private fun resolveOutputFormat(): DocumentFormat? {
-        return outputFormatOverride.value ?: resolveInputFormat()
-    }
 
 }

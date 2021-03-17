@@ -1,7 +1,6 @@
 package graymatter.sec.command
 
 import graymatter.sec.common.UUID
-import graymatter.sec.common.add
 import graymatter.sec.common.document.DocumentFormat
 import graymatter.sec.common.io.assertFileHasContentOf
 import graymatter.sec.common.resourceFile
@@ -26,20 +25,18 @@ internal class DecryptConfigTest : AbstractCommandTest<DecryptConfig>() {
 
         private val encryptedConfigFile: File = resourceFile("/samples/sample-config.yaml")
         private val decryptionKeyFile: File = resourceFile("/keys/test.private")
-        private lateinit var commandLineArgs: MutableList<String>
         private lateinit var decryptedContentFileName: String
         private lateinit var fileOut: File
 
         @BeforeEach
         fun prepareTest() {
             decryptedContentFileName = "decrypted-content-${UUID().toString().replace("-", "")}"
-            commandLineArgs = mutableListOf()
         }
 
         @Test
         @DisplayName("If I explicitly set the --format-out value, choose it.")
         fun userExplicitlySetsOutputFormat() {
-            commandLineArgs.add("--format-out", "json")
+            cliArgs("--format-out", "json")
             whenDecrypting()
             thenDecryptedFileContainsJsonConfiguration()
         }
@@ -70,13 +67,9 @@ internal class DecryptConfigTest : AbstractCommandTest<DecryptConfig>() {
 
         private fun whenDecrypting() {
             fileOut = file(decryptedContentFileName)
-            givenCommandLineOf(
-                *commandLineArgs.apply {
-                    add("--file-in", encryptedConfigFile.toString())
-                    add("--key", decryptionKeyFile.toString())
-                    add("--file-out", fileOut.toString())
-                }.toTypedArray()
-            )
+            cliArgs("--file-in", encryptedConfigFile.toString())
+            cliArgs("--key", decryptionKeyFile.toString())
+            cliArgs("--file-out", fileOut.toString())
             whenRunningCommand()
         }
     }

@@ -27,7 +27,7 @@ class EncryptConfig : Runnable {
         validate = true,
         heading = "Choose one of the following unencrypted configuration sources:%n"
     )
-    val configInput: InputSourceArgGroup = InputSourceArgGroup()
+    val source: InputSourceArgGroup = InputSourceArgGroup()
 
     @ArgGroup(
         exclusive = true,
@@ -35,7 +35,7 @@ class EncryptConfig : Runnable {
         validate = true,
         heading = "Choose one of the following methods to output the encrypted document to:%n"
     )
-    val configOutput: OutputTargetArgGroup = OutputTargetArgGroup()
+    val destination: OutputTargetArgGroup = OutputTargetArgGroup()
 
     @ArgGroup(
         exclusive = false,
@@ -51,24 +51,27 @@ class EncryptConfig : Runnable {
     )
     val keyProvider: KeyProviderArgGroup = KeyProviderArgGroup()
 
-    var outputFormat: DocumentFormat? = null
-        private set
+    private var actualFormatOut: DocumentFormat? = null
+    private var actualFormatIn: DocumentFormat? = null
 
     @Mixin
-    val inputFormatOption = InputFormatOption()
+    val inputFormatOverride = InputFormatOption()
 
     @Mixin
-    val outputFormatOption = OutputFormatOption()
+    val outputFormatOverride = OutputFormatOption()
 
     override fun run() {
         applyDefaults()
         validate()
-        val format = requireNotNull(resolveInputFormat())
+        runUseCase()
+    }
+
+    private fun runUseCase() {
         EncryptConfigUseCase(
-            openInput = configInput::openInputStream,
-            openOutput = configOutput::openOutputStream,
-            inputFormat = format,
-            outputFormat = outputFormat!!,
+            openInput = source::openInputStream,
+            openOutput = destination::openOutputStream,
+            inputFormat = actualFormatIn!!,
+            outputFormat = actualFormatOut!!,
             keyWithType = resolveKeyWithType(),
             encryptedPaths = processPaths.expandPaths()
         ).run()
@@ -90,21 +93,21 @@ class EncryptConfig : Runnable {
             }
         }
 
-        requires(configInput.isAvailable) {
+        requires(source.isAvailable) {
             "No source document to encrypt was provided."
         }.andThen({ resolveInputFormat() != null }) {
             buildString {
                 this.appendLine("No valid source document format detected: ")
                 when {
-                    configInput.uri == null && inputFormatOption.value == null -> {
+                    source.uri == null && inputFormatOverride.value == null -> {
                         this.appendLine(
                             "\t- Document source does not specify an regular file (such as STDIN) " +
                                     "to derive the file format from."
                         )
                     }
-                    configInput.uri != null && inputFormatOption.value == null -> {
+                    source.uri != null && inputFormatOverride.value == null -> {
                         this.appendLine(
-                            "\t- Document `${this@EncryptConfig.configInput.uri}` does not have any known " +
+                            "\t- Document `${this@EncryptConfig.source.uri}` does not have any known " +
                                     "standard supported extensions."
                         )
                     }
@@ -117,18 +120,49 @@ class EncryptConfig : Runnable {
     private fun applyDefaults() {
 
         processPaths.takeUnless { it.isAvailable }?.setPaths(emptyList())
-        configOutput.takeUnless { it.isAvailable }?.setOutputToStdOut()
+        destination.takeUnless { it.isAvailable }?.setOutputToStdOut()
 
-        when {
+        setActualInputFormat()
+        setActualOutputFormat()
 
-            outputFormatOption.value != null ->
-                outputFormat = outputFormatOption.value
+    }
 
-            configOutput.uri?.let { DocumentFormat.ofUri(it) } != null ->
-                outputFormat = configOutput.uri?.let { DocumentFormat.ofUri(it) }
+    /**
+     * As a User I want the tool to detect the output format based on (in order of precedence):
+     * 1. If I explicitly set the `--format-out` value, choose it.
+     * 2. If I name the output file with a known/valid extension then choose a format based on the output extension.
+     * 3. As a last resort us the input format.
+     */
+    private fun setActualOutputFormat() {
 
-            resolveInputFormat() != null ->
-                outputFormat = resolveInputFormat()
+        if (actualFormatOut != null) {
+            return
+        }
+
+        actualFormatOut = outputFormatOverride.value
+
+        if (actualFormatOut == null && destination.isAvailable && !destination.isStdOut) {
+            actualFormatOut = destination.uri?.let { DocumentFormat.ofUri(it) }
+        }
+
+        if (actualFormatOut == null) {
+            setActualInputFormat()
+            actualFormatOut = actualFormatIn
+        }
+    }
+
+    private fun setActualInputFormat() {
+
+        if (actualFormatIn != null) {
+            return
+        }
+
+        if (actualFormatIn == null) {
+            actualFormatIn = inputFormatOverride.value
+        }
+
+        if (actualFormatIn == null && source.isAvailable && !source.isStdIn) {
+            actualFormatIn = source.uri?.let { DocumentFormat.ofUri(it) }
         }
 
     }
@@ -138,8 +172,8 @@ class EncryptConfig : Runnable {
     }
 
     private fun resolveInputFormat(): DocumentFormat? {
-        return inputFormatOption.value
-            ?: configInput.uri?.let { DocumentFormat.ofUri(it) }
+        return inputFormatOverride.value
+            ?: source.uri?.let { DocumentFormat.ofUri(it) }
     }
 
 }

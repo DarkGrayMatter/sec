@@ -2,7 +2,7 @@
 
 package graymatter.sec.common.document
 
-import graymatter.sec.common.trimToLine
+import graymatter.sec.common.trimIndentToSentence
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import java.io.InputStream
@@ -19,7 +19,7 @@ fun <T : JsonNode> ObjectMapper.treeFromContent(content: String, expectedContent
             """
             Unexpected content type parsed. Expected ${expectedContentNodeClass.simpleName}, but found 
              ${node.javaClass.simpleName} instead. (see [${node.toPrettyString()}])"
-            """.trimToLine()
+            """.trimIndentToSentence()
         )
     }
 }

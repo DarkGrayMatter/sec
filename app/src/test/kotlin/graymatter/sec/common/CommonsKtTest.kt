@@ -24,7 +24,7 @@ internal class CommonsKtTest {
                 J
                 Q
                 t
-                """.trimToLine()
+                """.trimIndentToSentence()
             )
             thenExpectLine("1 2 3 4 J Q t")
         }
@@ -39,7 +39,7 @@ internal class CommonsKtTest {
                     4
                 5
                 6
-            """.trimIndentToLine()
+            """.trimIndentToSentence()
             )
             thenExpectLine("1 2     3     4 5 6")
         }
@@ -55,7 +55,7 @@ internal class CommonsKtTest {
                 | 6
                 |
                 |7
-            """.trimMarginToLine())
+            """.trimMarginToSentence())
             thenExpectLine("1 2 3 4  5  6  7")
         }
 

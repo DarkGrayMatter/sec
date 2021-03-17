@@ -18,7 +18,7 @@ internal class GenerateKeyTest : AbstractCommandTest<GenerateKey>() {
     @Test
     fun byDefaultDestinationPathShouldBeCreated() {
         val expectedKeyDir = File(givenWorkingDir, "keys")
-        givenCommandLineOf(
+        cliArgs(
             "--alg", "rsa",
             "--key", givenKeyName,
             "$expectedKeyDir"

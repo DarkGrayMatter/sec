@@ -3,7 +3,6 @@ package graymatter.sec.common
 import graymatter.sec.common.crypto.BinaryEncoding
 import java.io.File
 import java.io.FileNotFoundException
-import java.io.PrintStream
 import java.net.URI
 import java.net.URL
 import java.util.*
@@ -15,15 +14,12 @@ fun <T> Boolean.value(truth: T, notTrue: T): T {
     }
 }
 
-private fun Sequence<String>.join() = joinToString(" ", transform = {it.trimEnd()}).trim()
+fun Sequence<String>.joinAsSentence() = joinToString(" ", transform = {it.trimEnd()}).trim()
 
-fun String.trimToLine() = lineSequence().map { it.trim() }.join()
-fun String.trimIndentToLine() = trimIndent().lineSequence().join()
-fun String.trimMarginToLine(marginPrefix: String = "|") = trimMargin(marginPrefix).lineSequence().join()
-
+fun String.trimIndentToSentence() = trimIndent().lineSequence().joinAsSentence()
+fun String.trimMarginToSentence(marginPrefix: String = "|") = trimMargin(marginPrefix).lineSequence().joinAsSentence()
 
 fun ByteArray.encodeBinary(encoding: BinaryEncoding = BinaryEncoding.Base64): String = encoding.encode(this)
-fun String.decodeBinary(encoding: BinaryEncoding): ByteArray = encoding.decode(this)
 
 
 fun <T> queueOf(vararg initial: T): Queue<T> {
@@ -35,30 +31,6 @@ inline fun <E, T, V> Iterator<E>.collect(dest: T, valueOf: (E) -> T): T where T 
     while (hasNext()) dest += valueOf(next())
     return dest
 }
-
-/**
- * Keeps on consuming from this [Iterator] until [taking] returns `false`
- *
- * @receiver The [Iterator] which supplies the next value to consume
- * @param taking A lambda to check it it should consume the next available element.
- * @param consume A lambda which consumes the next element.
- */
-
-inline fun <E> Iterator<E>.consumeWhile(taking: () -> Boolean, consume: (E) -> Unit) {
-    while (hasNext() && taking()) consume(next())
-}
-
-/**
- * Keeps on consuming from this sequence until [taking] returns `false`
- *
- * @receiver The sequence to consume from
- * @param taking A lambda to check it it should consume the next available element.
- * @param consume A lambda which consumes the next element.
- */
-inline fun <T> Sequence<T>.consumeWhile(taking: () -> Boolean, consume: (T) -> Unit) {
-    iterator().consumeWhile(taking, consume)
-}
-
 
 class ClassPathResourceNotFoundException(resourcePath: String) : FileNotFoundException(resourcePath)
 class UndefinedLocalFileUriException(uri: URI) : FileNotFoundException("Undefined uri: $uri")
@@ -73,7 +45,6 @@ fun Any.resourceFile(path: String): File {
     return javaClass.getResource(path)?.file() ?: throw ClassPathResourceNotFoundException(path)
 }
 
-
 fun URL.file(): File {
     return toURI().let { uri ->
         when (val file = uri?.let(::File)?.canonicalFile) {
@@ -83,13 +54,5 @@ fun URL.file(): File {
     }
 }
 
-val stderr: PrintStream get() = System.err
-
 fun UUID(): UUID = UUID.randomUUID()
-fun UUID(named: String): UUID = UUID.fromString(named)
-fun UUID(namedByBytes: ByteArray): UUID = UUID.nameUUIDFromBytes(namedByBytes)
 
-fun <T> MutableCollection<T>.add(item: T, vararg more: T) {
-    this.add(item)
-    more.forEach { this.add(it) }
-}

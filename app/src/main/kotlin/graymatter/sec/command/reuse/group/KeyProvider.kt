@@ -21,7 +21,7 @@ import java.io.File
  *
  * > **NOTE:** Only one kind of supplier can be used.
  */
-class KeyProviderArgGroup {
+class KeyProvider {
 
     val isAvailable: Boolean get() = keySupplier != null
 

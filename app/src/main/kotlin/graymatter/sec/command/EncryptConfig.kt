@@ -1,25 +1,27 @@
 package graymatter.sec.command
 
 import com.palantir.config.crypto.KeyWithType
-import graymatter.sec.command.reuse.group.ProcessingPathsArgGroup
-import graymatter.sec.command.reuse.group.InputSourceArgGroup
-import graymatter.sec.command.reuse.group.KeyProviderArgGroup
+import graymatter.sec.command.reuse.group.KeyProvider
 import graymatter.sec.command.reuse.group.OutputTargetArgGroup
+import graymatter.sec.command.reuse.group.ProcessingPathsArgGroup
+import graymatter.sec.command.reuse.group.SourceAsInputProvider
 import graymatter.sec.command.reuse.mixin.InputFormatOption
 import graymatter.sec.command.reuse.mixin.OutputFormatOption
-import graymatter.sec.common.cli.validate
+import graymatter.sec.command.reuse.validation.validateKeyProvider
+import graymatter.sec.common.cli.SelfValidatingCommand
 import graymatter.sec.common.document.DocumentFormat
 import graymatter.sec.common.exception.failCommand
+import graymatter.sec.common.trimIndentToSentence
+import graymatter.sec.common.validation.Validator
+import graymatter.sec.common.validation.requiresThat
 import graymatter.sec.usecase.EncryptConfigUseCase
 import picocli.CommandLine
-import picocli.CommandLine.*
+import picocli.CommandLine.ArgGroup
+import picocli.CommandLine.Mixin
 
 @CommandLine.Command(name = "encrypt-config",
     description = ["Encrypt a configuration document given an appropriate key"])
-class EncryptConfig : Runnable {
-
-    @CommandLine.Spec
-    lateinit var spec: Model.CommandSpec
+class EncryptConfig : SelfValidatingCommand() {
 
     @ArgGroup(
         exclusive = true,
@@ -27,7 +29,7 @@ class EncryptConfig : Runnable {
         validate = true,
         heading = "Choose one of the following unencrypted configuration sources:%n"
     )
-    val source: InputSourceArgGroup = InputSourceArgGroup()
+    val source: SourceAsInputProvider = SourceAsInputProvider()
 
     @ArgGroup(
         exclusive = true,
@@ -49,7 +51,7 @@ class EncryptConfig : Runnable {
         validate = true,
         exclusive = true,
     )
-    val keyProvider: KeyProviderArgGroup = KeyProviderArgGroup()
+    val keyProvider: KeyProvider = KeyProvider()
 
     private var actualFormatOut: DocumentFormat? = null
     private var actualFormatIn: DocumentFormat? = null
@@ -60,13 +62,7 @@ class EncryptConfig : Runnable {
     @Mixin
     val outputFormatOverride = OutputFormatOption()
 
-    override fun run() {
-        applyDefaults()
-        validate()
-        runUseCase()
-    }
-
-    private fun runUseCase() {
+    override fun performAction() {
         EncryptConfigUseCase(
             openInput = source::openInputStream,
             openOutput = destination::openOutputStream,
@@ -77,54 +73,46 @@ class EncryptConfig : Runnable {
         ).run()
     }
 
-    private fun validate() = validate(spec) {
-
-        requires(keyProvider.isAvailable) {
-            "Please supply and key to encrypt the configuration with."
-        }.andThenWith({keyProvider.runCatching { keyWithType }}) { r ->
-            requires(r.isSuccess && r.getOrThrow() != null) {
-                buildString {
-                    append("Unable to load key from ${keyProvider.keyUri}")
-                    r.exceptionOrNull()?.also { cause ->
-                        append(" cause [${cause.javaClass.simpleName}]")
-                        cause.message?.also { message -> append(": $message") }
-                    }
-                }
-            }
-        }
-
-        requires(source.isAvailable) {
-            "No source document to encrypt was provided."
-        }.andThen({ resolveInputFormat() != null }) {
-            buildString {
-                this.appendLine("No valid source document format detected: ")
-                when {
-                    source.uri == null && inputFormatOverride.value == null -> {
-                        this.appendLine(
-                            "\t- Document source does not specify an regular file (such as STDIN) " +
-                                    "to derive the file format from."
-                        )
-                    }
-                    source.uri != null && inputFormatOverride.value == null -> {
-                        this.appendLine(
-                            "\t- Document `${this@EncryptConfig.source.uri}` does not have any known " +
-                                    "standard supported extensions."
-                        )
-                    }
-                }
-            }
-        }
-
-    }
-
-    private fun applyDefaults() {
-
+    override fun applyDefaults() {
         processPaths.takeUnless { it.isAvailable }?.setPaths(emptyList())
         destination.takeUnless { it.isAvailable }?.setOutputToStdOut()
-
         setActualInputFormat()
         setActualOutputFormat()
 
+    }
+
+    override fun Validator.validateSelf() {
+
+        val sourceValidation = requiresThat(source.isAvailable) {
+            "Please supply source document to encrypt"
+        }
+
+        val outputValidation = requiresThat(destination.isAvailable) {
+            "No destination provided to write encrypted document to."
+        }
+
+        requiresThat(
+            sourceValidation,
+            outputValidation
+        ) {
+            requiresThat(actualFormatIn != null) {
+                """
+                Unable to determine input configuration format.
+                 Please provide an input format via the command line. 
+                """.trimIndentToSentence()
+            }
+            requiresThat(actualFormatOut != null) {
+                """
+                Unable to determine output configuration format. Neither an input format
+                 nor output format override has been specified. 
+                """.trimIndentToSentence()
+            }
+        }
+
+        validateKeyProvider(keyProvider,
+            keyNotSetMessage = { "Please set encryption key." },
+            keyNotLoadingMessagePreamble = { "Unable load encryption key from ${keyProvider.keyUri}" }
+        )
     }
 
     /**
@@ -169,11 +157,6 @@ class EncryptConfig : Runnable {
 
     private fun resolveKeyWithType(): KeyWithType {
         return keyProvider.keyWithType ?: failCommand("No key specified.")
-    }
-
-    private fun resolveInputFormat(): DocumentFormat? {
-        return inputFormatOverride.value
-            ?: source.uri?.let { DocumentFormat.ofUri(it) }
     }
 
 }

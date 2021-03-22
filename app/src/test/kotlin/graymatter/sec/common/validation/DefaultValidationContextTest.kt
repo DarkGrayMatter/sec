@@ -7,6 +7,7 @@ import org.junit.jupiter.api.TestInstance
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+/*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class DefaultValidationContextTest {
@@ -77,3 +78,4 @@ internal class DefaultValidationContextTest {
     }
 
 }
+*/

@@ -9,7 +9,7 @@ import graymatter.sec.common.validation.requiresThat
 import picocli.CommandLine.*
 import java.security.SecureRandom
 
-@Command(name = "generate-random-bytes", description = ["Generates random bytes"])
+@Command(name = "generate-bytes", description = ["Generates random bytes"])
 class GenerateRandomBytes : SelfValidatingCommand() {
 
     private var numberOfChunks: Int = 1
@@ -19,12 +19,6 @@ class GenerateRandomBytes : SelfValidatingCommand() {
     @ArgGroup(validate = true, heading = "If you want specify a seed, use the following options:%n")
     private var givenSeed: GivenSeed? = null
 
-    private val secureRandom by lazy(LazyThreadSafetyMode.NONE) {
-        when (val seedAsBytes = givenSeed?.asBytes()) {
-            null -> SecureRandom()
-            else -> SecureRandom(seedAsBytes)
-        }
-    }
 
     @Option(
         names = ["-e", "--enc", "--encoding"],
@@ -46,8 +40,8 @@ class GenerateRandomBytes : SelfValidatingCommand() {
         this.byteSize = bytesSize
     }
 
-    @Option(names = ["-N"], required = false, description = ["How many random values should be generated."])
-    fun setNumberToGenerate(n: Int) {
+    @Option(names = ["-N", "--chunks"], required = false, description = ["How many random values should be generated."])
+    fun setNumberOfChunks(n: Int) {
         numberOfChunks = n
     }
 
@@ -67,21 +61,24 @@ class GenerateRandomBytes : SelfValidatingCommand() {
     }
 
     override fun performAction() {
-        generateRandomBytes()
-    }
-
-    private fun generateRandomBytes() {
-        if (numberOfChunks == 1) {
-            println(generateEncodedRandomBytes())
-        } else generateSequence { generateEncodedRandomBytes() }.take(numberOfChunks).forEach {
-            println(it)
+        val randomBytes = newByteStream().take(numberOfChunks).map { "[$it]" }.toList()
+        for (randBytes in randomBytes) {
+            println(randBytes.trim())
         }
     }
 
-    private fun generateEncodedRandomBytes() = secureRandom.run {
-        ByteArray(byteSize).run {
-            nextBytes(this)
-            encoding.encode(this)
+    private fun newByteStream(): Sequence<String> {
+
+        val random = when (val seed = givenSeed?.asBytes()) {
+            null -> SecureRandom()
+            else -> SecureRandom(seed)
+        }
+
+        return generateSequence {
+            ByteArray(byteSize).run {
+                random.nextBytes(this)
+                encoding.encode(this)
+            }
         }
     }
 }

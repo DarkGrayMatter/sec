@@ -8,6 +8,7 @@ import graymatter.sec.common.resourceFile
 import graymatter.sec.common.toPropertiesMap
 import org.junit.jupiter.api.*
 import picocli.CommandLine
+import picocli.CommandLine.ParameterException
 import java.io.File
 import java.util.*
 import kotlin.test.assertEquals
@@ -83,10 +84,10 @@ internal class EncryptConfigTest : AbstractCommandTest<EncryptConfig>() {
 
     @Test
     fun commandWithNoArgsShouldFailOnValidation() {
-        val expected = assertThrows<CommandLine.ParameterException> { whenRunningCommand() }
+        val expected = assertThrows<ParameterException> { whenRunningCommand() }
         println(expected.message)
         assertTrue(expected.message?.contains(
-            "For your assistance please consult the usage below:",
+            "For your assistance, please consult the usage below",
             ignoreCase = true) == true)
     }
 

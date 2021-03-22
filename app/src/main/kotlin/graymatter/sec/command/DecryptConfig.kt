@@ -1,35 +1,34 @@
 package graymatter.sec.command
 
-import graymatter.sec.command.reuse.group.InputSourceArgGroup
-import graymatter.sec.command.reuse.group.KeyProviderArgGroup
+import graymatter.sec.command.reuse.group.KeyProvider
 import graymatter.sec.command.reuse.group.OutputTargetArgGroup
+import graymatter.sec.command.reuse.group.SourceAsInputProvider
 import graymatter.sec.command.reuse.mixin.InputFormatOption
 import graymatter.sec.command.reuse.mixin.OutputFormatOption
-import graymatter.sec.common.cli.validate
+import graymatter.sec.command.reuse.validation.validateKeyProvider
+import graymatter.sec.common.cli.SelfValidatingCommand
 import graymatter.sec.common.document.DocumentFormat
 import graymatter.sec.common.trimIndentToSentence
+import graymatter.sec.common.validation.Validator
+import graymatter.sec.common.validation.requiresThat
 import graymatter.sec.usecase.DecryptConfigUseCase
 import picocli.CommandLine.*
-import java.io.IOException
 
 @Command(
     name = "decrypt-config",
     description = ["Decrypts configuration document given an appropriate key."]
 )
-class DecryptConfig : Runnable {
+class DecryptConfig : SelfValidatingCommand() {
 
     private var actualFormatOut: DocumentFormat? = null
     private var actualFormatIn: DocumentFormat? = null
-
-    @Spec
-    lateinit var spec: Model.CommandSpec
 
     @ArgGroup(
         exclusive = true,
         order = 0,
         heading = "Provide a source document to decrypt using one of the following arguments.%n"
     )
-    lateinit var source: InputSourceArgGroup
+    lateinit var source: SourceAsInputProvider
 
     @ArgGroup(
         exclusive = true,
@@ -43,19 +42,13 @@ class DecryptConfig : Runnable {
         order = 2,
         heading = "Use any of the following arguments or options to specify a key for decryption:%n"
     )
-    val keyProvider: KeyProviderArgGroup = KeyProviderArgGroup()
+    val keyProvider: KeyProvider = KeyProvider()
 
     @Mixin
     val inputFormatOverride = InputFormatOption()
 
     @Mixin
     val outputFormatOverride = OutputFormatOption()
-
-    override fun run() {
-        applyDefaults()
-        validate()
-        runUseCase()
-    }
 
     private fun runUseCase() {
         DecryptConfigUseCase(
@@ -67,7 +60,7 @@ class DecryptConfig : Runnable {
         ).run()
     }
 
-    private fun applyDefaults() {
+    override fun applyDefaults() {
         setDefaultToStdOutInAbsenceOfUserInput()
         setActualInputFormat()
         setActualOutputFormat()
@@ -117,47 +110,48 @@ class DecryptConfig : Runnable {
 
     }
 
-    private fun validate() {
-        validate(spec) {
+    override fun Validator.validateSelf() {
 
-            val inputIsPresent = requires(source.isAvailable) {
-                "No source document to decrypt was supplied."
-            }
+        val sourceValidation = requiresThat(source.isAvailable) {
+            "Please supply source document to decrypt"
+        }
 
-            val outputIsPresent = requires(destination.isAvailable) {
-                "No destination provided to output the decrypted document to."
-            }
+        val outputValidation = requiresThat(destination.isAvailable) {
+            "No destination provided to write decrypted document to."
+        }
 
-            val encryptionKeyIsPresent = requires(keyProvider.isAvailable) {
-                "No decryption key supplied."
-            }
-
-            requires(passed(inputIsPresent) && actualFormatIn != null) {
+        requiresThat(
+            sourceValidation,
+            outputValidation
+        ) {
+            requiresThat(actualFormatIn != null) {
                 """
-                Unable to determine input configuration format.
+                 Unable to determine input configuration format.
                  Please provide an input format via the command line. 
                 """.trimIndentToSentence()
             }
-
-            requires(passed(outputIsPresent) && actualFormatOut != null) {
+            requiresThat(actualFormatOut != null) {
                 """
-                Unable to determine output configuration format. Neither an input format
+                 Unable to determine output configuration format. Neither an input format
                  nor output format override has been specified. 
                 """.trimIndentToSentence()
             }
-
-            if (passed(encryptionKeyIsPresent)) {
-                try {
-                    val loadedKey = keyProvider.keyWithType
-                    requires(loadedKey != null) { "No encryption key source provided" }
-                } catch (e: IOException) {
-                    requires(false) { "Error reading encryption key from ${keyProvider.keyUri}: ${e.message}" }
-                }
-            }
-
         }
+
+        validateKeyProvider(keyProvider,
+            keyNotSetMessage = { "Please set a decryption key" },
+            keyNotLoadingMessagePreamble = { "Unable to load decryption key from ${keyProvider.keyUri}" }
+        )
     }
 
 
-
+    override fun performAction() {
+        DecryptConfigUseCase(
+            keyWithType = keyProvider.keyWithType!!,
+            source = source::openInputStream,
+            sourceFormat = actualFormatIn!!,
+            destination = destination::openOutputStream,
+            destinationFormat = actualFormatOut!!
+        ).run()
+    }
 }

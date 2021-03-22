@@ -1,22 +1,20 @@
 package graymatter.sec.command
 
-import graymatter.sec.command.reuse.group.OutputTargetArgGroup
 import graymatter.sec.command.reuse.mixin.GivenSeed
-import graymatter.sec.common.cli.validate
+import graymatter.sec.common.cli.SelfValidatingCommand
 import graymatter.sec.common.crypto.BinaryEncoding
-import graymatter.sec.common.exception.failCommandOn
+import graymatter.sec.common.trimIndentToSentence
+import graymatter.sec.common.validation.Validator
+import graymatter.sec.common.validation.requiresThat
 import picocli.CommandLine.*
 import java.security.SecureRandom
 
 @Command(name = "generate-random-bytes", description = ["Generates random bytes"])
-class GenerateRandomBytes : Runnable {
+class GenerateRandomBytes : SelfValidatingCommand() {
 
     private var numberOfChunks: Int = 1
     private var byteSize: Int = -1
     private lateinit var encoding: BinaryEncoding
-
-    @Spec
-    lateinit var spec: Model.CommandSpec
 
     @ArgGroup(validate = true, heading = "If you want specify a seed, use the following options:%n")
     private var givenSeed: GivenSeed? = null
@@ -53,8 +51,22 @@ class GenerateRandomBytes : Runnable {
         numberOfChunks = n
     }
 
-    override fun run() {
-        validateCli()
+    override fun Validator.validateSelf() {
+        requiresThat(numberOfChunks > 0) {
+            """
+            Unable to generate `$numberOfChunks` a random sets of bytes: 
+            Value must greater than one.
+            """.trimIndentToSentence()
+        }
+        requiresThat(byteSize > 0) {
+            """
+            Unable to generate random byte set with a byte size of `$byteSize`: 
+            Value must greater than one.
+            """.trimIndentToSentence()
+        }
+    }
+
+    override fun performAction() {
         generateRandomBytes()
     }
 
@@ -63,14 +75,6 @@ class GenerateRandomBytes : Runnable {
             println(generateEncodedRandomBytes())
         } else generateSequence { generateEncodedRandomBytes() }.take(numberOfChunks).forEach {
             println(it)
-        }
-    }
-
-    private fun validateCli() {
-        validate(spec) {
-            requires(numberOfChunks >= 0) {
-                "Number of generated values should always be 1 or more."
-            }
         }
     }
 

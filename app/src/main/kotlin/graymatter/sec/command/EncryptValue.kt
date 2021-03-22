@@ -1,8 +1,10 @@
 package graymatter.sec.command
 
-import graymatter.sec.command.reuse.group.KeyProviderArgGroup
+import graymatter.sec.command.reuse.group.KeyProvider
 import graymatter.sec.command.reuse.group.OutputTargetArgGroup
-import graymatter.sec.common.cli.validate
+import graymatter.sec.common.cli.SelfValidatingCommand
+import graymatter.sec.common.validation.Validator
+import graymatter.sec.common.validation.requiresThat
 import graymatter.sec.usecase.EncryptValueUseCase
 import picocli.CommandLine.*
 import picocli.CommandLine.Model.CommandSpec
@@ -12,16 +14,13 @@ import picocli.CommandLine.Model.CommandSpec
     name = "encrypt",
     description = ["Encrypt value based on the supplied public key."]
 )
-class EncryptValue : Runnable {
-
-    @Spec
-    lateinit var spec: CommandSpec
+class EncryptValue : SelfValidatingCommand() {
 
     @Parameters(index = "0", description = ["A value to encrypt."], arity = "1")
     lateinit var plainText: String
 
     @ArgGroup(exclusive = true, order = 2, heading = "Supply an appropriate encryption key using:%n")
-    val keyProvider = KeyProviderArgGroup()
+    val keyProvider = KeyProvider()
 
     @ArgGroup(
         exclusive = true,
@@ -30,23 +29,28 @@ class EncryptValue : Runnable {
     )
     val output = OutputTargetArgGroup()
 
-    override fun run() {
-        applyDefaults()
-        validateSpec()
-        EncryptValueUseCase(
-            plainText = plainText,
-            secretOut = output::openOutputStream,
-            key = requireNotNull(keyProvider.keyWithType)
-        ).run()
-    }
 
-    private fun validateSpec() {
-        validate(spec) {
-            requires(keyProvider.isAvailable) { "Please provide an key to encrypt with" }
+    override fun Validator.validateSelf() {
+        validate {
+            if (!keyProvider.isAvailable) {
+                error("Decryption key not set.")
+            } else try {
+                keyProvider.keyWithType ?: error("Could not read decryption key from ${keyProvider.keyUri}")
+            } catch (e: Exception) {
+                failed("Could not read decryption key from ${keyProvider.keyUri}", e)
+            }
         }
     }
 
-    private fun applyDefaults() {
+    override fun performAction() {
+        EncryptValueUseCase(
+            plainText = plainText,
+            secretOut = output::openOutputStream,
+            key = keyProvider.keyWithType!!
+        ).run()
+    }
+
+    override fun applyDefaults() {
         output.setOutputToStdOut()
     }
 

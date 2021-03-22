@@ -56,3 +56,10 @@ fun URL.file(): File {
 
 fun UUID(): UUID = UUID.randomUUID()
 
+inline fun <reified X:Exception> Result<*>.onFailureOf(handleException:(X) -> Unit) {
+    onFailure {
+        if (it is X) {
+            handleException(it)
+        }
+    }
+}

@@ -1,7 +1,7 @@
 package graymatter.sec.command
 
 import graymatter.sec.command.reuse.group.KeyProvider
-import graymatter.sec.command.reuse.group.OutputTargetArgGroup
+import graymatter.sec.command.reuse.group.OutputTargetProvider
 import graymatter.sec.command.reuse.group.SourceAsInputProvider
 import graymatter.sec.command.reuse.mixin.InputFormatOption
 import graymatter.sec.command.reuse.mixin.OutputFormatOption
@@ -35,7 +35,7 @@ class DecryptConfig : SelfValidatingCommand() {
         order = 1,
         heading = "Provide use one these arguments to determine where decrypted documents should be written to:%n"
     )
-    val destination: OutputTargetArgGroup = OutputTargetArgGroup()
+    val destination: OutputTargetProvider = OutputTargetProvider()
 
     @ArgGroup(
         exclusive = true,

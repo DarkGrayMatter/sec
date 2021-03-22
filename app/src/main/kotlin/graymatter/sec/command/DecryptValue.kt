@@ -1,10 +1,13 @@
 package graymatter.sec.command
 
 import com.palantir.config.crypto.EncryptedValue
-import com.palantir.config.crypto.KeyFileUtils
-import picocli.CommandLine.Command
-import picocli.CommandLine.Option
-import java.io.File
+import graymatter.sec.command.reuse.group.KeyProvider
+import graymatter.sec.command.reuse.group.OutputTargetProvider
+import graymatter.sec.command.reuse.validation.validateKeyProvider
+import graymatter.sec.common.cli.SelfValidatingCommand
+import graymatter.sec.common.validation.Validator
+import graymatter.sec.common.validation.requiresThat
+import picocli.CommandLine.*
 
 
 @Command(
@@ -12,34 +15,39 @@ import java.io.File
     description = ["Decrypts a value given a private key."]
 )
 @Suppress("unused")
-class DecryptValue : Runnable {
+class DecryptValue : SelfValidatingCommand() {
 
-    private lateinit var secretText: String
-    private lateinit var secretKey: File
+    @Parameters
+    var secretText: String? = null
 
-    override fun run() {
-        val encrypted = EncryptedValue.fromString(secretText)
-        val kt = KeyFileUtils.keyWithTypeFromPath(secretKey.toPath())
+    @ArgGroup
+    val output: OutputTargetProvider = OutputTargetProvider()
+
+    @ArgGroup
+    val keyProvider = KeyProvider()
+
+    override fun Validator.validateSelf() {
+
+        validateKeyProvider(
+            keyProvider,
+            keyNotSetMessage = { "Please provide an appropriate key to decrypt with." },
+            keyNotLoadingMessagePreamble = { "Failure to load decryption key:" },
+        )
+     
+        requiresThat(secretText != null) {
+            "Nothing to do: Please provide secret text."
+        }
+    }
+
+    override fun performAction() {
+        val encrypted = secretText?.let(EncryptedValue::fromString) ?: return
+        val kt = keyProvider.keyWithType!!
         val decrypted = encrypted.decrypt(kt)
-        println(decrypted)
+        output.openOutputStream().bufferedWriter().use { it.appendLine(decrypted) }
     }
 
-    @Option(
-        names = ["-k"],
-        required = true,
-        paramLabel = "PRIVATE_KEY_FILE",
-        description = ["Private key required to decrypt the secret text."]
-    )
-    fun setSecretKey(file: File) {
-        secretKey = file
+    override fun applyDefaults() {
+        output.setOutputToStdOut()
     }
 
-    @Option(
-        names = ["-v"],
-        required = true,
-        description = ["Secret text to decrypt."]
-    )
-    fun setSecretText(text: String) {
-        secretText = text
-    }
 }

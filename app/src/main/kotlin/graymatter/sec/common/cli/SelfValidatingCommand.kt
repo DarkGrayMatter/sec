@@ -37,7 +37,7 @@ abstract class SelfValidatingCommand : Runnable {
 
     companion object {
 
-        fun CommandSpec.process(failures: List<Validation.Failure>) {
+        private fun CommandSpec.process(failures: List<Validation.Failure>) {
 
             if (failures.isEmpty()) {
                 return

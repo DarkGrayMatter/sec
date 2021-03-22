@@ -4,8 +4,10 @@ import graymatter.sec.command.reuse.group.KeyProvider
 import graymatter.sec.command.reuse.group.OutputTargetArgGroup
 import graymatter.sec.common.cli.SelfValidatingCommand
 import graymatter.sec.common.validation.Validator
+import graymatter.sec.common.validation.requiresThat
 import graymatter.sec.usecase.EncryptValueUseCase
 import picocli.CommandLine.*
+import picocli.CommandLine.Model.CommandSpec
 
 @Suppress("unused")
 @Command(

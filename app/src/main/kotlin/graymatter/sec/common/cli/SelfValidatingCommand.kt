@@ -3,12 +3,14 @@ package graymatter.sec.common.cli
 import graymatter.sec.common.validation.Validation
 import graymatter.sec.common.validation.Validator
 import picocli.CommandLine
+import picocli.CommandLine.Model.CommandSpec
 
 
 @CommandLine.Command
 abstract class SelfValidatingCommand : Runnable {
 
-    lateinit var cli: CommandLine.Model.CommandSpec
+    @set:CommandLine.Spec
+    lateinit var cli: CommandSpec
 
     final override fun run() {
         applyDefaults()
@@ -19,9 +21,15 @@ abstract class SelfValidatingCommand : Runnable {
     private fun validateSelf() {
         when (val failedValidations = Validator().apply { validateSelf() }.takeIf { it.hasFailures() }) {
             null -> performAction()
-            else -> cli.process(failedValidations.failures())
+            else -> {
+                if (!this::cli.isInitialized) {
+                    cli = CommandSpec.forAnnotatedObject(this)
+                }
+                cli.process(failedValidations.failures())
+            }
         }
     }
+
 
     protected abstract fun Validator.validateSelf()
     protected abstract fun performAction()
@@ -29,14 +37,14 @@ abstract class SelfValidatingCommand : Runnable {
 
     companion object {
 
-        private fun CommandLine.Model.CommandSpec.process(failures: List<Validation.Failure>) {
+        fun CommandSpec.process(failures: List<Validation.Failure>) {
 
             if (failures.isEmpty()) {
                 return
             }
 
-            val commandLine = commandLine()
-            val command = commandLine.commandName
+            val commandLine: CommandLine? = commandLine()
+            val command = commandLine?.commandName ?: "command line"
             val userMessage = buildString {
                 appendLine()
                 appendLine("Unable to process $command. The following errors were reported:")

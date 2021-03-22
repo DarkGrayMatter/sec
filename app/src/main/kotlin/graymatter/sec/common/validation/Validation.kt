@@ -37,7 +37,7 @@ inline fun Validator.requiresThat(
     passed: Boolean,
     crossinline errorMessage: () -> String,
 ): ValidationLabel {
-    return validate { if (!passed) error(errorMessage()) }
+    return validate { if (!passed) failed(errorMessage()) }
 }
 
 

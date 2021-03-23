@@ -27,11 +27,8 @@ class GenerateRandomBytes : SelfValidatingCommand() {
     @Option(names = ["-n", "--bytes"], description = ["How many bytes random bytes to generate."])
     var numberOfBytes: Int = -1
 
-    @Option(names = ["--format"], description = ["Print format (defaults to \"%s\")"])
-    var printFormat: String = "%s"
-
     @Mixin
-    var givenSeed: GivenSeed? = null
+    val givenSeed: GivenSeed = GivenSeed()
 
     override fun Validator.validateSelf() {
         requiresThat(numberOfBytes > 0) {
@@ -43,19 +40,6 @@ class GenerateRandomBytes : SelfValidatingCommand() {
             """
                 Please set the number of chunks to greater than zero (instead of $numberOfChunks). 
             """.trimIndentToSentence()
-        }
-        validate {
-            val expected = "[expected]"
-            runCatching { printFormat.format(expected) }.apply {
-                onSuccess {
-                    if (expected !in it) {
-                        failed("Invalid print format supplied: $printFormat")
-                    }
-                }
-                onFailure {
-                    failed("Invalid print format supplied: $printFormat", it)
-                }
-            }
         }
     }
 
@@ -79,7 +63,10 @@ class GenerateRandomBytes : SelfValidatingCommand() {
 
     private fun generateByteChunks() {
 
-        val rng = when (val seed = givenSeed?.asBytes()) {
+        println("executed-once: $isExecutedOnce")
+        println("global-counter:  ${++globalCounter}")
+
+        val rng = when (val seed = givenSeed.asBytes()) {
             null -> SecureRandom()
             else -> SecureRandom(seed)
         }
@@ -87,8 +74,9 @@ class GenerateRandomBytes : SelfValidatingCommand() {
         fun nextBytes() = ByteArray(numberOfBytes).apply { rng.nextBytes(this) }
 
         PrintStream(output.openOutputStream()).use { out ->
-            repeat(numberOfBytes) {
-                out.println(nextBytes().encodeBinary(encoding))
+            repeat(numberOfChunks) { i ->
+                val bs = nextBytes().encodeBinary(encoding)
+                out.println("${i + 1} - $bs")
             }
         }
     }
@@ -99,6 +87,11 @@ class GenerateRandomBytes : SelfValidatingCommand() {
 
     companion object {
         //todo Need this flag to work around bug
+
+        @JvmStatic
         private var isExecutedOnce = false
+
+        @JvmStatic
+        private var globalCounter = 0
     }
 }

@@ -1,5 +1,6 @@
 @file:Suppress("SpellCheckingInspection")
 
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.time.LocalDateTime
 
@@ -7,6 +8,7 @@ plugins {
     kotlin("jvm") version "1.4.31"
     kotlin("kapt") version "1.4.31"
     id("org.jetbrains.dokka") version "1.4.20"
+    id("com.github.johnrengelman.shadow") version "6.1.0"
     application
     `maven-publish`
 }
@@ -15,6 +17,7 @@ repositories {
     mavenCentral()
     jcenter()
 }
+
 
 dependencies {
 
@@ -65,7 +68,7 @@ dependencies {
     testImplementation("com.github.stefanbirkner:system-lambda:1.2.0")
 
     // String tamplating engine
-    implementation("com.jaliansystems:simple-template:1.1")
+    // implementation("com.jaliansystems:simple-template:1.1")
 }
 
 val secToolAppMain = "graymatter.sec.App"
@@ -143,6 +146,93 @@ tasks.withType<ProcessResources> {
                 replacment(key, variable) ?: property
             }
             else -> property
+        }
+    }
+}
+
+
+tasks.withType<ShadowJar> {
+    project.setProperty("mainClassName", secToolAppMain) // Need this to work arround groovy!
+    archiveVersion.set("")
+    archiveClassifier.set("app")
+
+    mergeServiceFiles()
+}
+
+fun MavenPublication.configurePublication() {
+    artifactId = "sec"
+    pom {
+        name.set("sectool")
+        description.set("Security companion to the Palantir Configuration Values Library")
+        licenses {
+            license {
+                name.set("Apache License Version 2.0")
+                url.set("http://www.apache.org/licenses/LICENSE-2.0")
+                description.set("Apache License Version 2.0, January 2004")
+            }
+        }
+        scm {
+            developerConnection.set("git@github.com:DarkGrayMatter/sec.git")
+            connection.set("https://github.com/DarkGrayMatter/sec.git")
+        }
+        issueManagement {
+            url.set("https://github.com/DarkGrayMatter/sec/issues")
+        }
+        developers {
+            developers {
+                organization {
+                    name.set("DarkGrayMatter")
+                    url.set("https://github.com/DarkGrayMatter")
+                    contributors {
+                        contributor {
+                            name.set("andriesfc")
+                            email.set("andriesfc@gmail.com")
+                            roles.addAll("developer", "project admin")
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+tasks.withType<AbstractArchiveTask> {
+    isPreserveFileTimestamps = false
+    isReproducibleFileOrder = true
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "Gpr"
+            url = uri("https://maven.pkg.github.com/DarkGrayMatter/sec")
+            credentials {
+                username = project.findProperty("gpr.user") as String? ?: System.getenv("GPR_USER")
+                password = project.findProperty("gpr.key") as String? ?: System.getenv("GRP_TOKEN")
+            }
+        }
+        maven {
+            name = "Project"
+            url = rootProject.file("repo").toURI()
+        }
+    }
+    publications {
+        create<MavenPublication>("sec") {
+            from(components["java"])
+            configurePublication()
+        }
+    }
+}
+
+tasks.create("dropProjectRepo") {
+    description = "Cleans out the local project repostory"
+    group = "Project"
+    doLast {
+        with(rootProject.file("repo/graymatter")) {
+            if (exists()) {
+                println("Deleting $this")
+                deleteRecursively()
+            }
         }
     }
 }

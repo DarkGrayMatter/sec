@@ -4,8 +4,10 @@ package graymatter.sec.command
 
 import com.palantir.config.crypto.KeyPairFiles
 import com.palantir.config.crypto.algorithm.Algorithm
+import graymatter.sec.common.cli.SelfValidatingCommand
 import graymatter.sec.common.exception.failCommand
 import graymatter.sec.common.func.onException
+import graymatter.sec.common.validation.Validator
 import graymatter.sec.usecase.GenerateKeyUseCase
 import graymatter.sec.usecase.GenerateKeyUseCase.KeyGenerationException
 import picocli.CommandLine.*
@@ -16,7 +18,7 @@ import kotlin.math.max
     name = "generate-key",
     description = ["Generates AES key, or RSA private-public key pair"]
 )
-class GenerateKey : Runnable {
+class GenerateKey : SelfValidatingCommand() {
 
     private var failOnExistingKeyFiles: Boolean = false
     private lateinit var dest: File
@@ -73,8 +75,7 @@ class GenerateKey : Runnable {
         this.dest = path
     }
 
-
-    override fun run() {
+    override fun performAction() {
         GenerateKeyUseCase(
             keyName = this.keyName,
             keyAlgorithm = this.algorithm,
@@ -85,6 +86,8 @@ class GenerateKey : Runnable {
             .onException(this::reportKeyGenerationFailed)
             .onSuccess(this::reportKeyFilesGenerated)
     }
+
+    override fun Validator.validateSelf() = Unit
 
     private fun reportKeyGenerationFailed(keyGenerationException: KeyGenerationException) {
         failCommand(ExitCode.SOFTWARE, buildString {

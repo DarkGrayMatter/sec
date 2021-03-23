@@ -29,7 +29,7 @@ internal class DecryptConfigTest : AbstractCommandTest<DecryptConfig>() {
     }
 
     private fun whenCliSetsEncryptedConfigFileAndKey() {
-        cliArgs("--file-in", encryptedConfigFile.toString())
+        cliArgs("--file", encryptedConfigFile.toString())
         cliArgs("--key", decryptionKeyFile.toString())
     }
 

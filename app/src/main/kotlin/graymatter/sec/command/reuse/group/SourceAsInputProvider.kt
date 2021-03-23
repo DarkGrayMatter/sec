@@ -12,7 +12,7 @@ import java.io.InputStream
  * Requirement to capture an input source for a specific command.
  */
 @Suppress("unused", "MemberVisibilityCanBePrivate")
-class InputSourceArgGroup {
+class SourceAsInputProvider {
 
     private data class Target(val uri: String?, val open: () -> InputStream)
 
@@ -23,7 +23,7 @@ class InputSourceArgGroup {
 
 
     @Option(
-        names = ["--file-in"],
+        names = ["--file"],
         description = [
             "File as input for \${COMMAND-NAME}"
         ]

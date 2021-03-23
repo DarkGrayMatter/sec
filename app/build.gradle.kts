@@ -63,6 +63,9 @@ dependencies {
 
     // System lamdba to for testing
     testImplementation("com.github.stefanbirkner:system-lambda:1.2.0")
+
+    // String tamplating engine
+    implementation("com.jaliansystems:simple-template:1.1")
 }
 
 val secToolAppMain = "graymatter.sec.App"

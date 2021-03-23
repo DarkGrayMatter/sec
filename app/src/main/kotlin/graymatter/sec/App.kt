@@ -22,7 +22,7 @@ import kotlin.system.exitProcess
         GenerateKey::class,
         EncryptValue::class,
         DecryptValue::class,
-        GenerateRandomBytes::class,
+        //todo: GenerateRandomBytes::class,
         EncryptConfig::class,
         DecryptConfig::class,
     ]

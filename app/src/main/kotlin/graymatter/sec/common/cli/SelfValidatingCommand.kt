@@ -20,11 +20,10 @@ abstract class SelfValidatingCommand : Runnable {
 
     private fun validateSelf() {
         when (val failedValidations = Validator().apply { validateSelf() }.takeIf { it.hasFailures() }) {
-            null -> performAction()
+            null -> {
+                performAction()
+            }
             else -> {
-                if (!this::cli.isInitialized) {
-                    cli = CommandSpec.forAnnotatedObject(this)
-                }
                 cli.process(failedValidations.failures())
             }
         }
@@ -48,9 +47,12 @@ abstract class SelfValidatingCommand : Runnable {
             val userMessage = buildString {
                 appendLine()
                 appendLine("Unable to process $command. The following errors were reported:")
-                failures.withIndex().joinTo(this, "\n") { (index, error) -> "\t${index + 1}. $error" }
                 appendLine()
-                appendLine("For your assistance, please consult the usage below ↩")
+                failures.forEachIndexed { i, f ->
+                    appendLine("  ${i + 1}. ${f.message}")
+                }
+                appendLine()
+                appendLine("For your assistance, please consult the usage below.")
                 appendLine()
             }
 

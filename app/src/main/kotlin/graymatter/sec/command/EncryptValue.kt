@@ -1,15 +1,13 @@
 package graymatter.sec.command
 
 import graymatter.sec.command.reuse.group.KeyProvider
-import graymatter.sec.command.reuse.group.OutputTargetArgGroup
+import graymatter.sec.command.reuse.group.OutputTargetProvider
+import graymatter.sec.command.reuse.validation.validateKeyProvider
 import graymatter.sec.common.cli.SelfValidatingCommand
 import graymatter.sec.common.validation.Validator
-import graymatter.sec.common.validation.requiresThat
 import graymatter.sec.usecase.EncryptValueUseCase
 import picocli.CommandLine.*
-import picocli.CommandLine.Model.CommandSpec
 
-@Suppress("unused")
 @Command(
     name = "encrypt",
     description = ["Encrypt value based on the supplied public key."]
@@ -27,19 +25,15 @@ class EncryptValue : SelfValidatingCommand() {
         order = 2,
         heading = "Output of the encrypted value can be send to the following:%n"
     )
-    val output = OutputTargetArgGroup()
+    val output = OutputTargetProvider()
 
 
     override fun Validator.validateSelf() {
-        validate {
-            if (!keyProvider.isAvailable) {
-                error("Decryption key not set.")
-            } else try {
-                keyProvider.keyWithType ?: error("Could not read decryption key from ${keyProvider.keyUri}")
-            } catch (e: Exception) {
-                failed("Could not read decryption key from ${keyProvider.keyUri}", e)
-            }
-        }
+        validateKeyProvider(
+            keyProvider,
+            keyNotSetMessage = { "Please provide an encryption key." },
+            keyNotLoadingMessagePreamble = { "Unable to load encryption key:" }
+        )
     }
 
     override fun performAction() {

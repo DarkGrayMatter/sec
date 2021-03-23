@@ -23,7 +23,7 @@ class SourceAsInputProvider {
 
 
     @Option(
-        names = ["--file-in"],
+        names = ["--file"],
         description = [
             "File as input for \${COMMAND-NAME}"
         ]

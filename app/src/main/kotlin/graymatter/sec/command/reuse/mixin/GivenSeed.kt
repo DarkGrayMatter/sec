@@ -17,7 +17,6 @@ class GivenSeed() {
 
     @Option(
         names = ["--seed"],
-        required = true,
         description = [
             "Binary seed value (encoded as text)."
         ],
@@ -37,7 +36,6 @@ class GivenSeed() {
         ],
     )
     var binaryEncoding: BinaryEncoding = BinaryEncoding.Base64
-        private set
 
     fun asBytes(): ByteArray? = encodedValue?.let(binaryEncoding::decode)
 }

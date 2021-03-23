@@ -44,7 +44,7 @@ internal class EncryptConfigTest : AbstractCommandTest<EncryptConfig>() {
     @Test
     fun alwaysDefaultToStdOutIfUserHasNotSelectedExplicitOutput() {
         cliArgs("--key", givenEncryptionKeyFile.toString())
-        cliArgs("--file-in", givenUnencryptedPropertiesFile.toString())
+        cliArgs("--file", givenUnencryptedPropertiesFile.toString())
         val out = tapSystemOut { whenRunningCommand() }.also { println(it) }
         assertNotNull(out)
         assertTrue(out.isNotEmpty())
@@ -54,7 +54,7 @@ internal class EncryptConfigTest : AbstractCommandTest<EncryptConfig>() {
     private fun givenCommandToEncryptToFile(): File {
         val fileOut = file("encrypted.properties")
         cliArgs(
-            "--file-in", "$givenUnencryptedPropertiesFile",
+            "--file", "$givenUnencryptedPropertiesFile",
             "--key", "$givenEncryptionKeyFile",
             "--file-out", "$fileOut"
         )
@@ -159,7 +159,7 @@ internal class EncryptConfigTest : AbstractCommandTest<EncryptConfig>() {
         private fun whenEncrypting() {
             fileOut = file(fileOutName)
             cliArgs("--key", givenEncryptionKeyFile.toString())
-            cliArgs("--file-in", yamlConfigFile.toString())
+            cliArgs("--file", yamlConfigFile.toString())
             cliArgs("--file-out", fileOut.toString())
             whenRunningCommand()
         }

@@ -10,7 +10,7 @@ import java.io.OutputStream
  * Requirement to capture an output target for a specific command.
  */
 @Suppress("unused", "MemberVisibilityCanBePrivate")
-class OutputTargetArgGroup  {
+class OutputTargetProvider  {
 
     val isStdOut: Boolean
         get() = target != null && uri == "stdout://"

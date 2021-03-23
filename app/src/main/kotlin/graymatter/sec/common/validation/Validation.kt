@@ -40,7 +40,6 @@ inline fun Validator.requiresThat(
     return validate { if (!passed) failed(errorMessage()) }
 }
 
-
 sealed class Validation : Comparable<Validation> {
 
     class Passed() : Validation()

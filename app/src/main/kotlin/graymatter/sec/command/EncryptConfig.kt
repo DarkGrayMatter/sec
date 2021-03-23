@@ -2,7 +2,7 @@ package graymatter.sec.command
 
 import com.palantir.config.crypto.KeyWithType
 import graymatter.sec.command.reuse.group.KeyProvider
-import graymatter.sec.command.reuse.group.OutputTargetArgGroup
+import graymatter.sec.command.reuse.group.OutputTargetProvider
 import graymatter.sec.command.reuse.group.ProcessingPathsArgGroup
 import graymatter.sec.command.reuse.group.SourceAsInputProvider
 import graymatter.sec.command.reuse.mixin.InputFormatOption
@@ -37,7 +37,7 @@ class EncryptConfig : SelfValidatingCommand() {
         validate = true,
         heading = "Choose one of the following methods to output the encrypted document to:%n"
     )
-    val destination: OutputTargetArgGroup = OutputTargetArgGroup()
+    val destination: OutputTargetProvider = OutputTargetProvider()
 
     @ArgGroup(
         exclusive = false,

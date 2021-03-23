@@ -1,84 +1,104 @@
 package graymatter.sec.command
 
+import graymatter.sec.command.reuse.group.OutputTargetProvider
 import graymatter.sec.command.reuse.mixin.GivenSeed
 import graymatter.sec.common.cli.SelfValidatingCommand
 import graymatter.sec.common.crypto.BinaryEncoding
+import graymatter.sec.common.encodeBinary
 import graymatter.sec.common.trimIndentToSentence
 import graymatter.sec.common.validation.Validator
 import graymatter.sec.common.validation.requiresThat
 import picocli.CommandLine.*
+import java.io.PrintStream
 import java.security.SecureRandom
 
 @Command(name = "generate-bytes", description = ["Generates random bytes"])
 class GenerateRandomBytes : SelfValidatingCommand() {
 
-    private var numberOfChunks: Int = 1
-    private var byteSize: Int = -1
-    private lateinit var encoding: BinaryEncoding
+    @ArgGroup
+    val output: OutputTargetProvider = OutputTargetProvider()
 
-    @ArgGroup(validate = true, heading = "If you want specify a seed, use the following options:%n")
-    private var givenSeed: GivenSeed? = null
+    @Option(names = ["--enc"], description = ["Binary text encoding."], defaultValue = "base64")
+    lateinit var encoding: BinaryEncoding
 
+    @Option(names = ["--chunks"], description = ["Number of chunks of random bytes."])
+    var numberOfChunks: Int = 1
 
-    @Option(
-        names = ["-e", "--enc", "--encoding"],
-        required = true,
-        description = ["Binary encoding use to represents random bytes"],
-        showDefaultValue = Help.Visibility.ALWAYS,
-        defaultValue = "base64"
-    )
-    fun setEncoding(encoding: BinaryEncoding) {
-        this.encoding = encoding
-    }
+    @Option(names = ["-n", "--bytes"], description = ["How many bytes random bytes to generate."])
+    var numberOfBytes: Int = -1
 
-    @Option(
-        names = ["--bytes"],
-        required = true,
-        description = ["Size of random number generator."]
-    )
-    fun setByteSize(bytesSize: Int) {
-        this.byteSize = bytesSize
-    }
+    @Option(names = ["--format"], description = ["Print format (defaults to \"%s\")"])
+    var printFormat: String = "%s"
 
-    @Option(names = ["-N", "--chunks"], required = false, description = ["How many random values should be generated."])
-    fun setNumberOfChunks(n: Int) {
-        numberOfChunks = n
-    }
+    @Mixin
+    var givenSeed: GivenSeed? = null
 
     override fun Validator.validateSelf() {
-        requiresThat(numberOfChunks > 0) {
+        requiresThat(numberOfBytes > 0) {
             """
-            Unable to generate `$numberOfChunks` a random sets of bytes: 
-            Value must greater than one.
+                Number of bytes must be greater than zero (instead of $numberOfBytes)).
             """.trimIndentToSentence()
         }
-        requiresThat(byteSize > 0) {
+        requiresThat(numberOfChunks > 0) {
             """
-            Unable to generate random byte set with a byte size of `$byteSize`: 
-            Value must greater than one.
+                Please set the number of chunks to greater than zero (instead of $numberOfChunks). 
             """.trimIndentToSentence()
+        }
+        validate {
+            val expected = "[expected]"
+            runCatching { printFormat.format(expected) }.apply {
+                onSuccess {
+                    if (expected !in it) {
+                        failed("Invalid print format supplied: $printFormat")
+                    }
+                }
+                onFailure {
+                    failed("Invalid print format supplied: $printFormat", it)
+                }
+            }
         }
     }
 
     override fun performAction() {
-        val randomBytes = newByteStream().take(numberOfChunks).map { "[$it]" }.toList()
-        for (randBytes in randomBytes) {
-            println(randBytes.trim())
+        synchronized(this) {
+            if (!isExecutedOnce) {
+                generateByteChunks()
+                isExecutedOnce = true
+            }
         }
+
+        val generateBytes: () -> String = SecureRandom().let { rnd ->
+            {
+                val bytes = ByteArray(numberOfBytes)
+                rnd.nextBytes(bytes)
+                encoding.encode(bytes)
+            }
+        }
+        println(generateBytes())
     }
 
-    private fun newByteStream(): Sequence<String> {
+    private fun generateByteChunks() {
 
-        val random = when (val seed = givenSeed?.asBytes()) {
+        val rng = when (val seed = givenSeed?.asBytes()) {
             null -> SecureRandom()
             else -> SecureRandom(seed)
         }
 
-        return generateSequence {
-            ByteArray(byteSize).run {
-                random.nextBytes(this)
-                encoding.encode(this)
+        fun nextBytes() = ByteArray(numberOfBytes).apply { rng.nextBytes(this) }
+
+        PrintStream(output.openOutputStream()).use { out ->
+            repeat(numberOfBytes) {
+                out.println(nextBytes().encodeBinary(encoding))
             }
         }
+    }
+
+    override fun applyDefaults() {
+        output.setOutputToStdOut()
+    }
+
+    companion object {
+        //todo Need this flag to work around bug
+        private var isExecutedOnce = false
     }
 }

@@ -1,6 +1,5 @@
 package graymatter.sec.command.reuse.validation
 
-import com.google.common.io.BaseEncoding
 import com.google.common.io.BaseEncoding.DecodingException
 import graymatter.sec.command.reuse.group.KeyProvider
 import graymatter.sec.common.validation.Validator

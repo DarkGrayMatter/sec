@@ -1,9 +1,9 @@
 package graymatter.sec.common.func
 
 
-interface Try<T> {
+interface Tried<T> {
 
-    fun <E> onException(exceptionClass: Class<out E>, handleException: (E) -> Unit): Try<T>
+    fun <E> onException(exceptionClass: Class<out E>, handleException: (E) -> Unit): Tried<T>
             where E : Exception
 
     fun onSuccess(action: (T) -> Unit)
@@ -12,23 +12,23 @@ interface Try<T> {
 
     fun fold(mapException: (Exception) -> T): T
 
-    fun <R> thenLet(map: (T) -> R): Try<R>
+    fun <R> thenLet(map: (T) -> R): Tried<R>
 
 }
 
-inline fun <reified E : Exception,T> Try<T>.onException(noinline handleException: (E) -> Unit): Try<T> {
+inline fun <reified E : Exception,T> Tried<T>.onException(noinline handleException: (E) -> Unit): Tried<T> {
     return onException(E::class.java, handleException)
 }
 
 @Suppress("FunctionName")
-fun <T> Try(action: Try<T>.() -> T): Try<T> {
-    return object : Try<T> {
+fun <T> Try(action: Tried<T>.() -> T): Tried<T> {
+    return object : Tried<T> {
 
         private val r = runCatching(action).onFailure { throwable ->
             throwable.takeUnless { it !is Exception }?.also { throw it }
         }
 
-        override fun <E : Exception> onException(exceptionClass: Class<out E>, handleException: (E) -> Unit): Try<T> {
+        override fun <E : Exception> onException(exceptionClass: Class<out E>, handleException: (E) -> Unit): Tried<T> {
             return apply {
                 r.exceptionOrNull()
                     ?.takeIf { exceptionClass.isInstance(this) }
@@ -40,7 +40,7 @@ fun <T> Try(action: Try<T>.() -> T): Try<T> {
             return r.getOrElse { mapException(it as Exception) }
         }
 
-        override fun <R> thenLet(map: (T) -> R): Try<R> {
+        override fun <R> thenLet(map: (T) -> R): Tried<R> {
             return Try { map(r.getOrThrow()) }
         }
 

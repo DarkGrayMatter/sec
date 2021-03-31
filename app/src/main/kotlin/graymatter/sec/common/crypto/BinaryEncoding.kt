@@ -53,7 +53,7 @@ enum class BinaryEncoding(name: String, vararg alternates: String) {
 
     companion object {
 
-        fun fromName(namedEncoding: String): BinaryEncoding {
+        fun named(namedEncoding: String): BinaryEncoding {
             return values().firstOrNull { encoding -> namedEncoding in encoding.names }
                 ?: throw NoSuchElementException("Unknown binary encoding [$namedEncoding]")
         }

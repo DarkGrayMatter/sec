@@ -2,7 +2,7 @@ package graymatter.sec.command
 
 import graymatter.sec.command.reuse.group.KeyProvider
 import graymatter.sec.command.reuse.group.OutputTargetProvider
-import graymatter.sec.command.reuse.group.SourceAsInputProvider
+import graymatter.sec.command.reuse.group.InputTargetProvider
 import graymatter.sec.command.reuse.mixin.InputFormatOption
 import graymatter.sec.command.reuse.mixin.OutputFormatOption
 import graymatter.sec.command.reuse.validation.validateKeyProvider
@@ -28,7 +28,7 @@ class DecryptConfig : SelfValidatingCommand() {
         order = 0,
         heading = "Provide a source document to decrypt using one of the following arguments.%n"
     )
-    lateinit var source: SourceAsInputProvider
+    lateinit var source: InputTargetProvider
 
     @ArgGroup(
         exclusive = true,

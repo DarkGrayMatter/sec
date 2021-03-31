@@ -6,7 +6,7 @@ import com.palantir.config.crypto.KeyPairFiles
 import com.palantir.config.crypto.algorithm.Algorithm
 import graymatter.sec.common.cli.SelfValidatingCommand
 import graymatter.sec.common.exception.failCommand
-import graymatter.sec.common.func.onException
+import graymatter.sec.common.func.Either
 import graymatter.sec.common.validation.Validator
 import graymatter.sec.usecase.GenerateKeyUseCase
 import graymatter.sec.usecase.GenerateKeyUseCase.KeyGenerationException
@@ -76,15 +76,16 @@ class GenerateKey : SelfValidatingCommand() {
     }
 
     override fun performAction() {
-        GenerateKeyUseCase(
+        when (val r = GenerateKeyUseCase(
             keyName = this.keyName,
             keyAlgorithm = this.algorithm,
             forceKeyLocation = this.forcePath,
             overwriteExisting = !failOnExistingKeyFiles,
             keyLocation = this.dest,
-        ).call()
-            .onException(this::reportKeyGenerationFailed)
-            .onSuccess(this::reportKeyFilesGenerated)
+        ).call()) {
+            is Either.Left -> reportKeyGenerationFailed(r.value)
+            is Either.Right -> reportKeyFilesGenerated(r.value)
+        }
     }
 
     override fun Validator.validateSelf() = Unit

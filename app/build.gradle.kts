@@ -69,6 +69,9 @@ dependencies {
 
     // String tamplating engine
     // implementation("com.jaliansystems:simple-template:1.1")
+
+    // Assertions
+    testImplementation("org.assertj:assertj-core:3.19.0")
 }
 
 val secToolAppMain = "graymatter.sec.App"

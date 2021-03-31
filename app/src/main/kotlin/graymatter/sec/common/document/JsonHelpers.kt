@@ -5,6 +5,7 @@ package graymatter.sec.common.document
 import graymatter.sec.common.trimIndentToSentence
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.node.ObjectNode
 import java.io.InputStream
 import java.io.OutputStream
 import java.nio.charset.Charset
@@ -42,4 +43,8 @@ fun OutputStream.writeTree(tree: JsonNode, format: DocumentFormat) {
     val mapper = DocumentMapper.of(format)
     mapper.writeTree(mapper.createGenerator(this), tree)
     flush()
+}
+
+fun yamlOf(content: String): ObjectNode {
+    return DocumentMapper.yaml.readTree(content) as? ObjectNode ?: throw IllegalArgumentException("Expected object node from yaml: $content")
 }

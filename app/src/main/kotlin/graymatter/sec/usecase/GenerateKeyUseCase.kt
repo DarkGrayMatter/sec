@@ -3,12 +3,11 @@ package graymatter.sec.usecase
 import com.palantir.config.crypto.KeyFileUtils.keyPairToFile
 import com.palantir.config.crypto.KeyPairFiles
 import com.palantir.config.crypto.algorithm.Algorithm
-import graymatter.sec.common.func.Try
-import graymatter.sec.common.func.Tried
+import graymatter.sec.common.func.Either
+import graymatter.sec.common.func.eitherTry
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
-import java.lang.RuntimeException
 import java.util.concurrent.Callable
 
 class GenerateKeyUseCase(
@@ -17,13 +16,13 @@ class GenerateKeyUseCase(
     private val keyLocation: File,
     private val forceKeyLocation: Boolean,
     private val overwriteExisting: Boolean,
-) : Callable<Tried<KeyPairFiles>> {
+) : Callable<Either<Throwable, KeyPairFiles>> {
 
     class KeyGenerationException(val reason: String, cause: Exception? = null) : RuntimeException(reason, cause)
 
     private lateinit var preparedLocation: File
 
-    override fun call():Tried<KeyPairFiles> = Try {
+    override fun call() = eitherTry<KeyGenerationException, KeyPairFiles> {
         prepareLocation()
         generateKeyPair()
     }

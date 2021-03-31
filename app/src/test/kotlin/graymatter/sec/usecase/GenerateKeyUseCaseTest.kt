@@ -2,6 +2,7 @@ package graymatter.sec.usecase
 
 import com.palantir.config.crypto.algorithm.Algorithm
 import graymatter.sec.common.OrderedId
+import graymatter.sec.common.func.right
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -23,7 +24,7 @@ internal class GenerateKeyUseCaseTest {
                 keyAlgorithm = Algorithm.AES,
                 forceKeyLocation = false,
                 overwriteExisting = true
-            ).call().onSuccess {
+            ).call().right.let {
 
                 fun assertPathExistsAndPointsToNonEmptyFile(path: Path) {
                     val file = path.toFile()

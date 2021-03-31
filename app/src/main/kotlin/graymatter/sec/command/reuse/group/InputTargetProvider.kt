@@ -12,7 +12,7 @@ import java.io.InputStream
  * Requirement to capture an input source for a specific command.
  */
 @Suppress("unused", "MemberVisibilityCanBePrivate")
-class SourceAsInputProvider {
+class InputTargetProvider {
 
     private data class Target(val uri: String?, val open: () -> InputStream)
 

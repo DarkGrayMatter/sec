@@ -4,6 +4,7 @@ import graymatter.sec.command.*
 import graymatter.sec.common.cli.CommandFactory
 import graymatter.sec.common.cli.ToolVersionProvider
 import graymatter.sec.common.crypto.BinaryEncoding
+import graymatter.sec.common.document.DocumentFormat
 import graymatter.sec.common.exception.CommandFailedException
 import picocli.CommandLine
 import picocli.CommandLine.Command
@@ -22,9 +23,9 @@ import kotlin.system.exitProcess
         GenerateKey::class,
         EncryptValue::class,
         DecryptValue::class,
-        //todo: GenerateRandomBytes::class,
         EncryptConfig::class,
         DecryptConfig::class,
+        ConvertConfig::class
     ]
 )
 object App {
@@ -43,11 +44,11 @@ object App {
             .setInterpolateVariables(true)
             .registerCommonConverters()
             .setUsageHelpWidth(150)
-    }
-
+    }   
 
     private fun CommandLine.registerCommonConverters(): CommandLine = apply {
-        registerConverter(BinaryEncoding::class.java, BinaryEncoding.Companion::fromName)
+        registerConverter(BinaryEncoding::class.java) { BinaryEncoding.named(it) }
+        registerConverter(DocumentFormat::class.java) { DocumentFormat.named(it) }
     }
 
     private fun CommandLine.registerExceptionHandlers(): CommandLine {

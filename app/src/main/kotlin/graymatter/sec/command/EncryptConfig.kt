@@ -4,7 +4,7 @@ import com.palantir.config.crypto.KeyWithType
 import graymatter.sec.command.reuse.group.KeyProvider
 import graymatter.sec.command.reuse.group.OutputTargetProvider
 import graymatter.sec.command.reuse.group.ProcessingPathsArgGroup
-import graymatter.sec.command.reuse.group.SourceAsInputProvider
+import graymatter.sec.command.reuse.group.InputTargetProvider
 import graymatter.sec.command.reuse.mixin.InputFormatOption
 import graymatter.sec.command.reuse.mixin.OutputFormatOption
 import graymatter.sec.command.reuse.validation.validateKeyProvider
@@ -29,7 +29,7 @@ class EncryptConfig : SelfValidatingCommand() {
         validate = true,
         heading = "Choose one of the following unencrypted configuration sources:%n"
     )
-    val source: SourceAsInputProvider = SourceAsInputProvider()
+    val source: InputTargetProvider = InputTargetProvider()
 
     @ArgGroup(
         exclusive = true,

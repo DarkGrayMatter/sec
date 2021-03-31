@@ -5,15 +5,24 @@ package graymatter.sec.common.document
  */
 enum class DocumentFormat(vararg validExtensions: String) {
 
-    JSON("json"),
-    YAML("yaml","yml"),
-    JAVA_PROPERTIES("properties");
+    JSON("json") {
+        override val alternateNames: Set<String> = setOf("json")
+    },
+    YAML("yaml", "yml") {
+        override val alternateNames: Set<String> = setOf("yaml", "yml")
+    },
+    JAVA_PROPERTIES("properties") {
+        override val alternateNames: Set<String> = setOf("properties", "props", "java_props", "java_properties")
+    };
 
     val fileExtensions = validExtensions.map(String::toLowerCase).toList()
     val defaultFileExtension: String get() = fileExtensions.first()
 
+    abstract val alternateNames: Set<String>
+
     companion object {
 
+        @JvmStatic
         fun ofExt(ext: String): DocumentFormat {
             return values().first { ext.toLowerCase() in it.fileExtensions }
         }
@@ -41,6 +50,14 @@ enum class DocumentFormat(vararg validExtensions: String) {
         fun ofUri(name: String): DocumentFormat? {
             return FORMATS_WITH_SUFFIXES.firstOrNull { (_, suffix) -> name.endsWith(suffix, ignoreCase = true) }?.first
         }
+
+        @JvmStatic
+        fun named(namedFormat: String): DocumentFormat {
+            val alternateName by lazy { namedFormat.toLowerCase().trim() }
+            val found = values().firstOrNull { it.name == namedFormat || alternateName in it.alternateNames }
+            return requireNotNull(found) { "Unable to find named format \"$namedFormat\"" }
+        }
+
     }
 
 }

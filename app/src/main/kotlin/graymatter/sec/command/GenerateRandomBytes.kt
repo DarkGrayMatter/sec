@@ -14,7 +14,6 @@ import java.security.SecureRandom
 class GenerateRandomBytes : SelfValidatingCommand() {
 
     var enabled = true
-        private set
 
     @Option(
         names = ["-b", "--bytes"],

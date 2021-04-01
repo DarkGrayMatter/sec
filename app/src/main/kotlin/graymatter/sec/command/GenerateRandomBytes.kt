@@ -10,11 +10,11 @@ import picocli.CommandLine.*
 import java.io.PrintWriter
 import java.security.SecureRandom
 
-private var executed:Boolean = false
-private const val executionHackLock = 1
-
 @Command(name = "generate-random-bytes")
 class GenerateRandomBytes : SelfValidatingCommand() {
+
+    var enabled = true
+        private set
 
     @Option(
         names = ["-b", "--bytes"],
@@ -59,31 +59,32 @@ class GenerateRandomBytes : SelfValidatingCommand() {
 
     override fun performAction() {
 
-        synchronized(executionHackLock) {
+        if (!enabled) {
+            return
+        }
 
-            if (executed) {
-                return
-            }
+        val g = makeGenerator()
+        val bytes = ByteArray(numberOfBytes!!)
 
-            val g = makeGenerator()
-            val bytes = ByteArray(numberOfBytes!!)
-
-            PrintWriter(outputTarget.openOutputStream()).use { out ->
-                repeat(repeatNumberOfTimes) {
-                    val generatedBytes = g(bytes)
-                    when (prefix) {
-                        null -> out.println(generatedBytes)
-                        else -> out.println("$prefix$generatedBytes")
-                    }
+        PrintWriter(outputTarget.openOutputStream()).use { out ->
+            repeat(repeatNumberOfTimes) {
+                val generatedBytes = g(bytes)
+                when (prefix) {
+                    null -> out.println(generatedBytes)
+                    else -> out.println("$prefix$generatedBytes")
                 }
             }
-
-            executed = true
         }
+
+        enabled = false
 
     }
 
-    private fun makeGenerator():(ByteArray) -> String {
+    fun enableAgain() {
+        enabled = false
+    }
+
+    private fun makeGenerator(): (ByteArray) -> String {
 
         val generator = when (val seed = seedProvider?.seed()) {
             null -> SecureRandom()
@@ -96,11 +97,4 @@ class GenerateRandomBytes : SelfValidatingCommand() {
         }
     }
 
-    companion object {
-        fun runAgain() {
-            synchronized(executionHackLock) {
-                executed = false
-            }
-        }
-    }
 }

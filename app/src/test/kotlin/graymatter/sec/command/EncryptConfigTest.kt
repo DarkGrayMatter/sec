@@ -7,7 +7,6 @@ import graymatter.sec.common.io.assertFileHasContentOf
 import graymatter.sec.common.resourceFile
 import graymatter.sec.common.toPropertiesMap
 import org.junit.jupiter.api.*
-import picocli.CommandLine
 import picocli.CommandLine.ParameterException
 import java.io.File
 import java.util.*
@@ -16,13 +15,13 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class EncryptConfigTest : AbstractCommandTest<EncryptConfig>() {
+internal class EncryptConfigTest : CommandTest<EncryptConfig>() {
 
     private lateinit var givenUnencryptedProperties: Properties
     private lateinit var givenEncryptionKeyFile: File
     private lateinit var givenUnencryptedPropertiesFile: File
 
-    override fun setupCommand(): EncryptConfig {
+    override fun newCommand(): EncryptConfig {
         return EncryptConfig()
     }
 

@@ -47,7 +47,7 @@ class GenerateRandomBytes : SelfValidatingCommand() {
     )
     var encoding: BinaryEncoding = BinaryEncoding.Hex
 
-    @ArgGroup(order = 0, heading = "Use these options to specify a seed value for pseudo random numbers:%n")
+    @ArgGroup(order = 0, heading = "Use these options to specify a seed value for pseudo random numbers:%n", exclusive = false)
     var seedProvider: SeedProvider? = null
 
     @ArgGroup(order = 1, heading = "Use these options to control where the random bytes should be written to:%n")

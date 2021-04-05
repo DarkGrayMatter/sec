@@ -4,11 +4,11 @@ import org.junit.jupiter.api.Test
 import java.io.File
 import kotlin.test.assertTrue
 
-internal class GenerateKeyTest : AbstractCommandTest<GenerateKey>() {
+internal class GenerateKeyTest : CommandTest<GenerateKey>() {
 
     private val givenKeyName = "test"
 
-    override fun setupCommand(): GenerateKey {
+    override fun newCommand(): GenerateKey {
         return GenerateKey().apply {
             setDestination(givenWorkingDir)
             setKeyName(givenKeyName)

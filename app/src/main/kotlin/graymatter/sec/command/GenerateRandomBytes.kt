@@ -10,7 +10,10 @@ import picocli.CommandLine.*
 import java.io.PrintWriter
 import java.security.SecureRandom
 
-@Command(name = "generate-random-bytes")
+@Command(
+    name = "generate-random-bytes",
+    description = ["Generates random byte sequences using a secure random number generator."]
+)
 class GenerateRandomBytes : SelfValidatingCommand() {
 
     var enabled = true

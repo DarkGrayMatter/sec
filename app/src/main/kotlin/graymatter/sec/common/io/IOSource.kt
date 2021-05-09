@@ -4,6 +4,7 @@ import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
+import java.util.*
 import java.io.File as JavaFile
 
 /**
@@ -15,7 +16,8 @@ sealed class IOSource<out T> {
     abstract fun open(): T
     abstract val uri: String
 
-    final override fun toString(): String = "${javaClass.simpleName.toLowerCase()}@:$uri"
+    final override fun toString(): String =
+        "${javaClass.simpleName.lowercase(Locale.getDefault())}@:$uri"
 
     sealed class Input : IOSource<InputStream>() {
 

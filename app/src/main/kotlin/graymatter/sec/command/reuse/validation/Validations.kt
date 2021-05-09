@@ -5,9 +5,10 @@ import graymatter.sec.command.reuse.group.KeyProvider
 import graymatter.sec.common.validation.Validator
 import java.io.IOException
 import java.security.spec.InvalidKeySpecException
+import java.util.*
 
 private fun Exception.hasError(error: String): Boolean {
-    return when (val message = this.message?.toLowerCase()) {
+    return when (val message = this.message?.lowercase(Locale.getDefault())) {
         null -> false
         else -> error in message
     }

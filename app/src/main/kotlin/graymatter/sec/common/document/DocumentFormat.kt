@@ -1,5 +1,7 @@
 package graymatter.sec.common.document
 
+import java.util.*
+
 /**
  * An enum to indicate supported formats of documents this tool can process.
  */
@@ -15,7 +17,7 @@ enum class DocumentFormat(vararg validExtensions: String) {
         override val alternateNames: Set<String> = setOf("properties", "props", "java_props", "java_properties")
     };
 
-    val fileExtensions = validExtensions.map(String::toLowerCase).toList()
+    val fileExtensions = validExtensions.map { it.lowercase(Locale.getDefault()) }.toList()
     val defaultFileExtension: String get() = fileExtensions.first()
 
     abstract val alternateNames: Set<String>
@@ -24,13 +26,13 @@ enum class DocumentFormat(vararg validExtensions: String) {
 
         @JvmStatic
         fun ofExt(ext: String): DocumentFormat {
-            return values().first { ext.toLowerCase() in it.fileExtensions }
+            return values().first { ext.lowercase(Locale.getDefault()) in it.fileExtensions }
         }
 
         private val FORMATS_WITH_SUFFIXES: List<Pair<DocumentFormat, String>> =
             values().flatMap { format ->
                 format.fileExtensions.map { ext ->
-                    val suffix = ".${ext}".toLowerCase()
+                    val suffix = ".${ext}".lowercase(Locale.getDefault())
                     format to suffix
                 }
             }
@@ -53,7 +55,7 @@ enum class DocumentFormat(vararg validExtensions: String) {
 
         @JvmStatic
         fun named(namedFormat: String): DocumentFormat {
-            val alternateName by lazy { namedFormat.toLowerCase().trim() }
+            val alternateName by lazy { namedFormat.lowercase(Locale.getDefault()).trim() }
             val found = values().firstOrNull { it.name == namedFormat || alternateName in it.alternateNames }
             return requireNotNull(found) { "Unable to find named format \"$namedFormat\"" }
         }

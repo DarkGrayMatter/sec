@@ -31,7 +31,7 @@ fun assertFileHasContentOf(
         }
     }
 
-    val props = assertDoesNotThrow({ "Error parsing file as ${format.name.toLowerCase()}: $file" }) {
+    val props = assertDoesNotThrow({ "Error parsing file as ${format.name.lowercase(Locale.getDefault())}: $file" }) {
         when (format) {
             DocumentFormat.JAVA_PROPERTIES -> Properties(file)
             else -> readAsProperties()

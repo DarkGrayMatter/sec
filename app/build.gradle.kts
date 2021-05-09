@@ -5,8 +5,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.time.LocalDateTime
 
 plugins {
-    kotlin("jvm") version "1.4.31"
-    kotlin("kapt") version "1.4.31"
+    kotlin("jvm") version "1.5.0"
+    kotlin("kapt") version "1.5.0"
     id("org.jetbrains.dokka") version "1.4.20"
     id("com.github.johnrengelman.shadow") version "6.1.0"
     application

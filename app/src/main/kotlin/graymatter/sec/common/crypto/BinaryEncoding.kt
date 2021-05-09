@@ -4,6 +4,8 @@ package graymatter.sec.common.crypto
 
 import org.apache.commons.codec.binary.Base16
 import org.apache.commons.codec.binary.Base32
+import java.util.*
+import kotlin.NoSuchElementException
 
 enum class BinaryEncoding(name: String, vararg alternates: String) {
 
@@ -41,7 +43,7 @@ enum class BinaryEncoding(name: String, vararg alternates: String) {
         }
 
         override fun decode(byteString: String): ByteArray {
-            return Base16().decode(byteString.toLowerCase())
+            return Base16().decode(byteString.lowercase(Locale.getDefault()))
         }
     },
     ;

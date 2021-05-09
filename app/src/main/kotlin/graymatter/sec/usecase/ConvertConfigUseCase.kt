@@ -10,6 +10,7 @@ import java.io.InputStream
 import java.io.InputStreamReader
 import java.io.OutputStream
 import java.io.OutputStreamWriter
+import java.util.*
 import java.util.concurrent.Callable
 
 class ConvertConfigUseCase(
@@ -52,8 +53,8 @@ class ConvertConfigUseCase(
 
     private fun Enum<*>.title(): String {
         return buildString {
-            append(name.first().toUpperCase())
-            append(name.substring(1).toLowerCase().replace('_', ' '))
+            append(name.first().uppercaseChar())
+            append(name.substring(1).lowercase(Locale.getDefault()).replace('_', ' '))
         }
     }
 }

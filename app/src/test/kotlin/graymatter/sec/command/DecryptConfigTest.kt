@@ -12,12 +12,12 @@ import org.junit.jupiter.api.Test
 import java.io.File
 import kotlin.test.assertNotNull
 
-internal class DecryptConfigTest : AbstractCommandTest<DecryptConfig>() {
+internal class DecryptConfigTest : CommandTest<DecryptConfig>() {
 
     private val encryptedConfigFile: File = resourceFile("/samples/sample-config.yaml")
     private val decryptionKeyFile: File = resourceFile("/keys/test.private")
 
-    override fun setupCommand(): DecryptConfig = DecryptConfig()
+    override fun newCommand(): DecryptConfig = DecryptConfig()
 
     @Test
     @DisplayName("In the absence of explicit user instruction, always output to stdout.")

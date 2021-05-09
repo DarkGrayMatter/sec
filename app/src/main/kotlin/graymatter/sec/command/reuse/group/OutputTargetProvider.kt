@@ -2,7 +2,6 @@ package graymatter.sec.command.reuse.group
 
 import graymatter.sec.common.io.StandardOutputStream
 import picocli.CommandLine.Option
-import picocli.CommandLine.Parameters
 import java.io.File
 import java.io.OutputStream
 
@@ -12,8 +11,11 @@ import java.io.OutputStream
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 class OutputTargetProvider  {
 
+    val isFile: Boolean
+        get() = target is Target.File
+
     val isStdOut: Boolean
-        get() = target != null && uri == "stdout://"
+        get() = target is Target.StdOut
 
     private var target: Target? = null
 
@@ -22,7 +24,7 @@ class OutputTargetProvider  {
         description = ["Output to a specific file."]
     )
     fun setOutputToFile(file: File) {
-        target = Target(file.toURI().toString(), file::outputStream)
+        target = Target.File(file)
     }
 
     @Option(
@@ -33,7 +35,7 @@ class OutputTargetProvider  {
     )
     fun setOutputToStdOut(stdOut: Boolean) {
         if (stdOut && !isAvailable) {
-            target = Target("stdout://") { StandardOutputStream() }
+            target = Target.StdOut()
         }
     }
 
@@ -46,5 +48,9 @@ class OutputTargetProvider  {
         return requireNotNull(target).open()
     }
 
-    private data class Target(val uri: String?, val open: () -> OutputStream)
+    private sealed class Target(val uri: String?, val open: () -> OutputStream) {
+        class File(file: java.io.File) : Target(file.toURI().toString(), file::outputStream)
+        class StdOut() : Target(null, { StandardOutputStream() })
+    }
+
 }
